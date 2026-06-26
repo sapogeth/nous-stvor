@@ -106,7 +106,15 @@ export default function ATS1Page() {
             The Stvor reference implementation at{' '}
             <code style={{ color: C.green, fontSize: 11 }}>/api/v1/trust</code> and{' '}
             <code style={{ color: C.green, fontSize: 11 }}>/api/receipts/verify</code>{' '}
-            implements ATS-1 v0.1.0. Feedback and pull requests welcome.
+            implements ATS-1 v0.1.0.{' '}
+            <a
+              href="https://github.com/sapogeth/nous-stvor/blob/main/spec/ATS-1.md"
+              target="_blank" rel="noopener noreferrer"
+              style={{ color: C.blue, textDecoration: 'none', fontWeight: 600 }}
+            >
+              Read the markdown spec →
+            </a>{' '}
+            Issues and pull requests welcome.
           </InfoBox>
 
           {/* ToC */}
@@ -416,8 +424,9 @@ console.log('valid:', c.verify('sha256', Buffer.from(JSON.stringify(payload)), p
           display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center',
         }}>
           <a href="/integrate" style={{ fontSize: 13, color: C.blue, textDecoration: 'none' }}>← Integrate</a>
+          <a href="https://github.com/sapogeth/nous-stvor/blob/main/spec/ATS-1.md" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: C.text3, textDecoration: 'none' }}>spec/ATS-1.md ↗</a>
+          <a href="https://github.com/sapogeth/nous-stvor/issues" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: C.text3, textDecoration: 'none' }}>Discuss ↗</a>
           <a href="/api/v1/trust" target="_blank" style={{ fontSize: 13, color: C.text3, textDecoration: 'none' }}>Trust API ↗</a>
-          <a href="/api/.well-known/stvor-public-key" target="_blank" style={{ fontSize: 13, color: C.text3, textDecoration: 'none' }}>Public key ↗</a>
           <div style={{ flex: 1 }} />
           <span style={{ fontSize: 11, color: C.text3, fontFamily: C.mono }}>ATS-1 v0.1.0 · Stvor · 2026</span>
         </div>

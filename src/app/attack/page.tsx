@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
+import Link from 'next/link'
 import { Nav } from '@/components/Nav'
 import { AttackDemo } from '@/components/AttackDemo'
 import { LiveFeed } from '@/components/LiveFeed'
@@ -172,6 +173,39 @@ export default function AttackPage() {
           ))}
         </div>
 
+        {/* ATS-1 callout — shown after attack completes */}
+        {isDone && (
+          <div style={{
+            background: 'rgba(59,130,246,0.05)',
+            border: '1px solid rgba(59,130,246,0.18)',
+            borderLeft: '3px solid #3B82F6',
+            borderRadius: 8, padding: '14px 20px', marginBottom: 20,
+            display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap',
+          }}>
+            <div style={{ flex: 1, minWidth: 260 }}>
+              <div style={{ fontSize: 10, color: '#3B82F6', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 5 }}>
+                Caught by ATS-1 §4 — Escrow Lifecycle
+              </div>
+              <div style={{ fontSize: 12, color: C.text2, lineHeight: 1.6 }}>
+                Task hash mismatch triggered an automatic CANCELLED transition.
+                Funds returned to buyer. Trust score penalised −15 pts.
+                This is the ATS-1 v0.1.0 failure path — codified, deterministic, open.
+              </div>
+            </div>
+            <Link href="/ats-1#escrow" style={{ textDecoration: 'none', flexShrink: 0 }}>
+              <div style={{
+                fontSize: 11, fontWeight: 600, color: '#3B82F6',
+                background: 'rgba(59,130,246,0.10)',
+                border: '1px solid rgba(59,130,246,0.25)',
+                borderRadius: 6, padding: '8px 16px',
+                whiteSpace: 'nowrap',
+              }}>
+                Read the standard →
+              </div>
+            </Link>
+          </div>
+        )}
+
         {/* Main grid */}
         <div className="demo-layout" style={{}}>
           <AttackDemo events={events} currentStep={currentStep} />
@@ -212,6 +246,17 @@ function DefensePanel() {
           Stvor makes the payload tamper-evident, not tamper-proof.
         </div>
       </div>
+      <Link href="/ats-1" style={{ textDecoration: 'none', display: 'block', marginTop: 10 }}>
+        <div style={{
+          fontSize: 10, color: '#3B82F6',
+          background: 'rgba(59,130,246,0.06)',
+          border: '1px solid rgba(59,130,246,0.15)',
+          borderRadius: 5, padding: '7px 10px',
+          letterSpacing: '.02em', lineHeight: 1.5,
+        }}>
+          ATS-1 — open standard for agent trust →
+        </div>
+      </Link>
     </div>
   )
 }

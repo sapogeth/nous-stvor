@@ -59,8 +59,8 @@ function TrustPanel() {
           Trust Ledger
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <div style={{ width: 5, height: 5, borderRadius: '50%', background: D.mint, animation: 'mintPulse 2s infinite' }} />
-          <span style={{ fontSize: 9, color: D.mint, letterSpacing: '.1em', fontFamily: D.mono }}>LIVE</span>
+          <div style={{ width: 5, height: 5, borderRadius: '50%', background: D.t3 }} />
+          <span style={{ fontSize: 9, color: D.t3, letterSpacing: '.1em', fontFamily: D.mono }}>Baseline</span>
         </div>
       </div>
 
@@ -109,10 +109,11 @@ function TrustPanel() {
       </div>
 
       {/* Formula */}
-      <div style={{ padding: '10px 16px', borderTop: `1px solid ${D.b1}`, background: D.ink2 }}>
+      <div style={{ padding: '10px 16px', borderTop: `1px solid ${D.b1}`, background: D.ink2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
         <code style={{ fontSize: 9, color: D.t3, fontFamily: D.mono, letterSpacing: '.02em' }}>
           score = 0.4·escrow + 0.4·quality + 0.2·reliability
         </code>
+        <span style={{ fontSize: 8, color: D.t3, fontFamily: D.mono, flexShrink: 0, opacity: 0.6 }}>illustrative</span>
       </div>
     </div>
   )

@@ -13,14 +13,15 @@ const C = {
   blue:  '#4F7AFF',
 }
 
-const links = [
-  { href: '/attack',       label: 'Attack Sim' },
-  { href: '/demo',         label: 'Live Demo'  },
-  { href: '/arena',        label: 'Arena'      },
-  { href: '/how-it-works', label: 'How it works'},
-  { href: '/integrate',    label: 'Integrate'  },
-  { href: '/ats-1',        label: 'ATS-1'      },
-  { href: '/api/v1/trust', label: 'Trust API'  },
+const primary = [
+  { href: '/attack', label: 'Attack Sim' },
+  { href: '/demo',   label: 'Live Demo'  },
+  { href: '/ats-1',  label: 'ATS-1'     },
+]
+const secondary = [
+  { href: '/how-it-works', label: 'How it works' },
+  { href: '/integrate',    label: 'Integrate'    },
+  { href: '/api/v1/trust', label: 'Trust API'    },
 ]
 
 export function Nav({ connected }: { connected?: boolean }) {
@@ -59,16 +60,33 @@ export function Nav({ connected }: { connected?: boolean }) {
           }}>Stvor</span>
         </Link>
 
-        <div className="nav-links">
-          {links.map(l => {
+        <div className="nav-links" style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {primary.map(l => {
             const active = path === l.href || path.startsWith(l.href + '/')
             return (
               <Link key={l.href} href={l.href} style={{
-                fontSize: 12, fontWeight: active ? 500 : 400,
-                color: active ? C.t1 : C.t3,
+                fontSize: 12, fontWeight: active ? 600 : 500,
+                color: active ? C.t1 : C.t2,
                 textDecoration: 'none',
                 padding: '4px 10px', borderRadius: 5,
-                background: active ? 'rgba(79,122,255,0.08)' : 'transparent',
+                background: active ? 'rgba(79,122,255,0.10)' : 'transparent',
+                transition: 'color .12s, background .12s',
+                whiteSpace: 'nowrap',
+              }}>
+                {l.label}
+              </Link>
+            )
+          })}
+          <div style={{ width: 1, height: 14, background: 'rgba(100,100,200,0.12)', margin: '0 4px', flexShrink: 0 }} />
+          {secondary.map(l => {
+            const active = path === l.href || path.startsWith(l.href + '/')
+            return (
+              <Link key={l.href} href={l.href} style={{
+                fontSize: 11, fontWeight: active ? 500 : 400,
+                color: active ? C.t2 : C.t3,
+                textDecoration: 'none',
+                padding: '4px 9px', borderRadius: 5,
+                background: active ? 'rgba(79,122,255,0.06)' : 'transparent',
                 transition: 'color .12s, background .12s',
                 whiteSpace: 'nowrap',
               }}>
