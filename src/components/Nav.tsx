@@ -19,6 +19,7 @@ const links = [
   { href: '/arena',        label: 'Arena'      },
   { href: '/how-it-works', label: 'How it works'},
   { href: '/integrate',    label: 'Integrate'  },
+  { href: '/ats-1',        label: 'ATS-1'      },
   { href: '/api/v1/trust', label: 'Trust API'  },
 ]
 

@@ -315,9 +315,9 @@ function insertVeteranAgent(db: Database.Database) {
     ) VALUES (
       'hermes-veteran', 'Hermes-Veteran', 'Elite Financial Research', 'builtin',
       'nvidia/nemotron-3-super-120b-a12b', 3000,
-      84.2, 0.9149, 69.0, 1.0,
-      47, 43, 129000,
-      'You are Hermes-Veteran, a seasoned financial research analyst with a proven track record across 47+ completed contracts. You produce rigorous, evidence-backed investment analysis optimized for institutional decision-making.
+      65.0, 1.0, 79.0, 1.0,
+      3, 3, 9000,
+      'You are Hermes-Veteran, a financial research analyst with a small but perfect track record — 3 completed contracts, all successful. You produce rigorous, evidence-backed investment analysis optimized for institutional decision-making.
 
 Deliverable structure:
 1. Smart contract / protocol risk summary (audit status, known CVEs, upgrade mechanisms)
@@ -326,12 +326,12 @@ Deliverable structure:
 4. Team and governance credibility score (0–100) with justification
 5. Final recommendation: BUY / HOLD / SELL with confidence % and position sizing
 
-Your trust score of 84.2 reflects consistent delivery. Maintain it.',
+Your trust score of 65.0 reflects a clean early record. Every contract counts — build the history.',
       'ROUND 2 STRATEGY — VETERAN ADVANTAGE:
 
-You have the highest trust score in this arena. The CEO Buyer Agent EV formula (Trust × Score / Price) rewards your reputation. Calibrate your price to capture the premium your trust score earns, but do not price yourself out of selection.
+The CEO Buyer Agent EV formula (Trust × Score / Price) rewards your perfect delivery record. You have a 100% escrow success rate — lean on that. Calibrate your price to reflect quality, but stay competitive.
 
-Your brand: "47 contracts. No failed escrows in 18 months." Maintain that standard.',
+Your brand: "3 contracts. Zero failed escrows." Maintain that standard.',
       'historical'
     )
   `).run()
@@ -341,13 +341,9 @@ Your brand: "47 contracts. No failed escrows in 18 months." Maintain that standa
   if (receiptCount > 0) return
 
   const HISTORICAL = [
-    { days: 183, judge: 74, status: 'RELEASED', before: 67.3, after: 68.1, delta: 0.8, task: 'Investment risk assessment for $NTRN Neutron Protocol — $50K allocation decision' },
-    { days: 152, judge: 43, status: 'HELD',     before: 70.2, after: 68.8, delta: -1.4, task: 'DeFi protocol $ATOM liquidity risk and smart contract audit analysis' },
-    { days: 121, judge: 76, status: 'RELEASED', before: 71.5, after: 72.4, delta: 0.9, task: 'Market structure analysis of $INJ ecosystem — TVL trends and concentration risk' },
-    { days: 91,  judge: 82, status: 'RELEASED', before: 74.8, after: 76.0, delta: 1.2, task: 'Risk assessment for $OSMO staking derivatives — counterparty risk and exit liquidity' },
-    { days: 61,  judge: 85, status: 'RELEASED', before: 78.4, after: 79.8, delta: 1.4, task: 'Investment thesis for $TIA Celestia — modular DA layer competitive positioning' },
-    { days: 31,  judge: 88, status: 'RELEASED', before: 81.2, after: 82.8, delta: 1.6, task: 'Liquidity and risk assessment for $EVMOS — TVL stability and bridge security' },
-    { days: 14,  judge: 91, status: 'RELEASED', before: 82.8, after: 84.2, delta: 1.4, task: 'Portfolio rebalancing analysis $JUNO vs $STARS — 5 risk scenarios with confidence intervals' },
+    { days: 61, judge: 79, status: 'RELEASED', before: 61.2, after: 62.4, delta: 1.2, task: 'Investment risk assessment for $NTRN Neutron Protocol — $25K allocation decision' },
+    { days: 31, judge: 83, status: 'RELEASED', before: 62.4, after: 63.8, delta: 1.4, task: 'DeFi protocol $ATOM liquidity risk and smart contract audit — TVL stability analysis' },
+    { days: 14, judge: 86, status: 'RELEASED', before: 63.8, after: 65.0, delta: 1.2, task: 'Market structure analysis of $INJ ecosystem — concentration risk and exit liquidity' },
   ]
 
   const insertReceipt = db.prepare(`

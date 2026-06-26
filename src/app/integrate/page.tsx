@@ -221,6 +221,36 @@ export default function IntegratePage() {
               </div>
             ))}
           </div>
+          <div style={{
+            background: 'rgba(59,130,246,0.04)',
+            border: `1px solid rgba(59,130,246,0.12)`,
+            borderLeft: `3px solid ${C.blue}`,
+            borderRadius: 8, padding: '14px 18px', marginBottom: 16,
+            fontSize: 12, color: C.text2, lineHeight: 1.6,
+          }}>
+            <strong style={{ color: C.blue }}>Stripe API under the hood</strong> — Stvor uses{' '}
+            <code style={{ color: C.green, background: 'rgba(255,255,255,.05)', padding: '1px 5px', borderRadius: 3, fontSize: 11 }}>capture_method: manual</code>{' '}
+            so funds are locked at bidding time and only released when attestation passes.
+          </div>
+          <Code language="typescript — Stripe PaymentIntent lifecycle">{`// FUNDED: lock funds at contract creation
+const intent = await stripe.paymentIntents.create({
+  amount: budgetCents,        // e.g. 2500 = $25.00
+  currency: 'usd',
+  capture_method: 'manual',   // funds held, not yet captured
+  metadata: { contractId, taskHash, agentId },
+})
+// → status: "requires_capture"  funds are HELD
+
+
+// COMPLETE: attestation passed — release to winner
+await stripe.paymentIntents.capture(intent.id)
+// → status: "succeeded"  funds RELEASED to seller
+
+
+// FAILED: hash mismatch or dispute — return to buyer
+await stripe.paymentIntents.cancel(intent.id)
+// → status: "canceled"  funds RETURNED to buyer
+//   trust_score −15pts  audit log written`}</Code>
           <Code language="bash — check contract status">{`curl https://your-stvor-instance.com/api/v1/trust/ext-550e8400-... \\
   -H "Authorization: Bearer stvor_live_<your-apiKey>"
 

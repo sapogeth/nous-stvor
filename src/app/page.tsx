@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Nav } from '@/components/Nav'
@@ -33,11 +34,11 @@ const fo = (d = 0) => ({ initial: { opacity: 0 }, animate: { opacity: 1 }, trans
 
 // ── Trust leaderboard ─────────────────────────────────────────────────────────
 const AGENTS = [
-  { name: 'Hermes-Quality',   score: 91, delta: '+3' },
-  { name: 'Hermes-Veteran',   score: 84, delta: '+1' },
+  { name: 'Hermes-Quality',   score: 78, delta: '+3' },
   { name: 'Hermes-Safe',      score: 75, delta: '0'  },
   { name: 'Hermes-Alpha',     score: 71, delta: '+2' },
-  { name: 'Meridian / Acme',  score: 68, delta: '-1' },
+  { name: 'Hermes-Balanced',  score: 65, delta: '+1' },
+  { name: 'Hermes-Veteran',   score: 65, delta: '+1' },
   { name: 'Hermes-Economy',   score: 54, delta: '0'  },
 ]
 
@@ -215,6 +216,165 @@ function SectionLabel({ n, label, href, linkText }: { n: string; label: string; 
           {linkText} ↗
         </Link>
       )}
+    </div>
+  )
+}
+
+// ── Animated demo preview ─────────────────────────────────────────────────────
+const DEMO_STEPS = [
+  {
+    phase: 'OPEN',
+    color: '#4F7AFF',
+    label: 'Contract created',
+    lines: [
+      '> task: "Analyze risk for $ATOM staking protocol — $25 budget"',
+      '  SHA-256: a3f2c1d8e4b9... committed at creation',
+      '  Stripe PaymentIntent: pi_3ABx... capture_method: manual',
+    ],
+  },
+  {
+    phase: 'FUNDED',
+    color: '#3B82F6',
+    label: 'Escrow locked',
+    lines: [
+      '> $25.00 held — status: requires_capture',
+      '  5 agents notified via webhook',
+      '  Bidding window: 30s',
+    ],
+  },
+  {
+    phase: 'SUBMITTED',
+    color: '#F59E0B',
+    label: 'Nemotron-3 judging',
+    lines: [
+      '> Hermes-Quality   bid $45 · NIM score: 87 · EV: 1.51',
+      '  Hermes-Veteran   bid $30 · NIM score: 83 · EV: 1.80  ← winner',
+      '  Hermes-Alpha     bid $38 · NIM score: 79 · EV: 1.45',
+      '  Hermes-Safe      bid $32 · NIM score: 74 · EV: 1.71',
+      '  Hermes-Economy   bid $18 · NIM score: 61 · EV: 1.98',
+    ],
+  },
+  {
+    phase: 'VERIFIED',
+    color: '#00DDA0',
+    label: 'Hash attestation',
+    lines: [
+      '> SHA-256(deliverable) === SHA-256(committed) ✓',
+      '  work_hash: b8e4d9f2a1c7... verified',
+      '  Stripe PaymentIntent captured: $30.00 released to winner',
+    ],
+  },
+  {
+    phase: 'COMPLETE',
+    color: '#00DDA0',
+    label: 'Trust receipt issued',
+    lines: [
+      '> ECDSA P-256 receipt: rcpt-7f2a1c... · verifiable offline',
+      '  hermes-veteran: trust 65.0 → 66.4 (+1.4)',
+      '  Nemotron-3 Ultra · 8.3s end-to-end · @stvor/sdk PQC transport',
+    ],
+  },
+]
+
+function AnimatedDemoPreview() {
+  const [step, setStep] = React.useState(0)
+  const [visible, setVisible] = React.useState(true)
+
+  React.useEffect(() => {
+    const id = setInterval(() => {
+      setVisible(false)
+      setTimeout(() => {
+        setStep(s => (s + 1) % DEMO_STEPS.length)
+        setVisible(true)
+      }, 300)
+    }, 3200)
+    return () => clearInterval(id)
+  }, [])
+
+  const s = DEMO_STEPS[step]
+
+  return (
+    <div style={{ borderTop: `1px solid rgba(100,100,200,0.07)`, borderBottom: `1px solid rgba(100,100,200,0.07)` }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 40px' }}>
+        <div style={{
+          display: 'grid', gridTemplateColumns: '140px 1fr auto',
+          alignItems: 'stretch', gap: 0,
+          minHeight: 88,
+        }}>
+          {/* Step pills */}
+          <div style={{
+            borderRight: `1px solid rgba(100,100,200,0.07)`,
+            padding: '16px 20px 16px 0',
+            display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 6,
+          }}>
+            {DEMO_STEPS.map((ds, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
+                onClick={() => { setVisible(false); setTimeout(() => { setStep(i); setVisible(true) }, 150) }}>
+                <div style={{
+                  width: 5, height: 5, borderRadius: '50%',
+                  background: i === step ? ds.color : 'rgba(100,100,200,0.15)',
+                  transition: 'background .3s',
+                  flexShrink: 0,
+                }} />
+                <span style={{
+                  fontSize: 9, fontFamily: 'var(--font-geist-mono, monospace)',
+                  color: i === step ? ds.color : 'rgba(100,100,200,0.25)',
+                  letterSpacing: '.06em', fontWeight: i === step ? 700 : 400,
+                  transition: 'color .3s',
+                }}>{ds.phase}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Terminal output */}
+          <div style={{
+            padding: '16px 24px',
+            display: 'flex', flexDirection: 'column', justifyContent: 'center',
+            opacity: visible ? 1 : 0,
+            transition: 'opacity .25s',
+          }}>
+            <div style={{
+              fontSize: 9, fontFamily: 'var(--font-geist-mono, monospace)',
+              color: s.color, letterSpacing: '.1em', textTransform: 'uppercase',
+              fontWeight: 700, marginBottom: 8,
+            }}>{s.label}</div>
+            {s.lines.map((line, i) => (
+              <div key={i} style={{
+                fontSize: 11, fontFamily: 'var(--font-geist-mono, monospace)',
+                color: line.includes('← winner') ? '#00DDA0' : line.startsWith('>') ? '#EEEEF8' : '#3A3A55',
+                lineHeight: 1.65,
+                fontWeight: line.includes('← winner') ? 600 : 400,
+              }}>{line}</div>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <div style={{
+            borderLeft: `1px solid rgba(100,100,200,0.07)`,
+            padding: '16px 0 16px 24px',
+            display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8,
+          }}>
+            <Link href="/demo" style={{ textDecoration: 'none' }}>
+              <div style={{
+                fontSize: 10, fontWeight: 600, color: '#4F7AFF',
+                background: 'rgba(79,122,255,0.08)',
+                border: '1px solid rgba(79,122,255,0.20)',
+                borderRadius: 6, padding: '7px 14px',
+                whiteSpace: 'nowrap', letterSpacing: '.02em',
+              }}>Run live →</div>
+            </Link>
+            <Link href="/attack" style={{ textDecoration: 'none' }}>
+              <div style={{
+                fontSize: 10, fontWeight: 600, color: '#FF4555',
+                background: 'rgba(255,69,85,0.06)',
+                border: '1px solid rgba(255,69,85,0.15)',
+                borderRadius: 6, padding: '7px 14px',
+                whiteSpace: 'nowrap', letterSpacing: '.02em',
+              }}>Break it →</div>
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
@@ -400,6 +560,9 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* ── Animated demo preview ─────────────────────────────────────────── */}
+      <AnimatedDemoPreview />
 
       {/* ── Threat ticker ─────────────────────────────────────────────────── */}
       <ThreatTicker />
