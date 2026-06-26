@@ -19,19 +19,29 @@ export function hmacVerify(payload: string, signature: string): boolean {
 
 function loadEcKeys() {
   const privB64 = process.env.STVOR_EC_PRIVATE_KEY_B64
-  const pubB64  = process.env.STVOR_EC_PUBLIC_KEY_B64
-  if (!privB64 || !pubB64) return null
-  return {
-    privateKey: crypto.createPrivateKey({ key: Buffer.from(privB64, 'base64'), format: 'der', type: 'pkcs8' }),
-    publicKey:  crypto.createPublicKey({ key: Buffer.from(pubB64,  'base64'), format: 'der', type: 'spki' }),
-    publicKeyPem: `-----BEGIN PUBLIC KEY-----\n${pubB64.match(/.{1,64}/g)!.join('\n')}\n-----END PUBLIC KEY-----`,
-    publicKeyB64: pubB64,
-  }
+  if (!privB64) return null
+  try {
+    const privateKey = crypto.createPrivateKey({ key: Buffer.from(privB64, 'base64'), format: 'der', type: 'pkcs8' })
+    // Derive public key from private key — STVOR_EC_PUBLIC_KEY_B64 is optional
+    const publicKey = process.env.STVOR_EC_PUBLIC_KEY_B64
+      ? crypto.createPublicKey({ key: Buffer.from(process.env.STVOR_EC_PUBLIC_KEY_B64, 'base64'), format: 'der', type: 'spki' })
+      : crypto.createPublicKey(privateKey)
+    const pubDer  = publicKey.export({ format: 'der', type: 'spki' }) as Buffer
+    const pubB64  = pubDer.toString('base64')
+    return {
+      privateKey,
+      publicKey,
+      publicKeyPem: `-----BEGIN PUBLIC KEY-----\n${pubB64.match(/.{1,64}/g)!.join('\n')}\n-----END PUBLIC KEY-----`,
+      publicKeyB64: pubB64,
+    }
+  } catch { return null }
 }
 
 export function ecdsaSign(payload: string): string {
   const keys = loadEcKeys()
-  if (!keys) return hmacSign(payload) // fallback to HMAC if EC keys not configured
+  if (!keys) {
+    try { return hmacSign(payload) } catch { return 'unsigned' }
+  }
   const sig = crypto.sign('sha256', Buffer.from(payload, 'utf8'), keys.privateKey)
   return 'ecdsa:' + sig.toString('base64')
 }
