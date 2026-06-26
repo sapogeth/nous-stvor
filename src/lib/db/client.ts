@@ -1,7 +1,9 @@
 import Database from 'better-sqlite3'
 import path from 'path'
+import os from 'os'
 
-const DB_PATH = path.join(process.cwd(), 'stvor.db')
+// process.cwd() is read-only on Vercel/Railway serverless builds — use /tmp or a volume mount
+const DB_PATH = process.env.DB_PATH || path.join(os.tmpdir(), 'stvor.db')
 
 let _db: Database.Database | null = null
 
