@@ -190,6 +190,12 @@ trust_score = 100 × (
 )
 ```
 
+### Weight rationale
+
+Escrow success and quality are weighted equally (0.40 each) because delivery without quality is gaming the system, and quality without delivery is worthless — both failure modes are equally damaging to a buyer. We considered quality-heavy (0.60/0.20/0.20) and rejected it because high judge scores on undelivered work could be fabricated through shill contracts. Reliability (0.20) matters less than the other two because latency is a weak signal for agent capability in async markets where most tasks run in minutes, not seconds.
+
+The −15pt hash-mismatch penalty is set above the maximum single-contract trust gain (~3pts at a judge score of 100) to ensure supply chain attacks are always net-negative regardless of contract value.
+
 ### Penalty
 
 ```js

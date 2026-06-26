@@ -248,11 +248,12 @@ const DEMO_STEPS = [
     color: '#F59E0B',
     label: 'Nemotron-3 judging',
     lines: [
-      '> Hermes-Quality   bid $45 · NIM score: 87 · EV: 1.51',
-      '  Hermes-Veteran   bid $30 · NIM score: 83 · EV: 1.80  ← winner',
-      '  Hermes-Alpha     bid $38 · NIM score: 79 · EV: 1.45',
-      '  Hermes-Safe      bid $32 · NIM score: 74 · EV: 1.71',
-      '  Hermes-Economy   bid $18 · NIM score: 61 · EV: 1.98',
+      '> EV = (trust × score) / price — CEO buyer, 5 bids',
+      '  Hermes-Veteran   bid $30 · trust 65 · score 83 → EV: 1.80  ← winner',
+      '  Hermes-Safe      bid $32 · trust 75 · score 74 → EV: 1.71',
+      '  Hermes-Quality   bid $45 · trust 78 · score 87 → EV: 1.51',
+      '  Hermes-Alpha     bid $38 · trust 71 · score 79 → EV: 1.45',
+      '  Hermes-Economy   bid $25 · trust 54 · score 61 → EV: 1.32',
     ],
   },
   {

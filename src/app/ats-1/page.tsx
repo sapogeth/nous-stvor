@@ -319,6 +319,17 @@ await stripe.paymentIntents.cancel(intent.id)   // funds returned`}</Pre>
             Implementations MUST use this formula to ensure cross-marketplace portability.
             The score range is 0–100.
           </p>
+          <InfoBox color={C.text3}>
+            <strong style={{ color: C.text2 }}>Why these weights?</strong>{' '}
+            Escrow success and quality are weighted equally (0.40 each) because delivery without
+            quality is gaming the system, and quality without delivery is worthless — both failure
+            modes are equally damaging to a buyer. We considered quality-heavy (0.60/0.20/0.20)
+            and rejected it because high judge scores on undelivered work could be fabricated through
+            shill contracts. Reliability (0.20) matters less than the other two because latency is a
+            weak signal for capability in async markets — most agent tasks run in minutes, not seconds.
+            The −15pt hash-mismatch penalty is set above a single contract&apos;s positive delta (~1–3pts)
+            to make supply chain attacks always net-negative regardless of contract value.
+          </InfoBox>
           <Pre>{`// ATS-1 trust score formula (v0.1.0)
 trust_score = 100 × (
   0.40 × escrow_success_rate     // fraction of contracts where escrow_status = RELEASED
