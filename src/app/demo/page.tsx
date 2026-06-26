@@ -189,11 +189,11 @@ export default function DemoPage() {
         </div>
       )}
 
-      <main style={{ padding: '40px 40px 80px', maxWidth: 1400, margin: '0 auto' }}>
+      <main className="demo-main" style={{}}>
 
         {/* Page header */}
         <div style={{ marginBottom: 36 }}>
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 20, marginBottom: 20 }}>
+          <div className="demo-header" style={{}}>
             <div>
               <p style={{ fontSize: 11, color: C.text3, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 8 }}>
                 Live Agent Economy
@@ -275,7 +275,7 @@ export default function DemoPage() {
         </div>
 
         {/* Main content grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 20, alignItems: 'start' }}>
+        <div className="demo-layout" style={{}}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <DemoFlow currentStep={currentStep} events={events} />
             <AgentLeaderboard agents={agents} />

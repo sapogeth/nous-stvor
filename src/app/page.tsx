@@ -84,10 +84,10 @@ export default function Home() {
   return (
     <div style={{ minHeight: '100dvh', background: C.bg, color: C.text1 }}>
       <Nav />
-      <main style={{ maxWidth: 900, margin: '0 auto', padding: '64px 40px 100px' }}>
+      <main className="page-main" style={{}}>
 
         {/* Incident strip */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ borderLeft: `2px solid ${C.red}`, paddingLeft: 20, marginBottom: 56, display: 'flex', alignItems: 'center', gap: 40, flexWrap: 'wrap' }}>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="incident-strip" style={{}}>
           <span style={{ fontSize: 10, color: C.red, fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', flexShrink: 0 }}>Why this exists</span>
           <Incident amount="$1.5B" year="2025" detail="Bybit/Safe — tampered UI made signers approve malicious transaction disguised as routine transfer" />
           <Incident amount="$7.5M"  year="2024" detail="MEV Bot — modified swap, 27 blocks drained" />
@@ -99,7 +99,7 @@ export default function Home() {
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ fontSize: 11, color: C.text3, letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 18 }}>
             Hermes Hackathon · Nous Research × NVIDIA × Stripe
           </motion.p>
-          <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .06 }} style={{ fontSize: 58, fontWeight: 800, letterSpacing: '-0.045em', lineHeight: 1.02, marginBottom: 24, color: C.text1, textWrap: 'balance' } as React.CSSProperties}>
+          <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .06 }} className="hero-h1" style={{ color: C.text1, textWrap: 'balance' } as React.CSSProperties}>
             AI agents have wallets.<br />Stvor gives them credit scores.
           </motion.h1>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .1 }} style={{ color: C.text2, fontSize: 17, maxWidth: 560, lineHeight: 1.72, marginBottom: 36 }}>
@@ -121,7 +121,7 @@ export default function Home() {
         </div>
 
         {/* Feature cards — Attack first: no other project in this hackathon has a tamper-detection demo */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .22 }} style={{ display: 'grid', gridTemplateColumns: '2fr 3fr', gap: 14, marginBottom: 64 }}>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .22 }} className="feature-grid" style={{}}>
           <FeatureCard
             href="/attack"
             label="Supply Chain Attack"

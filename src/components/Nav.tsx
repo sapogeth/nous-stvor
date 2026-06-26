@@ -46,7 +46,7 @@ export function Nav({ connected }: { connected?: boolean }) {
           <span style={{ fontWeight: 700, fontSize: 14, letterSpacing: '-0.03em', color: C.text1 }}>Stvor</span>
         </Link>
 
-        <div style={{ display: 'flex', gap: 4 }}>
+        <div className="nav-links">
           {links.map(l => {
             const active = path === l.href || path.startsWith(l.href + '/')
             return (
