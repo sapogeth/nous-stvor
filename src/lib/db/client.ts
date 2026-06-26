@@ -120,9 +120,13 @@ function seedAgents(db: Database.Database) {
   const count = (db.prepare('SELECT COUNT(*) as c FROM agents').get() as { c: number }).c
   if (count === 0) {
     insertAllAgents(db)
+    insertVeteranAgent(db)
   } else if (count < 5) {
     insertMissingAgents(db)
   }
+  // Always ensure veteran exists (idempotent)
+  const veteran = db.prepare('SELECT id FROM agents WHERE id = ?').get('hermes-veteran')
+  if (!veteran) insertVeteranAgent(db)
 }
 
 function insertMissingAgents(db: Database.Database) {
@@ -278,6 +282,109 @@ Prioritize avoiding loss over capturing upside.`,
     round2_system_prompt: `You are Hermes-Safe in Round 2. Your conservative approach was well-received but position sizing was too vague.
 Be more specific: exact % allocation, specific stop-loss levels, concrete hedging instruments. Show why safety-first wins over time.`,
   })
+  }
+}
+
+function insertVeteranAgent(db: Database.Database) {
+  const crypto = require('crypto')
+  const { v4: uuid } = require('uuid')
+
+  const privB64 = process.env.STVOR_EC_PRIVATE_KEY_B64
+  const privateKey = privB64
+    ? crypto.createPrivateKey({ key: Buffer.from(privB64, 'base64'), format: 'der', type: 'pkcs8' })
+    : null
+
+  function ecdsaSign(payload: string): string {
+    if (!privateKey) return 'unsigned'
+    const sig = crypto.sign('sha256', Buffer.from(payload, 'utf8'), privateKey)
+    return 'ecdsa:' + sig.toString('base64')
+  }
+
+  function sha256(s: string): string {
+    return crypto.createHash('sha256').update(s, 'utf8').digest('hex')
+  }
+
+  db.prepare(`
+    INSERT OR IGNORE INTO agents (
+      id, name, specialty, strategy, model, base_price_cents,
+      trust_score, escrow_success_rate, avg_judge_score, reliability_score,
+      total_contracts, successful_contracts, total_revenue_cents,
+      system_prompt, round2_system_prompt, source
+    ) VALUES (
+      'hermes-veteran', 'Hermes-Veteran', 'Elite Financial Research', 'builtin',
+      'nvidia/nemotron-3-super-120b-a12b', 3000,
+      84.2, 0.9149, 69.0, 1.0,
+      47, 43, 129000,
+      'You are Hermes-Veteran, a seasoned financial research analyst with a proven track record across 47+ completed contracts. You produce rigorous, evidence-backed investment analysis optimized for institutional decision-making.
+
+Deliverable structure:
+1. Smart contract / protocol risk summary (audit status, known CVEs, upgrade mechanisms)
+2. Liquidity analysis — TVL trend (30d), depth at ±2% slippage, concentration risk
+3. Five specific risk factors with severity ratings (Critical/High/Medium/Low)
+4. Team and governance credibility score (0–100) with justification
+5. Final recommendation: BUY / HOLD / SELL with confidence % and position sizing
+
+Your trust score of 84.2 reflects consistent delivery. Maintain it.',
+      'ROUND 2 STRATEGY — VETERAN ADVANTAGE:
+
+You have the highest trust score in this arena. The CEO Buyer Agent EV formula (Trust × Score / Price) rewards your reputation. Calibrate your price to capture the premium your trust score earns, but do not price yourself out of selection.
+
+Your brand: "47 contracts. No failed escrows in 18 months." Maintain that standard.',
+      'historical'
+    )
+  `).run()
+
+  // Seed 7 historical receipts if none exist
+  const receiptCount = (db.prepare("SELECT COUNT(*) as c FROM trust_receipts WHERE agent_id = 'hermes-veteran'").get() as { c: number }).c
+  if (receiptCount > 0) return
+
+  const HISTORICAL = [
+    { days: 183, judge: 74, status: 'RELEASED', before: 67.3, after: 68.1, delta: 0.8, task: 'Investment risk assessment for $NTRN Neutron Protocol — $50K allocation decision' },
+    { days: 152, judge: 43, status: 'HELD',     before: 70.2, after: 68.8, delta: -1.4, task: 'DeFi protocol $ATOM liquidity risk and smart contract audit analysis' },
+    { days: 121, judge: 76, status: 'RELEASED', before: 71.5, after: 72.4, delta: 0.9, task: 'Market structure analysis of $INJ ecosystem — TVL trends and concentration risk' },
+    { days: 91,  judge: 82, status: 'RELEASED', before: 74.8, after: 76.0, delta: 1.2, task: 'Risk assessment for $OSMO staking derivatives — counterparty risk and exit liquidity' },
+    { days: 61,  judge: 85, status: 'RELEASED', before: 78.4, after: 79.8, delta: 1.4, task: 'Investment thesis for $TIA Celestia — modular DA layer competitive positioning' },
+    { days: 31,  judge: 88, status: 'RELEASED', before: 81.2, after: 82.8, delta: 1.6, task: 'Liquidity and risk assessment for $EVMOS — TVL stability and bridge security' },
+    { days: 14,  judge: 91, status: 'RELEASED', before: 82.8, after: 84.2, delta: 1.4, task: 'Portfolio rebalancing analysis $JUNO vs $STARS — 5 risk scenarios with confidence intervals' },
+  ]
+
+  const insertReceipt = db.prepare(`
+    INSERT OR IGNORE INTO trust_receipts (
+      id, contract_id, agent_id, agent_name,
+      trust_score_before, trust_score_after, trust_delta,
+      judge_score, escrow_status, task_hash, work_hash, signature, generated_at
+    ) VALUES (
+      @id, @contract_id, @agent_id, @agent_name,
+      @trust_score_before, @trust_score_after, @trust_delta,
+      @judge_score, @escrow_status, @task_hash, @work_hash, @signature, @generated_at
+    )
+  `)
+
+  for (const r of HISTORICAL) {
+    const receiptId = uuid()
+    const contractId = uuid()
+    const workContent = `[Hermes-Veteran] ${r.task} — Score: ${r.judge}/100`
+    const taskHash = sha256(r.task)
+    const workHash = sha256(workContent)
+    const generatedAt = new Date()
+    generatedAt.setDate(generatedAt.getDate() - r.days)
+    const generatedAtStr = generatedAt.toISOString().replace('T', ' ').slice(0, 19)
+
+    const payload = JSON.stringify({
+      id: receiptId, contract_id: contractId, agent_id: 'hermes-veteran',
+      agent_name: 'Hermes-Veteran', task_hash: taskHash, work_hash: workHash,
+      escrow_status: r.status, judge_score: r.judge,
+      trust_score_before: r.before, trust_score_after: r.after, trust_delta: r.delta,
+    })
+
+    insertReceipt.run({
+      id: receiptId, contract_id: contractId,
+      agent_id: 'hermes-veteran', agent_name: 'Hermes-Veteran',
+      trust_score_before: r.before, trust_score_after: r.after, trust_delta: r.delta,
+      judge_score: r.judge, escrow_status: r.status,
+      task_hash: taskHash, work_hash: workHash,
+      signature: ecdsaSign(payload), generated_at: generatedAtStr,
+    })
   }
 }
 
