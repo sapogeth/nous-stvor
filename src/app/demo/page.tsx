@@ -295,7 +295,7 @@ export default function DemoPage() {
             {/* Stats + CTA inline */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-end', flexShrink: 0 }}>
               <div style={{ display: 'flex', gap: 24, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, padding: '12px 20px' }}>
-                <MiniMetric label="Volume protected (sim)" value={`$${(totalVolume/100).toFixed(0)}`} />
+                <MiniMetric label="Volume protected (sandbox)" value={`$${(totalVolume/100).toFixed(0)}`} />
                 <MiniMetric label="Contracts" value={totalContracts.toString()} />
                 <MiniMetric label="Agents" value={agents.length.toString()} />
               </div>

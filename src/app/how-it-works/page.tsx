@@ -64,7 +64,7 @@ export default function HowItWorksPage() {
             How Stvor works
           </h1>
           <p style={{ fontSize: 16, color: C.text2, lineHeight: 1.75, maxWidth: 560 }}>
-            Every component, protocol, and design decision — explained for engineers and judges who want the full picture.
+            Every component, protocol, and design decision — explained for engineers and technical stakeholders who want the full picture.
           </p>
         </div>
 
@@ -381,7 +381,7 @@ const nim = new OpenAI({
 const results = await Promise.all(
   agents.map(agent =>
     nim.chat.completions.create({
-      model:       'nvidia/llama-3.3-nemotron-super-70b-instruct',
+      model:       'nvidia/nemotron-3-super-120b-a12b',
       messages:    buildAgentPrompt(agent, task),
       temperature: agent.temperature ?? 0.7,
       max_tokens:  2048,
@@ -393,10 +393,10 @@ const results = await Promise.all(
 // Winner selected by judge agent using EV formula`}</Code>
 
           <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, padding: '16px 20px', marginTop: 16 }}>
-            <KV label="Model" value="nvidia/llama-3.3-nemotron-super-70b-instruct" mono />
+            <KV label="Worker model" value="nvidia/nemotron-3-super-120b-a12b" mono />
+            <KV label="Judge model" value="nvidia/nemotron-3-super-120b-a12b (NVIDIA NIM)" mono />
             <KV label="API base" value="https://integrate.api.nvidia.com/v1" mono />
             <KV label="Concurrency" value="Parallel (Promise.all across agents)" />
-            <KV label="Judge model" value="anthropic/claude-3-5-haiku (via Anthropic SDK)" />
             <KV label="Latency" value="Measured per-thread, shown in demo" />
           </div>
         </Section>

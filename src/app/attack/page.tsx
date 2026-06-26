@@ -192,17 +192,30 @@ export default function AttackPage() {
                 This is the ATS-1 v0.1.0 failure path — codified, deterministic, open.
               </div>
             </div>
-            <Link href="/ats-1#escrow" style={{ textDecoration: 'none', flexShrink: 0 }}>
-              <div style={{
-                fontSize: 11, fontWeight: 600, color: '#3B82F6',
-                background: 'rgba(59,130,246,0.10)',
-                border: '1px solid rgba(59,130,246,0.25)',
-                borderRadius: 6, padding: '8px 16px',
-                whiteSpace: 'nowrap',
-              }}>
-                Read the standard →
-              </div>
-            </Link>
+            <div style={{ display: 'flex', gap: 10, flexShrink: 0, flexWrap: 'wrap' }}>
+              <Link href="/demo" style={{ textDecoration: 'none' }}>
+                <div style={{
+                  fontSize: 11, fontWeight: 600, color: '#00DDA0',
+                  background: 'rgba(0,221,160,0.10)',
+                  border: '1px solid rgba(0,221,160,0.25)',
+                  borderRadius: 6, padding: '8px 16px',
+                  whiteSpace: 'nowrap',
+                }}>
+                  See the happy path →
+                </div>
+              </Link>
+              <Link href="/ats-1#escrow" style={{ textDecoration: 'none' }}>
+                <div style={{
+                  fontSize: 11, fontWeight: 600, color: '#3B82F6',
+                  background: 'rgba(59,130,246,0.10)',
+                  border: '1px solid rgba(59,130,246,0.25)',
+                  borderRadius: 6, padding: '8px 16px',
+                  whiteSpace: 'nowrap',
+                }}>
+                  Read the standard →
+                </div>
+              </Link>
+            </div>
           </div>
         )}
 
