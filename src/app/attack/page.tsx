@@ -7,16 +7,17 @@ import { LiveFeed } from '@/components/LiveFeed'
 import { StvorEvent } from '@/types'
 
 const C = {
-  bg:      '#0A0A0F',
-  surface: '#111118',
-  surface2:'#16161F',
-  border:  '#1C1C28',
-  text1:   '#F1F5F9',
-  text2:   '#94A3B8',
-  text3:   '#475569',
-  green:   '#22C55E',
-  red:     '#EF4444',
+  bg:      '#07070F',
+  surface: '#0C0C1A',
+  surface2:'#101020',
+  border:  'rgba(100,100,200,0.08)',
+  text1:   '#EEEEF8',
+  text2:   '#7575A0',
+  text3:   '#3A3A55',
+  green:   '#00DDA0',
+  red:     '#FF4555',
   mono:    'var(--font-geist-mono), ui-monospace, monospace',
+  disp:    "var(--font-space), 'Space Grotesk', system-ui, sans-serif",
 }
 
 export default function AttackPage() {
@@ -87,7 +88,7 @@ export default function AttackPage() {
               <p style={{ fontSize: 11, color: C.red, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 8 }}>
                 Supply Chain Attack Simulation
               </p>
-              <h1 style={{ fontSize: 32, fontWeight: 800, letterSpacing: '-0.04em', color: C.text1, marginBottom: 8 }}>
+              <h1 style={{ fontSize: 32, fontWeight: 700, letterSpacing: '-0.04em', color: C.text1, marginBottom: 8, fontFamily: C.disp }}>
                 Payload tampered. Agent refused.
               </h1>
               <p style={{ fontSize: 14, color: C.text3, maxWidth: 560, lineHeight: 1.65 }}>

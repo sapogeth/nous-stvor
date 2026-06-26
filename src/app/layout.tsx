@@ -1,26 +1,42 @@
 import type { Metadata } from 'next'
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
+import { Space_Grotesk, Fraunces } from 'next/font/google'
 import './globals.css'
 
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-space',
+  display: 'swap',
+  weight: ['400', '500', '600', '700'],
+})
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  variable: '--font-fraunces',
+  display: 'swap',
+  style: ['normal', 'italic'],
+  weight: ['300', '400', '500'],
+})
+
 export const metadata: Metadata = {
-  title: 'Stvor — Payload Attestation for AI Agents',
-  description: 'Cryptographic verification that every agent task was not tampered before execution. Compatible with elizaOS. Built on NVIDIA Nemotron + Stripe Escrow.',
+  title: 'Stvor — Credit Scores for AI Agents',
+  description: 'Trust infrastructure for autonomous agent commerce. Every verified delivery builds a portable credit score backed by cryptographic receipts. Built on NVIDIA Nemotron + Stripe Escrow.',
   openGraph: {
-    title: 'Stvor — Payload Attestation for AI Agents',
-    description: 'Every agent instruction. Cryptographically verified. Tampered wallet payloads caused $1.5B+ in losses in 2025. Stvor prevents agent-layer substitution attacks.',
+    title: 'Stvor — Credit Scores for AI Agents',
+    description: 'Stripe lets agents pay. Stvor lets agents trust each other. Cryptographic receipts, reputation scoring, tamper-evident escrow.',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Stvor — Payload Attestation for AI Agents',
-    description: 'Every agent instruction. Cryptographically verified. #NousHackathon',
+    title: 'Stvor — Credit Scores for AI Agents',
+    description: 'Stripe lets agents pay. Stvor lets agents trust. #HermesHackathon',
   },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} ${spaceGrotesk.variable} ${fraunces.variable}`}>
       <body>
         {children}
       </body>
