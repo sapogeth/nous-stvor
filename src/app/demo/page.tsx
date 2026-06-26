@@ -168,27 +168,34 @@ export default function DemoPage() {
         </div>
       )}
 
-      {receiptId && isDone && (
-        <div style={{
-          background: 'rgba(34,197,94,.04)', borderBottom: '1px solid rgba(34,197,94,.15)',
-          padding: '8px 40px', display: 'flex', alignItems: 'center', gap: 14,
-        }}>
-          <span style={{ fontSize: 10, fontWeight: 700, color: C.green, textTransform: 'uppercase', letterSpacing: '.08em', flexShrink: 0 }}>
-            Receipt issued
-          </span>
-          <span style={{ fontSize: 12, color: C.text3, fontFamily: C.mono, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
-            /receipts/{receiptId}
-          </span>
-          <a href={`/receipts/${receiptId}`} target="_blank" rel="noopener noreferrer" style={{
-            fontSize: 11, fontWeight: 600, color: C.green,
-            textDecoration: 'none', flexShrink: 0,
-            background: 'rgba(34,197,94,.08)', border: '1px solid rgba(34,197,94,.2)',
-            borderRadius: 5, padding: '4px 12px',
+      {receiptId && isDone && (() => {
+        // Encode receipt data in URL so the receipt page works even after
+        // Vercel recycles the function instance (ephemeral /tmp SQLite).
+        const receiptUrl = receipt
+          ? `/receipts/${receiptId}?d=${encodeURIComponent(btoa(JSON.stringify(receipt)))}`
+          : `/receipts/${receiptId}`
+        return (
+          <div style={{
+            background: 'rgba(0,221,160,0.04)', borderBottom: '1px solid rgba(0,221,160,0.15)',
+            padding: '8px 40px', display: 'flex', alignItems: 'center', gap: 14,
           }}>
-            View + verify ↗
-          </a>
-        </div>
-      )}
+            <span style={{ fontSize: 10, fontWeight: 700, color: C.green, textTransform: 'uppercase', letterSpacing: '.08em', flexShrink: 0 }}>
+              Receipt issued
+            </span>
+            <span style={{ fontSize: 12, color: C.text3, fontFamily: C.mono, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+              /receipts/{receiptId}
+            </span>
+            <a href={receiptUrl} target="_blank" rel="noopener noreferrer" style={{
+              fontSize: 11, fontWeight: 600, color: C.green,
+              textDecoration: 'none', flexShrink: 0,
+              background: 'rgba(0,221,160,0.08)', border: '1px solid rgba(0,221,160,0.2)',
+              borderRadius: 5, padding: '4px 12px',
+            }}>
+              View + verify ↗
+            </a>
+          </div>
+        )
+      })()}
 
       <main className="demo-main" style={{}}>
 

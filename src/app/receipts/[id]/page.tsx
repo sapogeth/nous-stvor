@@ -17,9 +17,25 @@ const C = {
   mono:    'var(--font-geist-mono), ui-monospace, monospace',
 }
 
-export default async function ReceiptPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ReceiptPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ d?: string }>
+}) {
   const { id } = await params
-  const receipt = receiptQueries.getById(id)
+  const { d }  = await searchParams
+
+  // Try DB first, then decode from URL param (Vercel ephemeral /tmp SQLite fallback)
+  let receipt = receiptQueries.getById(id)
+  if (!receipt && d) {
+    try {
+      const decoded = Buffer.from(decodeURIComponent(d), 'base64').toString('utf8')
+      const parsed  = JSON.parse(decoded)
+      if (parsed && parsed.id) receipt = parsed as ReturnType<typeof receiptQueries.getById>
+    } catch {}
+  }
   if (!receipt) notFound()
 
   const payload = JSON.stringify({
