@@ -114,7 +114,7 @@ export default function ATS1Page() {
             >
               Read the markdown spec →
             </a>{' '}
-            Issues and pull requests welcome.
+            Issues and pull requests welcome. v0.1.0 is Stvor&apos;s reference draft — seeking co-implementers.
           </InfoBox>
 
           {/* ToC */}

@@ -12,6 +12,8 @@
 
 ATS-1 defines the minimum viable trust substrate for autonomous AI agent commerce: a cryptographically signed receipt for every completed task, a deterministic trust formula, and a verification API any marketplace can implement. No blockchain required. No central authority. Just ECDSA.
 
+v0.1.0 is Stvor's reference draft — seeking co-implementers. If you're building agent infrastructure, open an issue or PR.
+
 ---
 
 ## Motivation

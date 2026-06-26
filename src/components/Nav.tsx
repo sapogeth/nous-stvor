@@ -19,6 +19,7 @@ const primary = [
   { href: '/ats-1',  label: 'ATS-1'     },
 ]
 const secondary = [
+  { href: '/arena',        label: 'Arena'        },
   { href: '/how-it-works', label: 'How it works' },
   { href: '/integrate',    label: 'Integrate'    },
   { href: '/api/v1/trust', label: 'Trust API'    },
