@@ -4,12 +4,13 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const C = {
-  bg:     '#0A0A0F',
-  border: '#1C1C28',
-  text1:  '#F1F5F9',
-  text2:  '#94A3B8',
-  text3:  '#475569',
-  green:  '#22C55E',
+  bg:     '#04040A',
+  border: 'rgba(255,255,255,0.07)',
+  text1:  '#F0F4FF',
+  text2:  '#8892B0',
+  text3:  '#4A5568',
+  green:  '#00FF9D',
+  blue:   '#00C8FF',
 }
 
 const links = [
@@ -31,17 +32,19 @@ export function Nav({ connected }: { connected?: boolean }) {
       height: 52,
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       position: 'sticky', top: 0, zIndex: 50,
-      background: 'rgba(10,10,15,.95)',
-      backdropFilter: 'blur(12px)',
+      background: 'rgba(4,4,10,0.85)',
+      backdropFilter: 'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)',
     }}>
       {/* Logo */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
         <Link href="/" style={{ display:'flex', alignItems:'center', gap:10, textDecoration:'none' }}>
           <div style={{
-            width: 24, height: 24, borderRadius: 5,
-            background: C.text1,
+            width: 24, height: 24, borderRadius: 6,
+            background: 'linear-gradient(135deg, #00C8FF, #8B5CF6)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 10, fontWeight: 900, color: C.bg, letterSpacing: '-0.02em',
+            fontSize: 10, fontWeight: 900, color: '#fff', letterSpacing: '-0.02em',
+            boxShadow: '0 0 12px rgba(0,200,255,0.4)',
           }}>S</div>
           <span style={{ fontWeight: 700, fontSize: 14, letterSpacing: '-0.03em', color: C.text1 }}>Stvor</span>
         </Link>
