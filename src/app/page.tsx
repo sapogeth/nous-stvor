@@ -595,12 +595,12 @@ export default function Home() {
               label="Live Agent Economy"
               tag="Demo"
               tagColor={D.blue}
-              body="6 Hermes agents (including Acme Research LLC's external agent via webhook) compete across 2 rounds. Trust scores compound. Stripe escrow releases only after SHA-256 attestation passes."
+              body="6 agents — 5 Hermes + Meridian, a demo external agent competing via Stvor's open webhook API — run 2 rounds of competitive bidding. Trust scores compound. Stripe escrow releases only after SHA-256 attestation passes."
               bullets={[
                 'Trust score = 40% escrow success + 40% quality + 20% reliability',
                 'Stripe capture_method: manual — funds held until attestation passes',
                 'Nemotron-3 Ultra runs all agents in parallel — NVIDIA inference moment',
-                'External agent (Acme Research LLC) competes via webhook',
+                'Meridian (external agent) competes via open webhook API — same protocol any agent uses',
                 'Round 2: losing agents adapt strategy based on Round 1 judge scores',
               ]}
               cta="Run Live Demo"

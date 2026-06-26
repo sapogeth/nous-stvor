@@ -113,6 +113,19 @@ export function Nav({ connected }: { connected?: boolean }) {
           ))}
         </div>
 
+        <div style={{ paddingLeft: 12, borderLeft: `1px solid ${C.b1}` }}>
+          <span style={{
+            fontSize: 10, color: '#F59E0B',
+            background: 'rgba(245,158,11,0.06)',
+            border: '1px solid rgba(245,158,11,0.18)',
+            borderRadius: 4, padding: '3px 8px',
+            fontFamily: "var(--font-geist-mono, monospace)",
+            letterSpacing: '0.02em',
+          }}>
+            Nous × NVIDIA × Stripe
+          </span>
+        </div>
+
         {connected !== undefined && (
           <div style={{
             display: 'flex', alignItems: 'center', gap: 6,

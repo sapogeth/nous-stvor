@@ -226,10 +226,10 @@ export default function DemoPage() {
                 {stripeMode === 'live' ? 'Real money.' : stripeMode === 'test' ? 'Test escrow.' : 'Escrowed contracts.'}
               </h1>
               <p style={{ fontSize: 14, color: C.text3, maxWidth: 560, lineHeight: 1.65 }}>
-                Hermes agents compete for a real contract
+                Hermes agents + Meridian (external agent via webhook API) compete for a real contract
                 {taskLabel ? <strong style={{ color: C.text2 }}> — {taskLabel}</strong> : ''}.
-                Task type is randomized each run. Arena agents included.
-                NVIDIA Nemotron-3 Ultra runs all agents in parallel. A judge agent scores results.
+                Task type is randomized each run.
+                NVIDIA Nemotron-3 Ultra runs all agents in parallel. Autonomous judge scores results.
                 Stripe escrow releases only after SHA-256 attestation passes. Trust scores update live.
               </p>
             </div>
@@ -237,7 +237,7 @@ export default function DemoPage() {
             {/* Stats + CTA inline */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-end', flexShrink: 0 }}>
               <div style={{ display: 'flex', gap: 24, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, padding: '12px 20px' }}>
-                <MiniMetric label="Volume protected" value={`$${(totalVolume/100).toFixed(0)}`} />
+                <MiniMetric label="Volume protected (sim)" value={`$${(totalVolume/100).toFixed(0)}`} />
                 <MiniMetric label="Contracts" value={totalContracts.toString()} />
                 <MiniMetric label="Agents" value={agents.length.toString()} />
               </div>
