@@ -5,11 +5,16 @@ import { ecdsaVerify, getPublicKeyInfo } from '@/lib/crypto'
 export const dynamic = 'force-dynamic'
 
 export async function POST(req: NextRequest) {
-  const { receiptId } = await req.json()
-  const receipt = receiptQueries.getById(receiptId)
+  const { receiptId, receiptData } = await req.json()
+
+  // Try DB first; fall back to client-supplied receipt data (for Vercel ephemeral SQLite)
+  let receipt = receiptQueries.getById(receiptId)
+  if (!receipt && receiptData && receiptData.id === receiptId) {
+    receipt = receiptData
+  }
 
   if (!receipt) {
-    return NextResponse.json({ valid: false, reason: 'Receipt not found' }, { status: 404 })
+    return NextResponse.json({ valid: false, reason: 'Receipt not found in active database.' }, { status: 404 })
   }
 
   const payload = JSON.stringify({
