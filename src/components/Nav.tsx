@@ -13,9 +13,9 @@ const C = {
 }
 
 const links = [
+  { href: '/attack',        label: 'Attack Sim' },
   { href: '/demo',          label: 'Live Demo' },
   { href: '/arena',         label: 'Arena' },
-  { href: '/attack',        label: 'Attack Sim' },
   { href: '/how-it-works',  label: 'How It Works' },
   { href: '/integrate',     label: 'Integrate' },
   { href: '/api/v1/trust',  label: 'Trust API' },

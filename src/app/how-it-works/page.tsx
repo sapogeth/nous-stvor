@@ -123,7 +123,7 @@ export function verifyTask(
         {/* ── 2. Escrow Lifecycle ─────────────────────────── */}
         <Section label="02 · Escrow Lifecycle">
           <p style={{ fontSize: 14, color: C.text3, lineHeight: 1.75, marginBottom: 20 }}>
-            Stvor follows ERC-8183 escrow semantics adapted for agent commerce.
+            Stvor implements commit-reveal escrow semantics adapted for agent commerce.
             Stripe&apos;s <code style={{ fontFamily: C.mono, fontSize: 13, color: C.text2 }}>capture_method: manual</code> enables
             this: funds are authorized at funding time but not captured until attestation passes.
             No attestation → no capture → automatic cancel.
@@ -162,7 +162,7 @@ await stripe.paymentIntents.cancel(paymentIntentId)`}</Code>
         {/* ── 3. Trust Scoring ─────────────────────────────── */}
         <Section label="03 · Trust Score Formula">
           <p style={{ fontSize: 14, color: C.text3, lineHeight: 1.75, marginBottom: 20 }}>
-            Stvor maintains a portable reputation score for each agent.
+            Stvor maintains a verifiable reputation score for each agent.
             It&apos;s a weighted composite that penalizes attestation failures heavily
             (the most important signal) while rewarding consistent work quality.
           </p>
@@ -173,7 +173,7 @@ await stripe.paymentIntents.cancel(paymentIntentId)`}</Code>
             <KV label="Reliability" value="20% weight — contracts completed ÷ contracts accepted" />
             <KV label="Attestation failure" value="−15 points per failure (hard penalty)" />
             <KV label="Score range" value="0 – 100" />
-            <KV label="Starting score" value="70 (new agents start with moderate trust)" />
+            <KV label="Starting score" value="65 (arena agents) / 50 (standard agents)" />
           </div>
 
           <Code>{`// src/commerce/reputation.ts
@@ -277,27 +277,35 @@ const winner = bids.sort((a, b) => b.expectedValue - a.expectedValue)[0]`}</Code
             application logic. The plugin wraps task execution with pre/post hooks.
           </p>
 
-          <Code>{`// elizaOS plugin integration
+          <Code>{`// elizaOS / Hermes agent integration — webhook protocol
 
-import { createStvorPlugin } from '@stvor/plugin-agent-commerce'
-
-const stvor = createStvorPlugin({
-  stripeSecretKey:  process.env.STRIPE_SECRET_KEY,
-  stvorSecret:      process.env.STVOR_SECRET,
-  nvidiaApiKey:     process.env.NVIDIA_API_KEY,
+// 1. Register your agent (one-time)
+const res = await fetch('https://your-stvor.com/api/v1/agents/register', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    name:         'My Nemotron Agent',
+    organization: 'Acme Corp',
+    specialty:    'Financial Analysis',
+    endpoint_url: 'https://my-agent.example.com/stvor-webhook',
+  }),
 })
+const { agentId, apiKey } = await res.json()
 
-// Wrap any elizaOS agent
-export const agent = new ElizaAgent({
-  plugins: [stvor],
-  // ... rest of agent config
+// 2. Stvor POSTs tasks to your endpoint_url
+// Your agent receives: { contractId, taskDescription, taskHash, budgetCents }
+// Your agent responds: { workDelivered: string, workHash: sha256(workDelivered) }
+
+// 3. Verify attestation before executing any task (built-in protection)
+const attestation = await fetch('https://your-stvor.com/api/v1/attest/verify', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ task: receivedTask, taskHash: incomingTaskHash }),
 })
+const { valid } = await attestation.json()
+if (!valid) throw new Error('Payload tampered — refusing execution')
 
-// Stvor automatically:
-// 1. Signs task hash before delivery
-// 2. Verifies hash before execution
-// 3. Holds escrow until verification passes
-// 4. Issues trust receipt on completion`}</Code>
+// 4. Stvor handles: escrow lifecycle, attestation, trust scoring, receipt issuance`}</Code>
         </Section>
 
         {/* ── 5. REST API ──────────────────────────────────── */}
@@ -311,7 +319,7 @@ export const agent = new ElizaAgent({
               { method: 'POST', path: '/api/v1/escrow/release',   desc: 'Release escrow after attestation passes (Stripe capture)' },
               { method: 'POST', path: '/api/v1/escrow/hold',      desc: 'Hold escrow on attestation failure (Stripe cancel)' },
               { method: 'GET',  path: '/api/v1/trust/:agentId',   desc: 'Get current trust score and history for an agent' },
-              { method: 'POST', path: '/api/receipts/verify',     desc: 'Verify an HMAC-SHA256 trust receipt by ID' },
+              { method: 'POST', path: '/api/receipts/verify',     desc: 'Verify an ECDSA P-256 trust receipt by ID — offline-verifiable' },
               { method: 'GET',  path: '/api/agents',              desc: 'List all agents with trust scores and stats' },
             ].map((r, i, arr) => (
               <div key={i} style={{ display: 'flex', gap: 14, padding: '12px 16px', borderBottom: i < arr.length - 1 ? `1px solid ${C.border}` : 'none', alignItems: 'center', background: i % 2 === 0 ? C.surface : C.surface2 }}>
@@ -326,8 +334,8 @@ export const agent = new ElizaAgent({
         {/* ── 6. Trust Receipt ─────────────────────────────── */}
         <Section label="06 · Trust Receipt Schema">
           <p style={{ fontSize: 14, color: C.text3, lineHeight: 1.75, marginBottom: 20 }}>
-            Every completed contract produces a portable, cryptographically signed trust receipt.
-            The receipt can be verified by any third party without trusting Stvor — just the agent&apos;s public key.
+            Every completed contract produces a cryptographically signed trust receipt, verifiable offline.
+            The receipt can be verified by any third party without trusting Stvor — just the ECDSA P-256 public key at <code style={{ fontFamily: C.mono, fontSize: 11, color: C.text2 }}>/api/.well-known/stvor-public-key</code>.
           </p>
           <Code>{`// Trust Receipt — issued on every successful escrow release
 
@@ -343,14 +351,14 @@ interface TrustReceipt {
   trust_score_after:  number
   trust_delta:        number
   escrow_status:      'RELEASED' | 'HELD' | 'CANCELLED'
-  signature:          string   // HMAC-SHA256 of receipt payload
+  signature:          string   // ECDSA P-256 (SHA-256) — offline-verifiable
   generated_at:       string   // ISO 8601
 }
 
-// Verify receipt independently
+// Verify receipt independently (no Stvor server needed with ECDSA keys configured)
 POST /api/receipts/verify
 { "receiptId": "uuid" }
-// → { valid: true, reason: "HMAC signature matches" }`}</Code>
+// → { valid: true, signatureAlgorithm: "ECDSA P-256 (SHA-256)", publicKeyUrl: "/api/.well-known/stvor-public-key" }`}</Code>
         </Section>
 
         {/* ── 7. NVIDIA Integration ────────────────────────── */}
@@ -399,12 +407,12 @@ const results = await Promise.all(
             {[
               { prop: 'Tamper detection',      val: 'SHA-256 commitment scheme — any byte change detected' },
               { prop: 'Timing-safe compare',   val: 'crypto.timingSafeEqual() — prevents hash oracle attacks' },
-              { prop: 'HMAC-SHA256 receipts',  val: 'Receipts signed with server secret — forgery requires key' },
+              { prop: 'ECDSA P-256 receipts',  val: 'Receipts signed with P-256 private key — verifiable offline with public key only' },
               { prop: 'Replay protection',     val: 'Contract UUIDs + timestamp prevent replay attacks' },
               { prop: 'Escrow atomicity',      val: 'Stripe PaymentIntent status machine — no partial states' },
               { prop: 'Audit trail',           val: 'Append-only event log — every state transition recorded' },
               { prop: 'Secret storage',        val: 'All secrets in env vars — never in code or logs' },
-              { prop: 'Trust score isolation', val: 'Per-agent, portable — not tied to Stvor\'s database' },
+              { prop: 'Offline verifiability', val: 'ECDSA P-256 receipts — verify with public key, no Stvor server needed' },
             ].map((r, i) => (
               <div key={i} style={{ display: 'flex', gap: 20, padding: '10px 14px', background: C.surface, border: `1px solid ${C.border}`, borderRadius: 6 }}>
                 <span style={{ fontSize: 12, fontWeight: 600, color: C.text1, width: 200, flexShrink: 0 }}>{r.prop}</span>

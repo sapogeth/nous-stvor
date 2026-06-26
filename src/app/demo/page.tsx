@@ -10,7 +10,7 @@ import { LiveFeed } from '@/components/LiveFeed'
 import { StvorEvent, TrustReceipt } from '@/types'
 
 interface Agent {
-  id: string; name: string; specialty: string; strategy: string; model: string
+  id: string; name: string; specialty: string; strategy: string; model: string; source?: string | null
   trust_score: number; total_contracts: number; successful_contracts: number
   total_revenue_cents: number; escrow_success_rate: number; avg_judge_score: number
 }
@@ -33,11 +33,15 @@ export default function DemoPage() {
   const [events,         setEvents]         = useState<StvorEvent[]>([])
   const [receipt,        setReceipt]        = useState<TrustReceipt | null>(null)
   const [isRunning,      setIsRunning]      = useState(false)
+  const [taskLabel,      setTaskLabel]      = useState<string>('')
+  const [budgetCents,    setBudgetCents]    = useState<number | null>(null)
+  const [stripeMode,     setStripeMode]     = useState<'demo' | 'test' | 'live' | null>(null)
   const [isDone,         setIsDone]         = useState(false)
   const [currentStep,    setCurrentStep]    = useState(0)
   const [showReceipt,    setShowReceipt]    = useState(false)
   const [connected,      setConnected]      = useState(false)
   const [transfer,       setTransfer]       = useState<{ agentName: string; recipientEmail: string; amountCents: number } | null>(null)
+  const [receiptId,      setReceiptId]      = useState<string | null>(null)
   const eventsRef = useRef<StvorEvent[]>([])
 
   const fetchAgents = useCallback(async () => {
@@ -45,47 +49,74 @@ export default function DemoPage() {
   }, [])
 
   useEffect(() => {
+    fetch('/api/status')
+      .then(r => r.json())
+      .then(d => setStripeMode(d.stripe?.mode ?? null))
+      .catch(() => {})
+  }, [])
+
+  useEffect(() => {
     fetchAgents()
-    const es = new EventSource('/api/events')
-    es.onopen  = () => setConnected(true)
-    es.onerror = () => setConnected(false)
-    es.onmessage = (e) => {
-      const event: StvorEvent = JSON.parse(e.data)
-      if (event.type === 'CONNECTED') return
-      const updated = [event, ...eventsRef.current].slice(0, 100)
-      eventsRef.current = updated
-      setEvents([...updated])
-      switch (event.type) {
-        case 'CONTRACT_CREATED':   setCurrentStep(event.data.round === 1 ? 1 : 7); break
-        case 'ESCROW_FUNDED':      setCurrentStep(p => Math.max(p, 2)); break
-        case 'BID_SUBMITTED':      setCurrentStep(p => Math.max(p, 3)); break
-        case 'INFERENCE_STARTED':  setCurrentStep(p => Math.max(p, 4)); break
-        case 'JUDGE_STARTED':      setCurrentStep(p => Math.max(p, 5)); break
-        case 'ESCROW_RELEASED':    setCurrentStep(p => Math.max(p, 6)); break
-        case 'TRUST_GATE_REJECTED': setCurrentStep(p => Math.max(p, 7)); break
-        case 'ROUND2_STARTING':    setCurrentStep(7); break
-        case 'ADAPTATION_SUMMARY': setCurrentStep(10); break
-        case 'RECEIPT_GENERATED':
-          setCurrentStep(p => Math.max(p, 6))
-          setReceipt(event.data as TrustReceipt)
-          setTimeout(() => setShowReceipt(true), 1000)
-          break
-        case 'TRUST_UPDATED': fetchAgents(); break
-        case 'TRANSFER_INITIATED':
-          setTransfer({ agentName: event.data.agentName, recipientEmail: event.data.recipientEmail, amountCents: event.data.amountCents })
-          break
-        case 'DEMO_COMPLETE':
-        case 'DEMO_ERROR':
-          setIsRunning(false); setIsDone(true); break
+    let es: EventSource
+    let reconnectTimer: ReturnType<typeof setTimeout>
+
+    function connect() {
+      es = new EventSource('/api/events')
+      es.onopen  = () => setConnected(true)
+      es.onerror = () => {
+        setConnected(false)
+        es.close()
+        reconnectTimer = setTimeout(connect, 3000)
+      }
+      es.onmessage = (e) => {
+        const event: StvorEvent = JSON.parse(e.data)
+        if (event.type === 'CONNECTED') return
+        const updated = [event, ...eventsRef.current].slice(0, 100)
+        eventsRef.current = updated
+        setEvents([...updated])
+        switch (event.type) {
+          case 'CONTRACT_CREATED':
+            if (event.data.round === 1) {
+              setCurrentStep(1)
+              if (event.data.taskLabel) setTaskLabel(event.data.taskLabel as string)
+              if (event.data.budgetCents) setBudgetCents(event.data.budgetCents)
+            } else {
+              setCurrentStep(7)
+            }
+            break
+          case 'ESCROW_FUNDED':      setCurrentStep(p => Math.max(p, 2)); break
+          case 'BID_SUBMITTED':      setCurrentStep(p => Math.max(p, 3)); break
+          case 'INFERENCE_STARTED':  setCurrentStep(p => Math.max(p, 4)); break
+          case 'JUDGE_STARTED':      setCurrentStep(p => Math.max(p, 5)); break
+          case 'ESCROW_RELEASED':    setCurrentStep(p => Math.max(p, 6)); break
+          case 'TRUST_GATE_REJECTED': setCurrentStep(p => Math.max(p, 7)); break
+          case 'ROUND2_STARTING':    setCurrentStep(7); break
+          case 'ADAPTATION_SUMMARY': setCurrentStep(10); break
+          case 'RECEIPT_GENERATED':
+            setCurrentStep(p => Math.max(p, 6))
+            setReceipt(event.data as TrustReceipt)
+            setReceiptId((event.data as TrustReceipt).id)
+            setTimeout(() => setShowReceipt(true), 1000)
+            break
+          case 'TRUST_UPDATED': fetchAgents(); break
+          case 'TRANSFER_INITIATED':
+            setTransfer({ agentName: event.data.agentName, recipientEmail: event.data.recipientEmail, amountCents: event.data.amountCents })
+            break
+          case 'DEMO_COMPLETE':
+          case 'DEMO_ERROR':
+            setIsRunning(false); setIsDone(true); break
+        }
       }
     }
-    return () => es.close()
+
+    connect()
+    return () => { es?.close(); clearTimeout(reconnectTimer) }
   }, [fetchAgents])
 
   const reset = () => {
     setCurrentStep(0); eventsRef.current = []
     setEvents([]); setReceipt(null)
-    setShowReceipt(false); setIsDone(false); setTransfer(null)
+    setShowReceipt(false); setIsDone(false); setTransfer(null); setTaskLabel(''); setBudgetCents(null); setReceiptId(null)
   }
 
   const run = async () => {
@@ -101,6 +132,63 @@ export default function DemoPage() {
     <div style={{ minHeight: '100dvh', background: C.bg, color: C.text1 }}>
       <Nav connected={connected} />
 
+      {stripeMode === 'demo' && (
+        <div style={{
+          background: 'rgba(245,158,11,.06)', borderBottom: '1px solid rgba(245,158,11,.2)',
+          padding: '8px 40px', display: 'flex', alignItems: 'center', gap: 10,
+        }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: '#F59E0B', background: 'rgba(245,158,11,.12)', border: '1px solid rgba(245,158,11,.3)', borderRadius: 3, padding: '2px 6px', letterSpacing: '.08em', textTransform: 'uppercase' }}>
+            Stripe Demo Mode
+          </span>
+          <span style={{ fontSize: 12, color: '#94A3B8' }}>
+            Payments are simulated — set <code style={{ fontFamily: 'monospace', color: '#F1F5F9', background: 'rgba(255,255,255,.05)', padding: '1px 5px', borderRadius: 3 }}>STRIPE_SECRET_KEY=sk_test_...</code> in .env.local to enable real escrow
+          </span>
+        </div>
+      )}
+      {stripeMode === 'test' && (
+        <div style={{
+          background: 'rgba(59,130,246,.05)', borderBottom: '1px solid rgba(59,130,246,.15)',
+          padding: '8px 40px', display: 'flex', alignItems: 'center', gap: 10,
+        }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: '#3B82F6', background: 'rgba(59,130,246,.1)', border: '1px solid rgba(59,130,246,.25)', borderRadius: 3, padding: '2px 6px', letterSpacing: '.08em', textTransform: 'uppercase' }}>
+            Stripe Test Mode
+          </span>
+          <span style={{ fontSize: 12, color: '#94A3B8' }}>Real PaymentIntents, test cards — no real money</span>
+        </div>
+      )}
+
+      {isRunning && !connected && (
+        <div style={{
+          background: 'rgba(239,68,68,.06)', borderBottom: '1px solid rgba(239,68,68,.2)',
+          padding: '8px 40px', display: 'flex', alignItems: 'center', gap: 10,
+        }}>
+          <div style={{ width: 6, height: 6, borderRadius: '50%', border: '1.5px solid rgba(239,68,68,.6)', borderTop: '1.5px solid #EF4444', animation: 'spin .8s linear infinite' }} />
+          <span style={{ fontSize: 12, color: '#EF4444' }}>SSE disconnected — reconnecting in 3s. Events may be delayed.</span>
+        </div>
+      )}
+
+      {receiptId && isDone && (
+        <div style={{
+          background: 'rgba(34,197,94,.04)', borderBottom: '1px solid rgba(34,197,94,.15)',
+          padding: '8px 40px', display: 'flex', alignItems: 'center', gap: 14,
+        }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: C.green, textTransform: 'uppercase', letterSpacing: '.08em', flexShrink: 0 }}>
+            Receipt issued
+          </span>
+          <span style={{ fontSize: 12, color: C.text3, fontFamily: C.mono, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+            /receipts/{receiptId}
+          </span>
+          <a href={`/receipts/${receiptId}`} target="_blank" rel="noopener noreferrer" style={{
+            fontSize: 11, fontWeight: 600, color: C.green,
+            textDecoration: 'none', flexShrink: 0,
+            background: 'rgba(34,197,94,.08)', border: '1px solid rgba(34,197,94,.2)',
+            borderRadius: 5, padding: '4px 12px',
+          }}>
+            View + verify ↗
+          </a>
+        </div>
+      )}
+
       <main style={{ padding: '40px 40px 80px', maxWidth: 1400, margin: '0 auto' }}>
 
         {/* Page header */}
@@ -111,10 +199,13 @@ export default function DemoPage() {
                 Live Agent Economy
               </p>
               <h1 style={{ fontSize: 32, fontWeight: 800, letterSpacing: '-0.04em', color: C.text1, marginBottom: 8 }}>
-                {agents.length || 5} agents. 2 rounds. Real money.
+                {agents.length || 5} agents. 2 rounds.{' '}
+                {stripeMode === 'live' ? 'Real money.' : stripeMode === 'test' ? 'Test escrow.' : 'Escrowed contracts.'}
               </h1>
               <p style={{ fontSize: 14, color: C.text3, maxWidth: 560, lineHeight: 1.65 }}>
-                Hermes agents compete for a $50K financial analysis contract. Arena agents included.
+                Hermes agents compete for a real contract
+                {taskLabel ? <strong style={{ color: C.text2 }}> — {taskLabel}</strong> : ''}.
+                Task type is randomized each run. Arena agents included.
                 NVIDIA Nemotron-3 Ultra runs all agents in parallel. A judge agent scores results.
                 Stripe escrow releases only after SHA-256 attestation passes. Trust scores update live.
               </p>
@@ -127,29 +218,39 @@ export default function DemoPage() {
                 <MiniMetric label="Contracts" value={totalContracts.toString()} />
                 <MiniMetric label="Agents" value={agents.length.toString()} />
               </div>
-              <button
-                onClick={run} disabled={isRunning}
-                style={{
-                  background: isRunning ? C.surface : C.text1,
-                  color: isRunning ? C.text3 : C.bg,
-                  border: `1px solid ${isRunning ? C.border : C.text1}`,
-                  borderRadius: 6, padding: '10px 24px',
-                  fontSize: 13, fontWeight: 600, cursor: isRunning ? 'not-allowed' : 'pointer',
-                  display: 'inline-flex', alignItems: 'center', gap: 8,
-                  transition: 'all .15s',
-                }}
-              >
-                {isRunning
-                  ? <><Spin /> Running economy...</>
-                  : isDone ? 'Run Again' : 'Run Economy Demo'}
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+                <button
+                  onClick={run} disabled={isRunning}
+                  style={{
+                    background: isRunning ? C.surface : C.text1,
+                    color: isRunning ? C.text3 : C.bg,
+                    border: `1px solid ${isRunning ? C.border : C.text1}`,
+                    borderRadius: 6, padding: '10px 24px',
+                    fontSize: 13, fontWeight: 600, cursor: isRunning ? 'not-allowed' : 'pointer',
+                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                    transition: 'all .15s',
+                  }}
+                >
+                  {isRunning
+                    ? <><Spin /> Running economy...</>
+                    : isDone ? 'Run Again' : 'Run Economy Demo'}
+                </button>
+                {!isRunning && (
+                  <span style={{ fontSize: 10, color: C.text3 }}>
+                    {isDone ? 'picks a new task type each run' : '~5–8 min · picks task type randomly'}
+                  </span>
+                )}
+                {isRunning && taskLabel && (
+                  <span style={{ fontSize: 10, color: C.text2, fontStyle: 'italic' }}>Task: {taskLabel}</span>
+                )}
+              </div>
             </div>
           </div>
 
           {/* What's happening explainer */}
           <div style={{ display: 'flex', gap: 0, border: `1px solid ${C.border}`, borderRadius: 6, overflow: 'hidden' }}>
             {[
-              { step: '01', label: 'Contract created',   detail: '$50K analysis contract · SHA-256 hash committed' },
+              { step: '01', label: 'Contract created',   detail: `${budgetCents ? `$${(budgetCents/100).toFixed(0)} budget` : 'Buyer contract'} · SHA-256 hash committed` },
               { step: '02', label: 'Escrow funded',      detail: 'Stripe locks funds · capture_method: manual' },
               { step: '03', label: 'Agents bid',         detail: 'All agents bid · EV = (Trust × Score) ÷ Price' },
               { step: '04', label: 'NIM inference',      detail: 'Parallel Nemotron-3 Ultra · 5 concurrent threads' },
@@ -213,13 +314,15 @@ export default function DemoPage() {
             }}>$</div>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: '#22C55E', letterSpacing: '.04em', marginBottom: 4 }}>
-                PAYMENT INITIATED
+                ESCROW RELEASED
               </div>
               <div style={{ fontSize: 15, fontWeight: 700, color: '#F1F5F9', marginBottom: 2 }}>
-                {transfer.agentName} earned ${(transfer.amountCents / 100).toFixed(2)}
+                {transfer.agentName} won ${(transfer.amountCents / 100).toFixed(2)}
               </div>
               <div style={{ fontSize: 12, color: '#94A3B8' }}>
-                Transfer initiated → {transfer.recipientEmail}
+                {transfer.recipientEmail
+                  ? `Notification → ${transfer.recipientEmail} · check Stripe dashboard for capture`
+                  : 'Stripe capture confirmed · trust receipt issued'}
               </div>
             </div>
             <button onClick={() => setTransfer(null)} style={{
@@ -254,7 +357,7 @@ function AttestationInfo() {
         { label: 'Algorithm',  value: 'SHA-256' },
         { label: 'Signed by',  value: 'Buyer at contract creation' },
         { label: 'Verified by', value: 'Stvor before execution' },
-        { label: 'Receipt',    value: 'HMAC-SHA256 · portable proof' },
+        { label: 'Receipt',    value: 'ECDSA P-256 · offline-verifiable' },
         { label: 'Escrow',     value: 'Stripe · manual capture' },
       ].map((r, i) => (
         <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < 4 ? `1px solid ${C.border}` : 'none' }}>

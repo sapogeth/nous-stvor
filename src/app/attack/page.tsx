@@ -28,28 +28,39 @@ export default function AttackPage() {
   const eventsRef = useRef<StvorEvent[]>([])
 
   useEffect(() => {
-    const es = new EventSource('/api/events')
-    es.onopen  = () => setConnected(true)
-    es.onerror = () => setConnected(false)
-    es.onmessage = (e) => {
-      const event: StvorEvent = JSON.parse(e.data)
-      if (event.type === 'CONNECTED') return
-      const updated = [event, ...eventsRef.current].slice(0, 100)
-      eventsRef.current = updated
-      setEvents([...updated])
-      switch (event.type) {
-        case 'CONTRACT_CREATED':   setCurrentStep(1); break
-        case 'ESCROW_FUNDED':      setCurrentStep(2); break
-        case 'ATTACK_STARTED':     setCurrentStep(3); break
-        case 'ATTESTATION_FAILED': setCurrentStep(4); break
-        case 'ESCROW_HELD':        setCurrentStep(5); break
-        case 'ATTACK_PREVENTED':   setCurrentStep(6); break
-        case 'ATTACK_DEMO_COMPLETE':
-        case 'DEMO_ERROR':
-          setIsRunning(false); setIsDone(true); break
+    let es: EventSource
+    let reconnectTimer: ReturnType<typeof setTimeout>
+
+    function connect() {
+      es = new EventSource('/api/events')
+      es.onopen  = () => setConnected(true)
+      es.onerror = () => {
+        setConnected(false)
+        es.close()
+        reconnectTimer = setTimeout(connect, 3000)
+      }
+      es.onmessage = (e) => {
+        const event: StvorEvent = JSON.parse(e.data)
+        if (event.type === 'CONNECTED') return
+        const updated = [event, ...eventsRef.current].slice(0, 100)
+        eventsRef.current = updated
+        setEvents([...updated])
+        switch (event.type) {
+          case 'CONTRACT_CREATED':   setCurrentStep(1); break
+          case 'ESCROW_FUNDED':      setCurrentStep(2); break
+          case 'ATTACK_STARTED':     setCurrentStep(3); break
+          case 'ATTESTATION_FAILED': setCurrentStep(4); break
+          case 'ESCROW_HELD':        setCurrentStep(5); break
+          case 'ATTACK_PREVENTED':   setCurrentStep(6); break
+          case 'ATTACK_DEMO_COMPLETE':
+          case 'DEMO_ERROR':
+            setIsRunning(false); setIsDone(true); break
+        }
       }
     }
-    return () => es.close()
+
+    connect()
+    return () => { es?.close(); clearTimeout(reconnectTimer) }
   }, [])
 
   const reset = () => {
@@ -186,7 +197,7 @@ function DefensePanel() {
         { label: 'Transmit', value: 'Normal channel (unencrypted ok)' },
         { label: 'Verify',   value: 'SHA-256(received) === committed?' },
         { label: 'If fail',  value: 'Block execution + hold escrow' },
-        { label: 'Receipt',  value: 'HMAC-SHA256 signed audit record' },
+        { label: 'Receipt',  value: 'ECDSA P-256 signed audit record' },
       ].map((r, i) => (
         <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < 4 ? `1px solid ${C.border}` : 'none', gap: 12 }}>
           <span style={{ fontSize: 11, color: C.text3, flexShrink: 0 }}>{r.label}</span>

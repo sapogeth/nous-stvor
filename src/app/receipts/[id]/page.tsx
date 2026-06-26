@@ -198,7 +198,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
           <pre style={{
             fontSize: 11, fontFamily: C.mono, color: C.text2, lineHeight: 1.75,
             overflowX: 'auto', margin: 0,
-          }}>{`curl -X POST https://stvor.ai/api/receipts/verify \\
+          }}>{`curl -X POST /api/receipts/verify \\
   -H "Content-Type: application/json" \\
   -d '{"receiptId": "${receipt.id}"}'
 

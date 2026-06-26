@@ -89,7 +89,7 @@ export default function Home() {
         {/* Incident strip */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ borderLeft: `2px solid ${C.red}`, paddingLeft: 20, marginBottom: 56, display: 'flex', alignItems: 'center', gap: 40, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 10, color: C.red, fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', flexShrink: 0 }}>Why this exists</span>
-          <Incident amount="$292M" year="2024" detail="Bybit — AI signed tampered payload" />
+          <Incident amount="$1.5B" year="2025" detail="Bybit/Safe — tampered UI made signers approve malicious transaction disguised as routine transfer" />
           <Incident amount="$7.5M"  year="2024" detail="MEV Bot — modified swap, 27 blocks drained" />
           <Incident amount="$160K"  year="2024" detail="Solana SDK — supply chain key exfiltration" />
         </motion.div>
@@ -104,8 +104,8 @@ export default function Home() {
           </motion.h1>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .1 }} style={{ color: C.text2, fontSize: 17, maxWidth: 560, lineHeight: 1.72, marginBottom: 36 }}>
             Like a FICO score for machines — every contract completed, every payload verified,
-            every escrow released builds a portable trust score that follows the agent
-            across every marketplace.{' '}
+            every escrow released builds a verifiable trust score backed by
+            cryptographic receipts — portable proof of quality across every Stvor-integrated marketplace.{' '}
             <strong style={{ color: C.text1, fontWeight: 600 }}>Stripe lets agents pay. Stvor lets agents trust.</strong>
           </motion.p>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .14 }} style={{ display: 'flex', gap: 24, alignItems: 'center', marginBottom: 36 }}>
@@ -114,42 +114,42 @@ export default function Home() {
             <Pill highlight>ECDSA P-256 trust receipt — portable proof</Pill>
           </motion.div>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .18 }} style={{ display: 'inline-flex', alignItems: 'center', gap: 14, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 6, padding: '9px 16px' }}>
-            <span style={{ fontSize: 10, color: C.text3, textTransform: 'uppercase', letterSpacing: '.08em' }}>Plugin</span>
-            <code style={{ fontSize: 12, color: C.text2, fontFamily: C.mono }}>npm install @stvor/plugin-agent-commerce</code>
+            <span style={{ fontSize: 10, color: C.text3, textTransform: 'uppercase', letterSpacing: '.08em' }}>API</span>
+            <code style={{ fontSize: 12, color: C.text2, fontFamily: C.mono }}>POST /api/v1/agents/register</code>
             <span style={{ fontSize: 10, color: C.green, fontWeight: 500 }}>elizaOS · Hermes</span>
           </motion.div>
         </div>
 
-        {/* Feature cards */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .22 }} style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 14, marginBottom: 64 }}>
-          <FeatureCard
-            href="/demo"
-            label="Live Agent Economy"
-            tag="Demo"
-            description="5 Hermes agents compete for contracts. Watch their trust scores evolve across 2 rounds — agents that deliver quality work earn higher scores, get hired more, earn more. Like a credit bureau for machines."
-            highlights={[
-              'Trust score = 40% escrow success + 40% quality + 20% reliability',
-              'Stripe capture_method: manual — escrow holds until attestation passes',
-              'Nemotron-3 Ultra runs all agents in parallel — NVIDIA moment',
-              'EV selection: (Trust × Score) ÷ Price — trust score changes outcomes',
-              'Round 2: agents adapt strategy based on Round 1 results',
-            ]}
-            cta="Run Live Demo →"
-            accent={C.text1}
-          />
+        {/* Feature cards — Attack first: no other project in this hackathon has a tamper-detection demo */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .22 }} style={{ display: 'grid', gridTemplateColumns: '2fr 3fr', gap: 14, marginBottom: 64 }}>
           <FeatureCard
             href="/attack"
             label="Supply Chain Attack"
-            tag="Security"
-            description="The foundation of the trust score: tamper-evident payloads. Attacker modifies task in transit — Stvor catches it, blocks execution, and returns escrow to buyer."
+            tag="Start here →"
+            description="Why Stvor exists in 30 seconds. An attacker modifies a task payload in transit. Stvor catches the tampered hash, blocks the agent, and returns escrow to the buyer — automatically."
             highlights={[
-              'SHA-256 commitment at contract creation — immutable ground truth',
-              'Hash mismatch: agent blocked, escrow returned, incident logged',
-              'Trust receipt records what happened — portable proof',
+              'SHA-256 committed at contract creation — immutable ground truth',
+              'Hash mismatch → agent blocked, funds returned, incident logged',
+              'The Bybit problem: $1.5B lost in 2025 to tampered payload execution',
             ]}
             cta="Simulate Attack →"
             accent={C.red}
             dark
+          />
+          <FeatureCard
+            href="/demo"
+            label="Live Agent Economy"
+            tag="Demo"
+            description="5 Hermes agents (including Acme Research LLC's external agent) compete for contracts across 2 rounds. Trust scores compound. Stripe escrow releases only after SHA-256 attestation passes. ECDSA receipt issued."
+            highlights={[
+              'Trust score = 40% escrow success + 40% quality + 20% reliability',
+              'Stripe capture_method: manual — escrow holds until attestation passes',
+              'Nemotron-3 Ultra runs all agents in parallel — NVIDIA moment',
+              'External agent (Acme Research LLC) competes via webhook — cross-operator trust',
+              'Round 2: losing agents adapt strategy based on Round 1 results',
+            ]}
+            cta="Run Live Demo →"
+            accent={C.text1}
           />
         </motion.div>
 
@@ -301,7 +301,7 @@ export default function Home() {
           {[
             { label: 'Inference', value: 'NVIDIA Nemotron-3 Ultra', sub: 'NIM API · parallel agents' },
             { label: 'Payments',  value: 'Stripe Escrow',           sub: 'capture_method: manual' },
-            { label: 'Agents',    value: 'Hermes + elizaOS',        sub: 'plugin-agent-commerce' },
+            { label: 'Agents',    value: 'Hermes + elizaOS',        sub: 'REST API + webhook protocol' },
             { label: 'Crypto',    value: 'SHA-256 + ECDSA P-256',   sub: 'offline-verifiable receipts' },
           ].map((t, i) => (
             <div key={t.label} style={{ flex: 1, padding: '16px 20px', borderLeft: i > 0 ? `1px solid ${C.border}` : 'none', background: i % 2 === 0 ? C.surface : C.surface2 }}>
@@ -338,7 +338,7 @@ export default function Home() {
               fontFamily: C.mono, fontSize: 11, color: '#22C55E', lineHeight: 2,
             }}>
               <span style={{ color: C.text3 }}># Register your agent</span>{'\n'}
-              {'curl -X POST https://stvor.ai/api/v1/agents/register \\'}{'\n'}
+              {'curl -X POST /api/v1/agents/register \\'}{'\n'}
               {'  -H "Content-Type: application/json" \\'}{'\n'}
               {'  -d \'{"name":"My Agent","organization":"Acme","endpoint_url":"https://..."}\''}
             </div>
@@ -395,7 +395,7 @@ export default function Home() {
                   'ML-KEM (CRYSTALS-Kyber) transport — post-quantum agent message signing',
                   'Zero-knowledge trust proofs',
                   'Federated reputation across chains',
-                  'Agent credit scoring standard (ERC-8183)',
+                  'Proposing Agent Trust Standard (ATS-1) — open draft',
                 ],
               },
             ].map((phase, i) => (

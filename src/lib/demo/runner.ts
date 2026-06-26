@@ -4,15 +4,24 @@ import { sha256 } from '../crypto'
 import { transitionContract } from '../commerce/escrow'
 import { generateReceipt } from '../commerce/receipt'
 import { createEscrowPaymentIntent, captureEscrowPayment } from '../stripe/payments'
-import { runWorkerAgent } from '../agents/worker'
+import { runWorkerAgent, WebhookContext } from '../agents/worker'
 import { runJudgeAgent, EvaluationCriterion } from '../agents/judge'
 import { WORKER_MODEL } from '../nvidia/client'
 import { verify } from '../../sdk'
 import { sealTask, openTask, CT_BYTES } from '../pqc'
 import { emit } from '../events'
 
-const DEMO_TASK = {
-  description: `Produce a structured investment risk assessment for token $NTRN (Neutron Protocol) to inform a $50,000 portfolio allocation decision.
+interface DemoTask {
+  description: string
+  evaluation_criteria: EvaluationCriterion[]
+  budget_cents: number
+  label: string
+}
+
+const DEMO_TASKS: DemoTask[] = [
+  {
+    label: 'DeFi Token Risk Assessment',
+    description: `Produce a structured investment risk assessment for token $NTRN (Neutron Protocol) to inform a $50,000 portfolio allocation decision.
 
 Your report must include:
 1. Smart contract risk summary — audit status, known vulnerabilities, upgrade mechanisms
@@ -22,16 +31,88 @@ Your report must include:
 5. Final recommendation: BUY / HOLD / SELL with confidence percentage and position sizing advice
 
 The portfolio committee requires evidence-backed claims, specific on-chain metrics where available, and a clear risk/reward thesis. No generic disclaimers.`,
+    evaluation_criteria: [
+      { name: 'Smart Contract Risk Assessment', description: 'Identifies audit status, upgrade mechanisms, and specific contract vulnerabilities', weight: 0.25 },
+      { name: 'Liquidity & Market Analysis', description: 'TVL trend, slippage depth, and market concentration data included', weight: 0.25 },
+      { name: 'Risk Factor Enumeration', description: 'At least 5 specific risk factors with severity ratings', weight: 0.20 },
+      { name: 'BUY/HOLD/SELL with Confidence %', description: 'Clear recommendation with confidence percentage and position sizing', weight: 0.20 },
+      { name: 'Evidence-Backed Thesis', description: 'Claims supported by specific metrics — no generic disclaimers', weight: 0.10 },
+    ],
+    budget_cents: 10000,
+  },
+  {
+    label: 'AI Agent Architecture Audit',
+    description: `You are a senior AI systems architect. Audit the following agent pipeline design and produce a structured technical report for a team considering a $75,000 deployment.
 
-  evaluation_criteria: [
-    { name: 'Smart Contract Risk Assessment', description: 'Identifies audit status, upgrade mechanisms, and specific contract vulnerabilities', weight: 0.25 },
-    { name: 'Liquidity & Market Analysis', description: 'TVL trend, slippage depth, and market concentration data included', weight: 0.25 },
-    { name: 'Risk Factor Enumeration', description: 'At least 5 specific risk factors with severity ratings', weight: 0.20 },
-    { name: 'BUY/HOLD/SELL with Confidence %', description: 'Clear recommendation with confidence percentage and position sizing', weight: 0.20 },
-    { name: 'Evidence-Backed Thesis', description: 'Claims supported by specific metrics — no generic disclaimers', weight: 0.10 },
-  ] as EvaluationCriterion[],
+Agent pipeline: Multi-step autonomous research agent → summarization agent → action agent with tool access (web search, code execution, API calls). Agents run in sequence with shared memory context. No human-in-the-loop. Budget: $0.50/run, target latency: <30 seconds.
 
-  budget_cents: 10000,
+Your report must include:
+1. Failure mode analysis — at least 5 specific failure modes with probability estimates (High/Medium/Low)
+2. Security threat assessment — prompt injection risks, tool misuse scenarios, data exfiltration vectors
+3. Cost efficiency analysis — estimate real cost per run vs $0.50 target, bottleneck identification
+4. Latency breakdown — expected latency per stage vs 30s target
+5. Final verdict: DEPLOY / REDESIGN / REJECT with specific remediation steps if applicable
+
+Be technically precise. No generic AI safety talking points.`,
+    evaluation_criteria: [
+      { name: 'Failure Mode Specificity', description: 'Names at least 5 concrete failure modes with probability ratings, not generic categories', weight: 0.25 },
+      { name: 'Security Threat Depth', description: 'Identifies specific attack vectors with exploitation scenarios, not just categories', weight: 0.25 },
+      { name: 'Cost & Latency Math', description: 'Provides actual numerical estimates for cost and latency per stage', weight: 0.20 },
+      { name: 'DEPLOY/REDESIGN/REJECT Verdict', description: 'Clear verdict with specific, actionable remediation steps', weight: 0.20 },
+      { name: 'Technical Precision', description: 'Avoids generic statements, uses specific technical terminology correctly', weight: 0.10 },
+    ],
+    budget_cents: 15000,
+  },
+  {
+    label: 'Smart Contract Security Review',
+    description: `You are a smart contract security auditor. Review the following Solidity escrow contract design and produce a security report for a team preparing to deploy with $500,000 in TVL.
+
+Contract design: Two-party escrow. Buyer deposits ETH. Seller fulfills condition. Arbiter (third party address) can resolve disputes. Auto-release after 30-day timeout. No upgradability. Uses SafeERC20 for token transfers.
+
+Your report must include:
+1. Critical vulnerabilities — reentrancy, integer overflow, access control flaws, front-running opportunities
+2. Medium severity issues — gas optimization, event emission gaps, error handling
+3. Logic vulnerabilities — edge cases in the dispute flow, timeout bypass scenarios
+4. Comparison to established patterns — how does this differ from OpenZeppelin's escrow implementation?
+5. Deployment recommendation: SAFE / REQUIRES FIXES / DO NOT DEPLOY with specific line-level fixes
+
+Cite specific Solidity patterns and known CVEs where relevant.`,
+    evaluation_criteria: [
+      { name: 'Critical Vulnerability Identification', description: 'Identifies reentrancy, overflow, access control, and front-running with specific code references', weight: 0.30 },
+      { name: 'Logic Flaw Analysis', description: 'Finds edge cases in dispute flow and timeout mechanisms with exploitation scenarios', weight: 0.25 },
+      { name: 'OpenZeppelin Comparison', description: 'Meaningfully compares to established patterns with specific differences noted', weight: 0.20 },
+      { name: 'Deployment Recommendation Quality', description: 'Clear verdict with specific, implementable fixes at the code level', weight: 0.15 },
+      { name: 'CVE and Pattern Citations', description: 'References relevant CVEs, SWC registry entries, or known attack patterns', weight: 0.10 },
+    ],
+    budget_cents: 20000,
+  },
+  {
+    label: 'Go-to-Market Strategy for AI Infrastructure',
+    description: `You are a B2B SaaS go-to-market strategist. Develop a 90-day GTM plan for a new AI agent trust infrastructure product targeting enterprise buyers.
+
+Product: An API-first trust layer for AI agent pipelines. Enables cryptographic attestation of agent outputs, escrow-based payment for agent work, and portable reputation scoring. Priced at 0.5% of escrow value. Target customers: companies running autonomous AI agents in production at scale.
+
+Your plan must include:
+1. ICP definition — name the top 3 specific buyer personas with company size, tech stack, and pain point
+2. Channel strategy — rank top 3 acquisition channels with CAC estimates and rationale
+3. First 10 customers — specific outreach strategy to land the first 10 paying customers in 90 days
+4. Competitive positioning — how to position against DIY trust infrastructure and existing identity providers
+5. Pricing validation — 3 alternative pricing models with pros/cons vs the current 0.5% escrow fee
+
+Be specific. No generic "build a community" advice.`,
+    evaluation_criteria: [
+      { name: 'ICP Specificity', description: 'Names concrete buyer personas with specific company types, not vague categories', weight: 0.25 },
+      { name: 'Acquisition Channel Realism', description: 'Proposes realistic channels with actual CAC estimates, not generic advice', weight: 0.25 },
+      { name: 'First 10 Customers Plan', description: 'Gives a concrete, executable outreach plan — specific communities, events, cold outreach scripts', weight: 0.25 },
+      { name: 'Competitive Positioning Depth', description: 'Addresses specific competitors and DIY alternatives with differentiation reasoning', weight: 0.15 },
+      { name: 'Pricing Analysis', description: 'Provides meaningful alternatives with quantified trade-offs', weight: 0.10 },
+    ],
+    budget_cents: 8000,
+  },
+]
+
+function pickTask(): DemoTask {
+  return DEMO_TASKS[Math.floor(Math.random() * DEMO_TASKS.length)]
 }
 
 function delay(ms: number) {
@@ -43,6 +124,8 @@ function computeExpectedValue(trustScore: number, avgJudgeScore: number, priceCe
 }
 
 export async function runDemo(): Promise<string> {
+  const DEMO_TASK = pickTask()
+
   const allDb = agentQueries.getAll()
   const builtinPool = allDb.filter(a => (a.source ?? 'builtin') !== 'external' && a.source !== 'historical').slice(0, 4)
   const arenaPool   = allDb.filter(a => a.source === 'external').slice(0, 2)
@@ -69,6 +152,7 @@ export async function runDemo(): Promise<string> {
 
   emit({ type: 'CONTRACT_CREATED', data: {
     contractId,
+    taskLabel: DEMO_TASK.label,
     taskDescription: DEMO_TASK.description.slice(0, 140) + '...',
     budgetCents: DEMO_TASK.budget_cents,
     taskHash,
@@ -145,7 +229,8 @@ export async function runDemo(): Promise<string> {
         }})
       }
 
-      const work = await runWorkerAgent(agent, taskPayload, false)
+      const webhookCtx: WebhookContext = { contractId, taskHash, budgetCents: DEMO_TASK.budget_cents, round: 1 }
+      const work = await runWorkerAgent(agent, taskPayload, false, webhookCtx)
       const workHash = sha256(work.content)
 
       bidQueries.submitWork(bidId, work.content, workHash)
@@ -164,6 +249,7 @@ export async function runDemo(): Promise<string> {
         agentName: agent.name,
         workPreview: work.content.slice(0, 120) + '...',
         latencyMs: work.inferenceMs,
+        deliveryMethod: work.deliveryMethod,
         round: 1,
       }})
 
@@ -262,7 +348,7 @@ export async function runDemo(): Promise<string> {
       agentName: winner.agent.name,
       recipientEmail: winner.agent.organization,
       amountCents: winnerBid.priceCents,
-      note: `Your agent ${winner.agent.name} beat ${agents.length - 1} established agents and earned real money.`,
+      note: `Your agent ${winner.agent.name} beat ${agents.length - 1} established agents. Escrow released — check your Stripe dashboard for the captured payment.`,
     }})
   }
 
@@ -443,7 +529,8 @@ export async function runDemo(): Promise<string> {
         }})
       }
 
-      const work = await runWorkerAgent(agent, taskPayload2, !isR1Winner)
+      const webhookCtx2: WebhookContext = { contractId: contract2Id, taskHash: taskHash2, budgetCents: DEMO_TASK.budget_cents, round: 2 }
+      const work = await runWorkerAgent(agent, taskPayload2, !isR1Winner, webhookCtx2)
       const workHash = sha256(work.content)
 
       bidQueries.submitWork(bidId, work.content, workHash)
@@ -454,6 +541,7 @@ export async function runDemo(): Promise<string> {
         agentName: agent.name,
         workPreview: work.content.slice(0, 120) + '...',
         latencyMs: work.inferenceMs,
+        deliveryMethod: work.deliveryMethod,
         round: 2,
       }})
 
@@ -523,7 +611,7 @@ export async function runDemo(): Promise<string> {
       agentName: r2Winner.agent.name,
       recipientEmail: r2Winner.agent.organization,
       amountCents: r2WinnerBid.priceCents,
-      note: `Round 2 win. ${r2Winner.agent.name} adapted strategy and earned real money.`,
+      note: `Round 2 win. ${r2Winner.agent.name} adapted strategy. Escrow released — check your Stripe dashboard for the captured payment.`,
     }})
   }
 

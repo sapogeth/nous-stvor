@@ -8,6 +8,7 @@ interface Agent {
   specialty: string
   strategy: string
   model: string
+  source?: string | null
   trust_score: number
   total_contracts: number
   successful_contracts: number
@@ -66,7 +67,10 @@ export function AgentLeaderboard({ agents }: { agents: Agent[] }) {
             Career Leaderboard
           </h2>
           <p style={{ fontSize: 11, color: T.text3, marginTop: 3 }}>
-            Trust Score = 40% escrow success · 40% quality · 20% reliability · persists across sessions
+            Trust Score = 40% escrow success · 40% quality · 20% reliability · updates live with each demo run
+          </p>
+          <p style={{ fontSize: 10, color: T.text3, marginTop: 2, fontStyle: 'italic' }}>
+            History seeded at launch. Every demo run adds real contract history.
           </p>
         </div>
         <span style={{ fontSize: 9, color: T.text3, fontFamily: T.mono, textTransform: 'uppercase', letterSpacing: '.1em' }}>FICO for machines</span>
@@ -95,6 +99,11 @@ export function AgentLeaderboard({ agents }: { agents: Agent[] }) {
               <span style={{ fontSize: 10, color: T.text3, background: T.surface2, borderRadius: 3, padding: '1px 6px', textTransform: 'capitalize' }}>
                 {sorted[0].strategy}
               </span>
+              {sorted[0].source === 'external' && (
+                <span style={{ fontSize: 9, fontWeight: 700, color: '#3B82F6', background: 'rgba(59,130,246,.1)', border: '1px solid rgba(59,130,246,.25)', borderRadius: 3, padding: '1px 6px', letterSpacing: '.06em' }}>
+                  EXTERNAL
+                </span>
+              )}
               {sorted[0].recent_delta != null && (
                 <span style={{ fontSize: 10, fontFamily: T.mono, color: sorted[0].recent_delta >= 0 ? T.green : T.red, fontWeight: 600 }}>
                   {sorted[0].recent_delta >= 0 ? '+' : ''}{sorted[0].recent_delta.toFixed(1)}
@@ -135,8 +144,13 @@ export function AgentLeaderboard({ agents }: { agents: Agent[] }) {
           <span style={{ fontSize: 9, fontFamily: T.mono, color: T.text3, width: 20, flexShrink: 0, textAlign: 'right' }}>#{i + 2}</span>
           <TrustRing score={agent.trust_score} size={40} />
           <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2, flexWrap: 'wrap' }}>
               <span style={{ fontSize: 13, fontWeight: 600, color: T.text1, letterSpacing: '-0.01em' }}>{agent.name}</span>
+              {agent.source === 'external' && (
+                <span style={{ fontSize: 9, fontWeight: 700, color: '#3B82F6', background: 'rgba(59,130,246,.1)', border: '1px solid rgba(59,130,246,.25)', borderRadius: 3, padding: '1px 5px', letterSpacing: '.06em' }}>
+                  EXTERNAL
+                </span>
+              )}
               {agent.recent_delta != null && (
                 <span style={{ fontSize: 9, fontFamily: T.mono, color: agent.recent_delta >= 0 ? T.green : T.red, fontWeight: 600 }}>
                   {agent.recent_delta >= 0 ? '+' : ''}{agent.recent_delta.toFixed(1)}

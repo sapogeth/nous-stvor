@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: 'Cryptographic verification that every agent task was not tampered before execution. Compatible with elizaOS. Built on NVIDIA Nemotron + Stripe Escrow.',
   openGraph: {
     title: 'Stvor — Payload Attestation for AI Agents',
-    description: 'Every agent instruction. Cryptographically verified. L0 lost $292M from payload tampering. Stvor prevents it.',
+    description: 'Every agent instruction. Cryptographically verified. Tampered wallet payloads caused $1.5B+ in losses in 2025. Stvor prevents agent-layer substitution attacks.',
     type: 'website',
   },
   twitter: {

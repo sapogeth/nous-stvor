@@ -123,6 +123,8 @@ export function LiveFeed({ events }: { events: StvorEvent[] }) {
               const dotColor = cls === 'attack' ? T.red : cls === 'positive' ? T.green : T.text3
               const labelColor = cls === 'attack' ? T.red : cls === 'positive' ? T.text1 : T.text2
 
+              const receiptId = event.type === 'RECEIPT_GENERATED' ? event.data.id : null
+
               return (
                 <motion.div
                   key={i}
@@ -134,8 +136,8 @@ export function LiveFeed({ events }: { events: StvorEvent[] }) {
                     padding: '9px 16px',
                     borderBottom: `1px solid ${T.bg}`,
                     display: 'flex', alignItems: 'flex-start', gap: 9,
-                    background: cls === 'attack' ? 'rgba(239,68,68,.03)' : 'transparent',
-                    borderLeft: cls === 'attack' ? `2px solid rgba(239,68,68,.3)` : '2px solid transparent',
+                    background: cls === 'attack' ? 'rgba(239,68,68,.03)' : receiptId ? 'rgba(34,197,94,.03)' : 'transparent',
+                    borderLeft: cls === 'attack' ? `2px solid rgba(239,68,68,.3)` : receiptId ? '2px solid rgba(34,197,94,.3)' : '2px solid transparent',
                   }}
                 >
                   <div style={{ width: 5, height: 5, borderRadius: '50%', background: dotColor, flexShrink: 0, marginTop: 4 }} />
@@ -149,6 +151,15 @@ export function LiveFeed({ events }: { events: StvorEvent[] }) {
                       </div>
                     )}
                   </div>
+                  {receiptId && (
+                    <a href={`/receipts/${receiptId}`} target="_blank" rel="noopener noreferrer" style={{
+                      fontSize: 9, color: T.green, textDecoration: 'none', flexShrink: 0,
+                      background: 'rgba(34,197,94,.08)', border: '1px solid rgba(34,197,94,.2)',
+                      borderRadius: 3, padding: '2px 7px', fontFamily: 'var(--font-geist-mono)', fontWeight: 600,
+                    }}>
+                      view ↗
+                    </a>
+                  )}
                 </motion.div>
               )
             })}

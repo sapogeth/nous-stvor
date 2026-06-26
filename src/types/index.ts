@@ -27,12 +27,12 @@ export interface AdaptationEntry {
 
 export type StvorEvent =
   | { type: 'CONNECTED' }
-  | { type: 'CONTRACT_CREATED'; data: { contractId: string; taskDescription: string; budgetCents: number; taskHash: string; round: number } }
+  | { type: 'CONTRACT_CREATED'; data: { contractId: string; taskLabel?: string; taskDescription: string; budgetCents: number; taskHash: string; round: number } }
   | { type: 'ESCROW_FUNDED'; data: { contractId: string; amountCents: number; paymentIntentId: string } }
   | { type: 'BID_SUBMITTED'; data: { contractId: string; bidId: string; agentId: string; agentName: string; priceCents: number; round: number; expectedValue: number; model: string; adaptationReason?: string } }
   | { type: 'INFERENCE_STARTED'; data: { contractId: string; agentCount: number; model: string; parallelThreads: number; round?: number } }
   | { type: 'INFERENCE_COMPLETE'; data: { contractId: string; avgLatencyMs: number; parallelThreads: number; model?: string } }
-  | { type: 'WORK_DELIVERED'; data: { bidId: string; agentId: string; agentName: string; workPreview: string; latencyMs: number; round: number } }
+  | { type: 'WORK_DELIVERED'; data: { bidId: string; agentId: string; agentName: string; workPreview: string; latencyMs: number; round: number; deliveryMethod?: 'webhook' | 'nim' } }
   | { type: 'JUDGE_STARTED'; data: { contractId: string; round: number } }
   | { type: 'BID_SCORED'; data: { bidId: string; agentId: string; agentName: string; judgeScore: number; breakdown: Record<string, number>; reasoning: string; round: number } }
   | { type: 'WINNER_SELECTED'; data: { contractId: string; winnerId: string; winnerName: string; score: number; priceCents: number; round: number } }

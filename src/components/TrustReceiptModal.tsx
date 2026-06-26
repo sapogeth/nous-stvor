@@ -20,6 +20,17 @@ const T = {
 export function TrustReceiptModal({ receipt, onClose }: { receipt: TrustReceipt; onClose: () => void }) {
   const [verifying,    setVerifying]    = useState(false)
   const [verifyResult, setVerifyResult] = useState<{ valid: boolean; reason: string } | null>(null)
+  const [copied,       setCopied]       = useState(false)
+
+  const receiptUrl = typeof window !== 'undefined' ? `${window.location.origin}/receipts/${receipt.id}` : `/receipts/${receipt.id}`
+  const isEcdsa = receipt.signature?.startsWith('ecdsa:')
+
+  const copyUrl = () => {
+    navigator.clipboard.writeText(receiptUrl).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    })
+  }
 
   const handleVerify = async () => {
     setVerifying(true)
@@ -109,11 +120,51 @@ export function TrustReceiptModal({ receipt, onClose }: { receipt: TrustReceipt;
         </div>
 
         {/* Signature */}
-        <div style={{ background:T.surface2, borderRadius:8, padding:'10px 14px', marginBottom:16, border:`1px solid ${T.border}` }}>
-          <div style={{ fontSize:9, color:T.text3, marginBottom:5, textTransform:'uppercase', letterSpacing:'.07em' }}>HMAC-SHA256 Signature</div>
+        <div style={{ background:T.surface2, borderRadius:8, padding:'10px 14px', marginBottom:12, border:`1px solid ${T.border}` }}>
+          <div style={{ fontSize:9, color:T.text3, marginBottom:5, textTransform:'uppercase', letterSpacing:'.07em' }}>
+            {isEcdsa ? 'ECDSA P-256 Signature' : 'HMAC-SHA256 Signature'}
+          </div>
           <div style={{ fontSize:10, fontFamily:T.mono, color:T.text3, wordBreak:'break-all', lineHeight:1.7 }}>
             {receipt.signature}
           </div>
+          {isEcdsa && (
+            <div style={{ marginTop:6, fontSize:10, color:T.text3 }}>
+              Verifiable offline — no Stvor server required. Fetch public key from{' '}
+              <code style={{ color:T.text2, fontSize:9 }}>/api/.well-known/stvor-public-key</code>
+            </div>
+          )}
+        </div>
+
+        {/* Permanent link */}
+        <div style={{ background:T.surface2, border:`1px solid rgba(34,197,94,.2)`, borderRadius:8, padding:'10px 14px', marginBottom:16, display:'flex', alignItems:'center', gap:10 }}>
+          <div style={{ flex:1, minWidth:0 }}>
+            <div style={{ fontSize:9, color:T.green, marginBottom:3, textTransform:'uppercase', letterSpacing:'.07em', fontWeight:600 }}>
+              Permanent receipt URL
+            </div>
+            <div style={{ fontSize:11, fontFamily:T.mono, color:T.text2, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+              {receiptUrl}
+            </div>
+          </div>
+          <button onClick={copyUrl} style={{
+            background: copied ? 'rgba(34,197,94,.1)' : T.surface,
+            border:`1px solid ${copied ? 'rgba(34,197,94,.3)' : T.border}`,
+            borderRadius:5, padding:'5px 12px',
+            fontSize:10, fontWeight:600,
+            color: copied ? T.green : T.text3,
+            cursor:'pointer', flexShrink:0,
+            transition:'all .15s',
+          }}>
+            {copied ? '✓ copied' : 'copy'}
+          </button>
+          <a href={`/receipts/${receipt.id}`} target="_blank" rel="noopener noreferrer" style={{
+            background:'none', border:`1px solid ${T.border}`,
+            borderRadius:5, padding:'5px 12px',
+            fontSize:10, fontWeight:600, color:T.text3,
+            textDecoration:'none', flexShrink:0,
+            display:'inline-flex', alignItems:'center', gap:4,
+          }}>
+            open ↗
+          </a>
         </div>
 
         {/* Verify */}
@@ -144,24 +195,9 @@ export function TrustReceiptModal({ receipt, onClose }: { receipt: TrustReceipt;
             ) : verifyResult?.valid === false ? (
               'Invalid — signature mismatch'
             ) : (
-              'Verify receipt'
+              'Verify signature'
             )}
           </button>
-
-          <a
-            href={`/receipts/${receipt.id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              background:'none', border:`1px solid ${T.border}`,
-              borderRadius:7, padding:'10px 18px',
-              fontSize:12, fontWeight:600, color:T.text3,
-              cursor:'pointer', textDecoration:'none',
-              display:'inline-flex', alignItems:'center', gap:6,
-            }}
-          >
-            View online ↗
-          </a>
 
           {verifyResult && (
             <div style={{ fontSize:11, color:T.text3, flex:1 }}>

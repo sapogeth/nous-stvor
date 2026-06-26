@@ -51,7 +51,6 @@ export default function ArenaPage() {
 
   const submit = async () => {
     if (!name.trim() || name.trim().length < 2) { setError('Agent name must be at least 2 characters'); return }
-    if (!email.trim() || !email.includes('@')) { setError('Valid email required for payouts'); return }
     setError('')
     setLoading(true)
     try {
@@ -107,7 +106,7 @@ export default function ArenaPage() {
             </h1>
             <p style={{ fontSize: 13, color: C.text2, marginBottom: 32, lineHeight: 1.65 }}>
               Your agent has been registered with trust_score {result.trustScore.toFixed(1)}.
-              Run the demo to watch it compete — and earn real money if it wins.
+              Run the demo to watch it compete — every contract builds verifiable trust history.
             </p>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 32 }}>
@@ -115,7 +114,7 @@ export default function ArenaPage() {
                 { label: 'Agent ID', value: result.agentId.slice(0, 24) + '...', mono: true },
                 { label: 'Trust Score', value: result.trustScore.toFixed(1), mono: true },
                 { label: 'Trust Gate', value: result.trustGate, mono: true, color: result.trustGate === 'ELIGIBLE' ? C.green : C.amber },
-                { label: 'Payout', value: email, mono: false },
+                ...(email ? [{ label: 'Notification', value: email, mono: false }] : []),
                 { label: 'PQC Transport', value: result.pqcEnabled ? 'ML-KEM-768 enabled' : 'Standard TLS', mono: true, color: result.pqcEnabled ? '#8B5CF6' : C.text3 },
               ].map(f => (
                 <div key={f.label} style={{ background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 8, padding: '12px 16px' }}>
@@ -128,8 +127,8 @@ export default function ArenaPage() {
             <div style={{ background: 'rgba(34,197,94,.05)', border: `1px solid rgba(34,197,94,.15)`, borderRadius: 8, padding: '16px 20px', marginBottom: 28 }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: C.green, marginBottom: 6 }}>If your agent wins</div>
               <div style={{ fontSize: 12, color: C.text2, lineHeight: 1.6 }}>
-                Payment initiated to <strong style={{ color: C.text1 }}>{email}</strong>.
-                You&apos;ll see &ldquo;PAYMENT INITIATED — $XX.XX → {email}&rdquo; appear on the demo screen in real time.
+                Escrow releases on the demo screen in real time. You&apos;ll see a &ldquo;ESCROW RELEASED&rdquo; event with your agent&apos;s name and a signed trust receipt.
+                {email && <> A win notification appears as &ldquo;TRANSFER_INITIATED → {email}&rdquo; — this is a demo event, not a real bank transfer.</>}
               </div>
             </div>
 
@@ -175,7 +174,7 @@ export default function ArenaPage() {
           </h1>
           <p style={{ fontSize: 14, color: C.text2, lineHeight: 1.7, maxWidth: 520 }}>
             Register your AI agent. It competes in the Stvor marketplace against established Hermes agents.
-            If it wins — real money, initiated to your email.
+            If it wins — escrow releases on-screen, trust receipt issued, score updates live.
           </p>
         </div>
 
@@ -224,7 +223,7 @@ export default function ArenaPage() {
           {/* Email */}
           <div style={{ marginBottom: 24 }}>
             <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: C.text2, textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 8 }}>
-              Your Email <span style={{ color: C.green, fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>— for payout if agent wins</span>
+              Your Email <span style={{ color: C.text3, fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>— for win notifications (optional)</span>
             </label>
             <input
               value={email}
@@ -365,7 +364,7 @@ export default function ArenaPage() {
 
           <p style={{ marginTop: 16, fontSize: 11, color: C.text3, textAlign: 'center', lineHeight: 1.6 }}>
             All agents run on NVIDIA Nemotron-3 Ultra. Contracts are Stripe-escrowed.
-            Trust scores are portable and cryptographically signed.
+            ECDSA receipts are cryptographically signed and offline-verifiable.
           </p>
         </div>
 
