@@ -494,7 +494,7 @@ export default function Home() {
                   }}
                     onMouseEnter={e => { const el = e.currentTarget; el.style.opacity = '.85'; el.style.transform = 'translateY(-1px)' }}
                     onMouseLeave={e => { const el = e.currentTarget; el.style.opacity = '1'; el.style.transform = '' }}>
-                    Simulate Attack
+                    Watch Supply Chain Attack →
                   </button>
                 </Link>
                 <Link href="/demo" style={{ textDecoration: 'none' }}>
@@ -509,7 +509,7 @@ export default function Home() {
                   }}
                     onMouseEnter={e => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.04)'; el.style.transform = 'translateY(-1px)' }}
                     onMouseLeave={e => { const el = e.currentTarget; el.style.background = 'transparent'; el.style.transform = '' }}>
-                    Live Demo
+                    Run Agent Economy →
                   </button>
                 </Link>
               </motion.div>

@@ -269,6 +269,18 @@ console.log('valid:', c.verify('sha256', Buffer.from(JSON.stringify(payload)), p
 
 ---
 
+## §8 Reference Implementation — Business Model
+
+The Stvor reference implementation monetizes the ATS-1 protocol as follows:
+
+- **Escrow fee**: 1.5% of released escrow volume (deducted at `COMPLETE` transition, not on cancellation)
+- **Verification API**: Free tier — 10,000 calls/month per API key. Above free tier: $0.002/call
+- **Trust score export**: Free — export/import of `TrustReceipts` between ATS-1-compatible marketplaces is always free to preserve agent portability
+
+Alternative implementations may choose different fee structures. The protocol itself is fee-agnostic.
+
+---
+
 ## Contributing
 
 ATS-1 is an open draft. Issues, pull requests, and feedback are welcome in this repository.

@@ -42,6 +42,8 @@ export default function DemoPage() {
   const [showReceipt,    setShowReceipt]    = useState(false)
   const [connected,      setConnected]      = useState(false)
   const [transfer,       setTransfer]       = useState<{ agentName: string; recipientEmail: string; amountCents: number } | null>(null)
+  const [myAgent,        setMyAgent]        = useState<{ agentId: string; agentName: string } | null>(null)
+  const [myAgentUpdate,  setMyAgentUpdate]  = useState<{ before: number; after: number; delta: number } | null>(null)
   const [receiptId,      setReceiptId]      = useState<string | null>(null)
   const eventsRef = useRef<StvorEvent[]>([])
 
@@ -54,6 +56,11 @@ export default function DemoPage() {
       .then(r => r.json())
       .then(d => setStripeMode(d.stripe?.mode ?? null))
       .catch(() => {})
+    // Pick up agent registered on /integrate
+    try {
+      const stored = sessionStorage.getItem('stvor_my_agent')
+      if (stored) setMyAgent(JSON.parse(stored))
+    } catch {}
   }, [])
 
   useEffect(() => {
@@ -104,7 +111,12 @@ export default function DemoPage() {
             setTimeout(() => setShowReceipt(true), 1000)
             break
           }
-          case 'TRUST_UPDATED': fetchAgents(); break
+          case 'TRUST_UPDATED':
+            fetchAgents()
+            if (myAgent && event.data.agentId === myAgent.agentId) {
+              setMyAgentUpdate({ before: event.data.before, after: event.data.after, delta: event.data.delta })
+            }
+            break
           case 'TRANSFER_INITIATED':
             setTransfer({ agentName: event.data.agentName, recipientEmail: event.data.recipientEmail, amountCents: event.data.amountCents })
             break
@@ -123,6 +135,7 @@ export default function DemoPage() {
     setCurrentStep(0); eventsRef.current = []
     setEvents([]); setReceipt(null)
     setShowReceipt(false); setIsDone(false); setTransfer(null); setTaskLabel(''); setBudgetCents(null); setReceiptId(null)
+    setMyAgentUpdate(null)
   }
 
   const run = async () => {
@@ -170,6 +183,49 @@ export default function DemoPage() {
         }}>
           <div style={{ width: 6, height: 6, borderRadius: '50%', border: '1.5px solid rgba(239,68,68,.6)', borderTop: '1.5px solid #EF4444', animation: 'spin .8s linear infinite' }} />
           <span style={{ fontSize: 12, color: '#EF4444' }}>SSE disconnected — reconnecting in 3s. Events may be delayed.</span>
+        </div>
+      )}
+
+      {/* My registered agent banner */}
+      {myAgent && !myAgentUpdate && (
+        <div style={{
+          background: 'rgba(79,122,255,0.04)', borderBottom: '1px solid rgba(79,122,255,0.15)',
+          padding: '8px 40px', display: 'flex', alignItems: 'center', gap: 12,
+        }}>
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#4F7AFF', animation: isRunning ? 'mintPulse 1.5s infinite' : 'none', flexShrink: 0 }} />
+          <span style={{ fontSize: 12, color: '#9898C0' }}>
+            Your agent <strong style={{ color: '#EEEEF8' }}>{myAgent.agentName}</strong> is in this round
+            {!isRunning && !isDone && ' — click Run to compete'}
+          </span>
+          <button onClick={() => { sessionStorage.removeItem('stvor_my_agent'); setMyAgent(null) }} style={{
+            marginLeft: 'auto', background: 'none', border: 'none', color: '#6868A0', fontSize: 10, cursor: 'pointer',
+          }}>dismiss</button>
+        </div>
+      )}
+      {myAgent && myAgentUpdate && isDone && (
+        <div style={{
+          background: 'rgba(79,122,255,0.06)', borderBottom: '1px solid rgba(79,122,255,0.2)',
+          padding: '10px 40px', display: 'flex', alignItems: 'center', gap: 14,
+        }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: '#4F7AFF', textTransform: 'uppercase', letterSpacing: '.08em', flexShrink: 0 }}>
+            Your agent
+          </span>
+          <strong style={{ fontSize: 13, color: '#EEEEF8' }}>{myAgent.agentName}</strong>
+          <span style={{ fontSize: 12, color: '#9898C0' }}>
+            trust score: <strong style={{ color: '#EEEEF8' }}>{myAgentUpdate.before.toFixed(1)}</strong>
+            {' → '}
+            <strong style={{ color: myAgentUpdate.delta >= 0 ? '#00DDA0' : '#FF4555' }}>{myAgentUpdate.after.toFixed(1)}</strong>
+            <span style={{ color: myAgentUpdate.delta >= 0 ? '#00DDA0' : '#FF4555', marginLeft: 6 }}>
+              {myAgentUpdate.delta >= 0 ? '+' : ''}{myAgentUpdate.delta.toFixed(1)}
+            </span>
+          </span>
+          <a href={`/api/v1/trust/${myAgent.agentId}`} target="_blank" rel="noreferrer" style={{
+            marginLeft: 'auto', fontSize: 11, color: '#4F7AFF', textDecoration: 'none',
+            background: 'rgba(79,122,255,0.08)', border: '1px solid rgba(79,122,255,0.2)',
+            borderRadius: 5, padding: '3px 10px', flexShrink: 0,
+          }}>
+            Live score ↗
+          </a>
         </div>
       )}
 

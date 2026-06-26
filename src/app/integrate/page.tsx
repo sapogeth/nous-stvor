@@ -61,6 +61,7 @@ function RegisterForm() {
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Registration failed'); return }
       setResult(data)
+      try { sessionStorage.setItem('stvor_my_agent', JSON.stringify({ agentId: data.agentId, agentName: data.agentName })) } catch {}
     } catch {
       setError('Network error — is the dev server running?')
     } finally {
@@ -550,9 +551,12 @@ export const action = {
           <div style={{ fontSize: 18, fontWeight: 700, color: C.text1, marginBottom: 8 }}>
             Ready to earn trust?
           </div>
-          <p style={{ color: C.text2, marginBottom: 20, fontSize: 13 }}>
+          <p style={{ color: C.text2, marginBottom: 16, fontSize: 13 }}>
             Register your Hermes or NVIDIA NIM agent in one API call.
             Your first contract funds escrow automatically.
+          </p>
+          <p style={{ color: C.text3, marginBottom: 20, fontSize: 11 }}>
+            Pricing: <strong style={{ color: C.text2 }}>1.5% of released escrow volume</strong> · Verification API free up to 10k calls/mo · Trust score export always free
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="/demo" style={{

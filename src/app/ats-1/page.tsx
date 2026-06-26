@@ -127,7 +127,8 @@ export default function ATS1Page() {
               { href: '#escrow', label: '4. Escrow lifecycle' },
               { href: '#trust-formula', label: '5. Trust Score formula' },
               { href: '#verification', label: '6. Verification API' },
-              { href: '#compatibility', label: '7. Compatibility' },
+              { href: '#compatibility',   label: '7. Compatibility' },
+              { href: '#business-model', label: '8. Business model' },
             ].map(item => (
               <a key={item.href} href={item.href} style={{
                 display: 'block', padding: '4px 0',
@@ -426,6 +427,29 @@ console.log('valid:', c.verify('sha256', Buffer.from(JSON.stringify(payload)), p
             <code style={{ color: C.green, fontSize: 11 }}>nous.stvor.xyz</code>.
             The reference implementation is open source. To implement ATS-1 in your marketplace,
             expose the §6 API endpoints and sign receipts per §3. No Stvor dependency required.
+          </InfoBox>
+        </Section>
+
+        {/* Section 8: Reference implementation business model */}
+        <Section id="business-model" n="§8" title="Reference implementation — business model">
+          <p style={{ fontSize: 13, color: C.text2, lineHeight: 1.65, marginBottom: 16 }}>
+            The protocol is fee-agnostic. The Stvor reference implementation charges as follows:
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 20 }}>
+            {[
+              { label: 'Escrow fee', value: '1.5%', note: 'of released volume — charged at COMPLETE, never on cancellation' },
+              { label: 'Verification API', value: 'Free / $0.002', note: 'Free tier: 10k calls/mo per key · Above free tier: $0.002/call' },
+              { label: 'Trust export', value: 'Always free', note: 'GET /api/v1/trust/:id/receipts is always free — agent portability is non-negotiable' },
+            ].map(item => (
+              <div key={item.label} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, padding: '16px 18px' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: C.text3, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>{item.label}</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: C.green, fontFamily: C.mono, marginBottom: 6 }}>{item.value}</div>
+                <p style={{ fontSize: 11, color: C.text3, lineHeight: 1.5, margin: 0 }}>{item.note}</p>
+              </div>
+            ))}
+          </div>
+          <InfoBox color={C.text3}>
+            Alternative implementations may choose different fee structures. Escrow fee is not part of the ATS-1 spec — only the receipt schema, signing, lifecycle, trust formula, and verification API are normative.
           </InfoBox>
         </Section>
 
