@@ -2,12 +2,14 @@
  * Stvor PQC Transport Layer
  *
  * Hybrid post-quantum key exchange for secure agent task delivery.
+ * Powered by @stvor/sdk/pqc — the same PQC layer that agents use when
+ * they call Stvor.connect({ pqc: true }).
  *
  * Protocol:
- *   1. ML-KEM-768 (NIST FIPS 203, @noble/post-quantum) — quantum-resistant KEM
- *   2. ECDH P-256 (classical) — breaks with large quantum computer
+ *   1. ML-KEM-768 (NIST FIPS 203)         — quantum-resistant KEM
+ *   2. ECDH P-256 (classical)              — breaks with large quantum computer
  *   3. Hybrid KDF: HKDF-SHA256(ECDH_SS || ML-KEM_SS, 'stvor:task:v1')
- *   4. AES-256-GCM — authenticated task encryption
+ *   4. AES-256-GCM                         — authenticated task encryption
  *
  * Security guarantee: secure if EITHER classical ECDH OR ML-KEM-768 is secure.
  * A quantum adversary who breaks P-256 still cannot decrypt the task payload.
@@ -20,14 +22,13 @@
  */
 
 import crypto from 'crypto'
-import { ml_kem768 } from '@noble/post-quantum/ml-kem.js'
+import { pqcKeyGen, pqcEncaps, pqcDecaps, hybridKDF, EK_SIZE, DK_SIZE, CT_SIZE } from '@stvor/sdk/pqc'
 
-// ── Constants ─────────────────────────────────────────────────────────────────
-
-export const EK_BYTES = 1184  // ML-KEM-768 encapsulation key size
-export const DK_BYTES = 2400  // ML-KEM-768 decapsulation key size
-export const CT_BYTES = 1088  // ML-KEM-768 KEM ciphertext size
-export const SS_BYTES = 32    // Shared secret size
+// Re-export constants so callers don't need to import from @stvor/sdk directly
+export const EK_BYTES = EK_SIZE   // 1184
+export const DK_BYTES = DK_SIZE   // 2400
+export const CT_BYTES = CT_SIZE   // 1088
+export const SS_BYTES = 32
 
 // ── Key Bundle ────────────────────────────────────────────────────────────────
 
@@ -39,7 +40,7 @@ export interface PQCKeyBundle {
 }
 
 export function generatePQCKeyBundle(): PQCKeyBundle {
-  const { publicKey: ek, secretKey: dk } = ml_kem768.keygen()
+  const { ek, dk } = pqcKeyGen()
   const { publicKey: ecdhPub, privateKey: ecdhPriv } =
     crypto.generateKeyPairSync('ec', { namedCurve: 'prime256v1' })
   return {
@@ -67,7 +68,7 @@ export function stvorEncapsulate(
 ): PQCChannel {
   // 1. ML-KEM-768 encapsulate using agent's public encapsulation key
   const agentEk = new Uint8Array(Buffer.from(agentEkB64, 'base64'))
-  const { cipherText: kemCt, sharedSecret: pqcSS } = ml_kem768.encapsulate(agentEk)
+  const { ciphertext: kemCt, sharedSecret: pqcSS } = pqcEncaps(agentEk)
 
   // 2. Stvor generates fresh ephemeral ECDH keypair
   const { publicKey: stvorEphPub, privateKey: stvorEphPriv } =
@@ -83,11 +84,14 @@ export function stvorEncapsulate(
     privateKey: stvorEphPriv,
   })
 
-  // 4. Hybrid KDF: HKDF-SHA256(ECDH_SS || ML-KEM_SS, info='stvor:task:v1')
-  const ikm = Buffer.concat([classicalSS, Buffer.from(pqcSS)])
-  const sessionKey = crypto.hkdfSync('sha256', ikm, Buffer.alloc(32), 'stvor:task:v1', 32)
+  // 4. Hybrid KDF via @stvor/sdk: HKDF-SHA256(ECDH_SS || ML-KEM_SS)
+  const sessionKey = Buffer.from(hybridKDF(
+    new Uint8Array(classicalSS),
+    pqcSS,
+    'stvor:task:v1',
+  ))
 
-  const kemCtB64      = Buffer.from(kemCt).toString('base64')
+  const kemCtB64       = Buffer.from(kemCt).toString('base64')
   const stvorEphPubB64 = stvorEphPub.export({ format: 'der', type: 'spki' }).toString('base64')
 
   return {
@@ -95,7 +99,7 @@ export function stvorEncapsulate(
     stvorEphPubB64,
     ekPreview:     agentEkB64.slice(0, 40) + '...',
     ctPreview:     kemCtB64.slice(0, 40) + '...',
-    sessionKeyB64: Buffer.from(sessionKey).toString('base64'),
+    sessionKeyB64: sessionKey.toString('base64'),
   }
 }
 
@@ -109,7 +113,7 @@ export function agentDecapsulate(
   // 1. ML-KEM-768 decapsulate
   const kemCt = new Uint8Array(Buffer.from(kemCtB64, 'base64'))
   const dk    = new Uint8Array(Buffer.from(agentDkB64, 'base64'))
-  const pqcSS = ml_kem768.decapsulate(kemCt, dk)
+  const pqcSS = pqcDecaps(kemCt, dk)
 
   // 2. ECDH: agent private × Stvor ephemeral public
   const stvorEphPub = crypto.createPublicKey({
@@ -125,9 +129,12 @@ export function agentDecapsulate(
     privateKey: agentEcdhPriv,
   })
 
-  // 3. Same hybrid KDF — must produce identical key as Stvor side
-  const ikm = Buffer.concat([classicalSS, Buffer.from(pqcSS)])
-  return Buffer.from(crypto.hkdfSync('sha256', ikm, Buffer.alloc(32), 'stvor:task:v1', 32))
+  // 3. Hybrid KDF via @stvor/sdk — must produce identical key as Stvor side
+  return Buffer.from(hybridKDF(
+    new Uint8Array(classicalSS),
+    pqcSS,
+    'stvor:task:v1',
+  ))
 }
 
 // ── AES-256-GCM symmetric encryption ─────────────────────────────────────────
@@ -150,8 +157,8 @@ export function encryptTask(sessionKey: Buffer, plaintext: string): EncryptedPay
 }
 
 export function decryptTask(sessionKey: Buffer, p: EncryptedPayload): string {
-  const iv      = Buffer.from(p.ivB64, 'base64')
-  const ct      = Buffer.from(p.ctB64, 'base64')
+  const iv       = Buffer.from(p.ivB64, 'base64')
+  const ct       = Buffer.from(p.ctB64, 'base64')
   const decipher = crypto.createDecipheriv('aes-256-gcm', sessionKey, iv)
   decipher.setAuthTag(Buffer.from(p.tagB64, 'base64'))
   return Buffer.concat([decipher.update(ct), decipher.final()]).toString('utf8')

@@ -253,10 +253,14 @@ console.log('valid:', c.verify('sha256', Buffer.from(payload), pub, sig));
             Post-Quantum Transport Layer
           </div>
           <div style={{ fontSize: 12, color: C.text2, lineHeight: 1.65 }}>
-            For quantum-resistant agent communication, arena agents can enable{' '}
+            This task was delivered over{' '}
             <code style={{ color: '#22C55E', background: 'rgba(255,255,255,.05)', padding: '1px 5px', borderRadius: 3, fontSize: 11 }}>@stvor/sdk</code>{' '}
-            with <code style={{ color: '#22C55E', background: 'rgba(255,255,255,.05)', padding: '1px 5px', borderRadius: 3, fontSize: 11 }}>pqc: true</code>{' '}
-            — ML-KEM-768 + X3DH hybrid key exchange. Verified against NIST FIPS 203 test vectors.
+            PQC transport — ML-KEM-768 + ECDH P-256 hybrid key exchange, AES-256-GCM payload encryption.
+            Verified against NIST FIPS 203 test vectors. A quantum adversary who breaks P-256 cannot decrypt
+            the task payload.{' '}
+            <code style={{ color: '#7575A0', background: 'rgba(255,255,255,.03)', padding: '1px 5px', borderRadius: 3, fontSize: 10 }}>
+              Stvor.connect(&#123; pqc: true &#125;)
+            </code>
           </div>
         </div>
 

@@ -229,7 +229,7 @@ export async function runDemo(): Promise<string> {
           kemCiphertextBytes: CT_BYTES,
           taskEncryption: 'AES-256-GCM',
           hybridKdf: 'HKDF-SHA256(ECDH_SS || ML-KEM_SS)',
-          library: '@noble/post-quantum',
+          library: '@stvor/sdk',
         }})
       }
 
@@ -529,7 +529,7 @@ export async function runDemo(): Promise<string> {
           kemCiphertextBytes: CT_BYTES,
           taskEncryption: 'AES-256-GCM',
           hybridKdf: 'HKDF-SHA256(ECDH_SS || ML-KEM_SS)',
-          library: '@noble/post-quantum',
+          library: '@stvor/sdk',
         }})
       }
 

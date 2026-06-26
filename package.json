@@ -2,9 +2,10 @@
   "name": "nous-hackathon",
   "version": "1.0.0",
   "scripts": {
-    "dev": "node node_modules/next/dist/bin/next dev",
-    "build": "node node_modules/next/dist/bin/next build",
+    "dev": "node scripts/patch-stvor-sdk.js && node node_modules/next/dist/bin/next dev",
+    "build": "node scripts/patch-stvor-sdk.js && node node_modules/next/dist/bin/next build",
     "start": "node node_modules/next/dist/bin/next start",
+    "postinstall": "node scripts/patch-stvor-sdk.js",
     "demo:setup": "APP_URL=${APP_URL:-http://localhost:3000} ./scripts/demo-setup.sh",
     "demo:setup:prod": "./scripts/demo-setup.sh"
   },
