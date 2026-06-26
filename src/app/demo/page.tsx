@@ -93,12 +93,17 @@ export default function DemoPage() {
           case 'TRUST_GATE_REJECTED': setCurrentStep(p => Math.max(p, 7)); break
           case 'ROUND2_STARTING':    setCurrentStep(7); break
           case 'ADAPTATION_SUMMARY': setCurrentStep(10); break
-          case 'RECEIPT_GENERATED':
+          case 'RECEIPT_GENERATED': {
+            const r = event.data as TrustReceipt
             setCurrentStep(p => Math.max(p, 6))
-            setReceipt(event.data as TrustReceipt)
-            setReceiptId((event.data as TrustReceipt).id)
+            setReceipt(r)
+            setReceiptId(r.id)
+            // Save to sessionStorage so receipt page can load it even after Vercel
+            // routes the next request to a different function instance (ephemeral SQLite)
+            try { sessionStorage.setItem(`stvor:receipt:${r.id}`, JSON.stringify(r)) } catch {}
             setTimeout(() => setShowReceipt(true), 1000)
             break
+          }
           case 'TRUST_UPDATED': fetchAgents(); break
           case 'TRANSFER_INITIATED':
             setTransfer({ agentName: event.data.agentName, recipientEmail: event.data.recipientEmail, amountCents: event.data.amountCents })
@@ -169,8 +174,8 @@ export default function DemoPage() {
       )}
 
       {receiptId && isDone && (() => {
-        // Encode receipt data in URL so the receipt page works even after
-        // Vercel recycles the function instance (ephemeral /tmp SQLite).
+        // Always include ?d= so the receipt page works across Vercel instances.
+        // sessionStorage is also saved above as a same-browser fallback.
         const receiptUrl = receipt
           ? `/receipts/${receiptId}?d=${encodeURIComponent(btoa(JSON.stringify(receipt)))}`
           : `/receipts/${receiptId}`
@@ -182,8 +187,9 @@ export default function DemoPage() {
             <span style={{ fontSize: 10, fontWeight: 700, color: C.green, textTransform: 'uppercase', letterSpacing: '.08em', flexShrink: 0 }}>
               Receipt issued
             </span>
-            <span style={{ fontSize: 12, color: C.text3, fontFamily: C.mono, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
-              /receipts/{receiptId}
+            <span style={{ fontSize: 12, color: C.text3, fontFamily: C.mono, flex: 1,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              #{receiptId.slice(0, 8)}…
             </span>
             <a href={receiptUrl} target="_blank" rel="noopener noreferrer" style={{
               fontSize: 11, fontWeight: 600, color: C.green,
@@ -193,6 +199,15 @@ export default function DemoPage() {
             }}>
               View + verify ↗
             </a>
+            <button
+              onClick={() => navigator.clipboard?.writeText(window.location.origin + receiptUrl)}
+              style={{
+                fontSize: 10, color: C.text3, background: 'none', border: `1px solid ${C.border}`,
+                borderRadius: 4, padding: '4px 10px', cursor: 'pointer', flexShrink: 0,
+              }}
+            >
+              Copy link
+            </button>
           </div>
         )
       })()}
