@@ -2,6 +2,7 @@
 
 import { Nav } from '@/components/Nav'
 import { useState } from 'react'
+import Link from 'next/link'
 
 const C = {
   bg:      '#0A0A0F',
@@ -14,6 +15,173 @@ const C = {
   blue:    '#3B82F6',
   purple:  '#8B5CF6',
   amber:   '#F59E0B',
+}
+
+interface RegisterResult {
+  agentId: string
+  apiKey: string
+  agentName: string
+  trustScore: number
+  trustGate: string
+  verifyUrl: string
+  message: string
+}
+
+function RegisterForm() {
+  const [name,     setName]     = useState('')
+  const [org,      setOrg]      = useState('')
+  const [spec,     setSpec]     = useState('')
+  const [url,      setUrl]      = useState('')
+  const [loading,  setLoading]  = useState(false)
+  const [result,   setResult]   = useState<RegisterResult | null>(null)
+  const [error,    setError]    = useState<string | null>(null)
+  const [copied,   setCopied]   = useState<string | null>(null)
+
+  const copy = (text: string, key: string) => {
+    navigator.clipboard.writeText(text)
+    setCopied(key)
+    setTimeout(() => setCopied(null), 1500)
+  }
+
+  const submit = async () => {
+    if (!name.trim()) { setError('Agent name is required'); return }
+    setLoading(true); setError(null)
+    try {
+      const res = await fetch('/api/v1/agents/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          organization: org.trim() || undefined,
+          specialty: spec.trim() || undefined,
+          endpoint_url: url.trim() || undefined,
+          arena: true,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Registration failed'); return }
+      setResult(data)
+    } catch {
+      setError('Network error — is the dev server running?')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const inputStyle = {
+    width: '100%', boxSizing: 'border-box' as const,
+    background: 'rgba(0,0,0,.4)',
+    border: `1px solid ${C.border}`,
+    borderRadius: 7, padding: '10px 14px',
+    fontSize: 13, color: C.text1,
+    fontFamily: 'inherit', outline: 'none',
+  }
+  const labelStyle = { fontSize: 11, fontWeight: 600, color: C.text3, textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: 6, display: 'block' }
+
+  if (result) {
+    return (
+      <div style={{
+        background: 'rgba(34,197,94,.04)',
+        border: `1px solid rgba(34,197,94,.25)`,
+        borderRadius: 10, padding: '24px 28px', marginBottom: 40,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: C.green }} />
+          <span style={{ fontSize: 13, fontWeight: 700, color: C.green }}>Agent registered — trust score active</span>
+        </div>
+        {[
+          { label: 'Agent ID',    value: result.agentId,    key: 'id' },
+          { label: 'API Key',     value: result.apiKey,     key: 'key' },
+          { label: 'Trust Score', value: String(result.trustScore), key: 'score' },
+          { label: 'Trust Gate',  value: result.trustGate,  key: 'gate' },
+        ].map(({ label, value, key }) => (
+          <div key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 0', borderBottom: `1px solid rgba(34,197,94,.08)` }}>
+            <span style={{ fontSize: 11, color: C.text3, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', width: 100, flexShrink: 0 }}>{label}</span>
+            <code style={{ fontSize: 12, color: C.green, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</code>
+            <button onClick={() => copy(value, key)} style={{ background: 'none', border: 'none', color: copied === key ? C.green : C.text3, fontSize: 10, cursor: 'pointer', flexShrink: 0, padding: '0 0 0 12px' }}>
+              {copied === key ? '✓' : 'copy'}
+            </button>
+          </div>
+        ))}
+        <div style={{ marginTop: 18, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <Link href="/demo" style={{ background: C.green, color: '#000', padding: '8px 18px', borderRadius: 6, fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>
+            Run demo with your agent →
+          </Link>
+          <a href={result.verifyUrl} target="_blank" rel="noreferrer" style={{ border: `1px solid rgba(34,197,94,.3)`, color: C.green, padding: '8px 18px', borderRadius: 6, fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>
+            Live trust score ↗
+          </a>
+          <button onClick={() => setResult(null)} style={{ background: 'none', border: 'none', color: C.text3, fontSize: 12, cursor: 'pointer', padding: '8px 0' }}>
+            Register another
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{
+      background: C.surface,
+      border: `1px solid ${C.border}`,
+      borderRadius: 10, padding: '24px 28px', marginBottom: 40,
+    }}>
+      <div style={{ fontSize: 13, fontWeight: 700, color: C.text1, marginBottom: 18 }}>
+        Register agent — live
+        <span style={{ fontSize: 11, fontWeight: 400, color: C.text3, marginLeft: 10 }}>calls POST /api/v1/agents/register</span>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px 20px', marginBottom: 14 }}>
+        <div>
+          <label style={labelStyle}>Agent name *</label>
+          <input
+            value={name} onChange={e => setName(e.target.value)}
+            placeholder="My Nemotron Agent"
+            style={inputStyle}
+            onKeyDown={e => e.key === 'Enter' && submit()}
+          />
+        </div>
+        <div>
+          <label style={labelStyle}>Organization</label>
+          <input
+            value={org} onChange={e => setOrg(e.target.value)}
+            placeholder="Acme Corp (optional)"
+            style={inputStyle}
+          />
+        </div>
+        <div>
+          <label style={labelStyle}>Specialty</label>
+          <input
+            value={spec} onChange={e => setSpec(e.target.value)}
+            placeholder="Financial Analysis (optional)"
+            style={inputStyle}
+          />
+        </div>
+        <div>
+          <label style={labelStyle}>Webhook URL</label>
+          <input
+            value={url} onChange={e => setUrl(e.target.value)}
+            placeholder="https://my-agent.example.com/webhook (optional)"
+            style={inputStyle}
+          />
+        </div>
+      </div>
+      {error && <div style={{ fontSize: 12, color: '#EF4444', marginBottom: 12 }}>{error}</div>}
+      <button
+        onClick={submit}
+        disabled={loading}
+        style={{
+          background: loading ? 'rgba(34,197,94,.3)' : C.green,
+          color: '#000', border: 'none', borderRadius: 7,
+          padding: '10px 24px', fontSize: 13, fontWeight: 700,
+          cursor: loading ? 'not-allowed' : 'pointer',
+          transition: 'background .15s',
+        }}
+      >
+        {loading ? 'Registering…' : 'Register Agent →'}
+      </button>
+      <span style={{ fontSize: 11, color: C.text3, marginLeft: 16 }}>
+        Starts with trust_score 65 · above Trust Gate
+      </span>
+    </div>
+  )
 }
 
 function Code({ children, language = 'bash' }: { children: string; language?: string }) {
@@ -139,8 +307,11 @@ export default function IntegratePage() {
           </p>
         </div>
 
+        {/* Live registration form */}
+        <RegisterForm />
+
         {/* Step 1 */}
-        <Section num="1" title="Register your agent">
+        <Section num="1" title="Register your agent — API reference">
           <p style={{ color: C.text2, marginBottom: 14, fontSize: 13 }}>
             One API call. No SDK required. Returns an <code style={{ color: C.green, background: 'rgba(255,255,255,.06)', padding: '1px 5px', borderRadius: 3, fontSize: 11 }}>agentId</code> and <code style={{ color: C.green, background: 'rgba(255,255,255,.06)', padding: '1px 5px', borderRadius: 3, fontSize: 11 }}>apiKey</code> you'll use for all subsequent calls.
           </p>

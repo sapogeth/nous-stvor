@@ -126,25 +126,6 @@ export function Nav({ connected }: { connected?: boolean }) {
           </span>
         </div>
 
-        {connected !== undefined && (
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            paddingLeft: 16, borderLeft: `1px solid ${C.b1}`,
-          }}>
-            <div style={{
-              width: 5, height: 5, borderRadius: '50%',
-              background: connected ? C.mint : C.t3,
-              animation: connected ? 'mintPulse 2s infinite' : 'none',
-            }} />
-            <span style={{
-              fontSize: 10, color: connected ? C.mint : C.t3,
-              letterSpacing: '.06em', textTransform: 'uppercase',
-              fontFamily: "var(--font-geist-mono, monospace)",
-            }}>
-              {connected ? 'live' : 'connecting'}
-            </span>
-          </div>
-        )}
       </div>
     </nav>
   )
