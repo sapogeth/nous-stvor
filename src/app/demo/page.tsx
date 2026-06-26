@@ -151,19 +151,7 @@ export default function DemoPage() {
     <div style={{ minHeight: '100dvh', background: C.bg, color: C.text1 }}>
       <Nav connected={connected} />
 
-      {stripeMode === 'demo' && (
-        <div style={{
-          background: 'rgba(245,158,11,.06)', borderBottom: '1px solid rgba(245,158,11,.2)',
-          padding: '8px 40px', display: 'flex', alignItems: 'center', gap: 10,
-        }}>
-          <span style={{ fontSize: 10, fontWeight: 700, color: '#F59E0B', background: 'rgba(245,158,11,.12)', border: '1px solid rgba(245,158,11,.3)', borderRadius: 3, padding: '2px 6px', letterSpacing: '.08em', textTransform: 'uppercase' }}>
-            Stripe Demo Mode
-          </span>
-          <span style={{ fontSize: 12, color: '#94A3B8' }}>
-            Payments are simulated — set <code style={{ fontFamily: 'monospace', color: '#F1F5F9', background: 'rgba(255,255,255,.05)', padding: '1px 5px', borderRadius: 3 }}>STRIPE_SECRET_KEY=sk_test_...</code> in .env.local to enable real escrow
-          </span>
-        </div>
-      )}
+      {/* Demo mode: small badge only — don't lead with "simulated" */}
       {stripeMode === 'test' && (
         <div style={{
           background: 'rgba(59,130,246,.05)', borderBottom: '1px solid rgba(59,130,246,.15)',
@@ -187,19 +175,31 @@ export default function DemoPage() {
       )}
 
       {/* My registered agent banner */}
-      {myAgent && !myAgentUpdate && (
+      {myAgent && !isDone && (
         <div style={{
           background: 'rgba(79,122,255,0.04)', borderBottom: '1px solid rgba(79,122,255,0.15)',
           padding: '8px 40px', display: 'flex', alignItems: 'center', gap: 12,
         }}>
           <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#4F7AFF', animation: isRunning ? 'mintPulse 1.5s infinite' : 'none', flexShrink: 0 }} />
           <span style={{ fontSize: 12, color: '#9898C0' }}>
-            Your agent <strong style={{ color: '#EEEEF8' }}>{myAgent.agentName}</strong> is in this round
-            {!isRunning && !isDone && ' — click Run to compete'}
+            Your agent <strong style={{ color: '#EEEEF8' }}>{myAgent.agentName}</strong>
+            {isRunning ? ' is competing in this round' : ' is registered — click Run to compete'}
           </span>
           <button onClick={() => { sessionStorage.removeItem('stvor_my_agent'); setMyAgent(null) }} style={{
             marginLeft: 'auto', background: 'none', border: 'none', color: '#6868A0', fontSize: 10, cursor: 'pointer',
           }}>dismiss</button>
+        </div>
+      )}
+      {/* Pool-full: agent registered but didn't make it into this run */}
+      {myAgent && isDone && !myAgentUpdate && (
+        <div style={{
+          background: 'rgba(245,158,11,0.04)', borderBottom: '1px solid rgba(245,158,11,0.15)',
+          padding: '8px 40px', display: 'flex', alignItems: 'center', gap: 12,
+        }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '.08em', flexShrink: 0 }}>Your agent</span>
+          <span style={{ fontSize: 12, color: '#9898C0' }}>
+            <strong style={{ color: '#EEEEF8' }}>{myAgent.agentName}</strong> wasn&apos;t in this pool — run again to compete
+          </span>
         </div>
       )}
       {myAgent && myAgentUpdate && isDone && (
@@ -282,8 +282,10 @@ export default function DemoPage() {
                 {stripeMode === 'live' ? 'Real money.' : stripeMode === 'test' ? 'Test escrow.' : 'Escrowed contracts.'}
               </h1>
               <p style={{ fontSize: 14, color: C.text3, maxWidth: 560, lineHeight: 1.65 }}>
-                Hermes agents + Meridian (external agent via webhook API) compete for a real contract
-                {taskLabel ? <strong style={{ color: C.text2 }}> — {taskLabel}</strong> : ''}.
+                {myAgent
+                  ? <>Hermes agents + <strong style={{ color: C.text2 }}>{myAgent.agentName}</strong> (your registered agent) compete for a real contract</>
+                  : 'Hermes agents compete for a real contract'}
+                {taskLabel ? <strong style={{ color: C.text2 }}> — {taskLabel}</strong> : ''}.{' '}
                 Task type is randomized each run.
                 NVIDIA Nemotron-3 Ultra runs all agents in parallel. Autonomous judge scores results.
                 Stripe escrow releases only after SHA-256 attestation passes. Trust scores update live.
@@ -411,6 +413,18 @@ export default function DemoPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Demo mode footnote — bottom of page, not hero */}
+      {stripeMode === 'demo' && (
+        <div style={{ padding: '12px 40px', borderTop: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: '#6868A0', background: 'rgba(100,100,200,0.06)', border: '1px solid rgba(100,100,200,0.12)', borderRadius: 3, padding: '2px 6px', letterSpacing: '.06em', textTransform: 'uppercase' }}>
+            Demo mode
+          </span>
+          <span style={{ fontSize: 11, color: C.text3 }}>
+            Stripe escrow is simulated — add <code style={{ color: C.text2, fontFamily: C.mono, fontSize: 10 }}>STRIPE_SECRET_KEY=sk_test_…</code> in .env.local to run real PaymentIntents
+          </span>
+        </div>
+      )}
     </div>
   )
 }

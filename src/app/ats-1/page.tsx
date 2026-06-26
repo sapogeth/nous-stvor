@@ -128,7 +128,7 @@ export default function ATS1Page() {
               { href: '#trust-formula', label: '5. Trust Score formula' },
               { href: '#verification', label: '6. Verification API' },
               { href: '#compatibility',   label: '7. Compatibility' },
-              { href: '#business-model', label: '8. Business model' },
+              { href: '#business-model', label: 'Pricing (not normative)' },
             ].map(item => (
               <a key={item.href} href={item.href} style={{
                 display: 'block', padding: '4px 0',
@@ -430,28 +430,36 @@ console.log('valid:', c.verify('sha256', Buffer.from(JSON.stringify(payload)), p
           </InfoBox>
         </Section>
 
-        {/* Section 8: Reference implementation business model */}
-        <Section id="business-model" n="§8" title="Reference implementation — business model">
-          <p style={{ fontSize: 13, color: C.text2, lineHeight: 1.65, marginBottom: 16 }}>
-            The protocol is fee-agnostic. The Stvor reference implementation charges as follows:
+        {/* Stvor pricing — NOT part of the normative spec, clearly separated */}
+        <div id="business-model" style={{
+          background: C.surface, border: `1px solid ${C.border}`,
+          borderRadius: 10, padding: '24px 28px', marginBottom: 40,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: C.text3, textTransform: 'uppercase', letterSpacing: '.08em' }}>
+              Stvor reference implementation · Pricing
+            </span>
+            <span style={{ fontSize: 10, color: C.text3, background: 'rgba(100,100,200,0.06)', border: '1px solid rgba(100,100,200,0.12)', borderRadius: 4, padding: '2px 8px' }}>
+              not normative · ATS-1 is fee-agnostic
+            </span>
+          </div>
+          <p style={{ fontSize: 13, color: C.text2, marginBottom: 16 }}>
+            The protocol itself defines no fees. The Stvor implementation charges:
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 20 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
             {[
               { label: 'Escrow fee', value: '1.5%', note: 'of released volume — charged at COMPLETE, never on cancellation' },
-              { label: 'Verification API', value: 'Free / $0.002', note: 'Free tier: 10k calls/mo per key · Above free tier: $0.002/call' },
-              { label: 'Trust export', value: 'Always free', note: 'GET /api/v1/trust/:id/receipts is always free — agent portability is non-negotiable' },
+              { label: 'Verification API', value: 'Free / $0.002', note: 'Free tier: 10k calls/mo per key · Above: $0.002/call' },
+              { label: 'Trust export', value: 'Always free', note: 'Export/import of TrustReceipts is always free — portability is the product' },
             ].map(item => (
-              <div key={item.label} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, padding: '16px 18px' }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: C.text3, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>{item.label}</div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: C.green, fontFamily: C.mono, marginBottom: 6 }}>{item.value}</div>
+              <div key={item.label} style={{ background: 'rgba(0,0,0,0.2)', border: `1px solid ${C.border}`, borderRadius: 8, padding: '14px 16px' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: C.text3, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 5 }}>{item.label}</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: C.green, fontFamily: C.mono, marginBottom: 5 }}>{item.value}</div>
                 <p style={{ fontSize: 11, color: C.text3, lineHeight: 1.5, margin: 0 }}>{item.note}</p>
               </div>
             ))}
           </div>
-          <InfoBox color={C.text3}>
-            Alternative implementations may choose different fee structures. Escrow fee is not part of the ATS-1 spec — only the receipt schema, signing, lifecycle, trust formula, and verification API are normative.
-          </InfoBox>
-        </Section>
+        </div>
 
         {/* Footer */}
         <div style={{
