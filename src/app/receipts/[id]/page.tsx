@@ -36,7 +36,54 @@ export default async function ReceiptPage({
       if (parsed && parsed.id) receipt = parsed as ReturnType<typeof receiptQueries.getById>
     } catch {}
   }
-  if (!receipt) notFound()
+  if (!receipt) {
+    return (
+      <div style={{ minHeight: '100dvh', background: '#07070F', color: '#EEEEF8', fontFamily: 'system-ui, sans-serif' }}>
+        <Nav />
+        <main style={{ maxWidth: 560, margin: '0 auto', padding: '80px 40px', textAlign: 'center' }}>
+          <div style={{ fontSize: 48, marginBottom: 24, opacity: 0.3 }}>◌</div>
+          <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 12, color: '#EEEEF8' }}>
+            Receipt not in this instance
+          </h1>
+          <p style={{ fontSize: 14, color: '#7575A0', lineHeight: 1.75, marginBottom: 32 }}>
+            Stvor runs on Vercel serverless with an ephemeral SQLite in{' '}
+            <code style={{ fontFamily: 'monospace', color: '#EEEEF8', background: 'rgba(255,255,255,0.06)', padding: '1px 6px', borderRadius: 3 }}>/tmp</code>.
+            This receipt was issued in a different function instance that has since been recycled.
+          </p>
+          <div style={{
+            background: 'rgba(79,122,255,0.07)', border: '1px solid rgba(79,122,255,0.2)',
+            borderRadius: 10, padding: '20px 24px', marginBottom: 32, textAlign: 'left',
+          }}>
+            <div style={{ fontSize: 10, color: '#4F7AFF', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 10, fontFamily: 'monospace' }}>
+              How to get a permanent receipt link
+            </div>
+            <div style={{ fontSize: 13, color: '#7575A0', lineHeight: 1.75 }}>
+              Run the Live Demo — new receipt URLs now embed all data in the URL itself
+              (<code style={{ color: '#EEEEF8', fontFamily: 'monospace', fontSize: 11 }}>?d=base64</code>).
+              Those links work permanently, without touching the database.
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link href="/demo" style={{
+              fontSize: 13, fontWeight: 600, color: '#EEEEF8', textDecoration: 'none',
+              background: '#4F7AFF', borderRadius: 7, padding: '10px 22px',
+            }}>
+              Run Demo →
+            </Link>
+            <Link href="/" style={{
+              fontSize: 13, color: '#7575A0', textDecoration: 'none',
+              border: '1px solid rgba(100,100,200,0.16)', borderRadius: 7, padding: '10px 22px',
+            }}>
+              Back to home
+            </Link>
+          </div>
+          <p style={{ fontSize: 10, color: '#3A3A55', marginTop: 40, fontFamily: 'monospace' }}>
+            Receipt ID: {id}
+          </p>
+        </main>
+      </div>
+    )
+  }
 
   const payload = JSON.stringify({
     id: receipt.id,
