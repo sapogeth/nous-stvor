@@ -31,32 +31,16 @@ export function ReceiptFallback({ id }: { id: string }) {
           fontSize: 20, fontWeight: 700, letterSpacing: '-0.03em',
           marginBottom: 10, color: '#EEEEF8',
         }}>
-          Receipt data not available
+          Receipt link expired
         </h1>
         <p style={{ fontSize: 13, color: '#7575A0', lineHeight: 1.75, marginBottom: 28 }}>
-          This receipt was issued in a Vercel function instance that has since been
-          recycled. The data lives in ephemeral <code style={{
-            fontFamily: 'monospace', color: '#EEEEF8',
-            background: 'rgba(255,255,255,0.06)', padding: '1px 5px', borderRadius: 3,
-          }}>/tmp</code> SQLite.
+          This receipt link doesn't include its embedded data payload.
+          Permanent receipt links from the demo encode all data directly in the URL
+          and work anywhere, forever — no server required.
           <br /><br />
-          To get a permanent receipt: run the Live Demo and use the{' '}
-          <strong style={{ color: '#EEEEF8' }}>View + verify ↗</strong> button
-          (the link embeds the receipt data directly in the URL).
+          Use the <strong style={{ color: '#EEEEF8' }}>View + verify ↗</strong> button
+          from the demo page to get a permanent link, or run a fresh demo below.
         </p>
-
-        <div style={{
-          background: 'rgba(79,122,255,0.06)', border: '1px solid rgba(79,122,255,0.18)',
-          borderRadius: 8, padding: '14px 18px', marginBottom: 28,
-          fontSize: 12, color: '#7575A0', textAlign: 'left', lineHeight: 1.65,
-        }}>
-          <span style={{ color: '#4F7AFF', fontWeight: 600 }}>Tip:</span>{' '}
-          Receipt links look like{' '}
-          <code style={{ fontFamily: 'monospace', fontSize: 11, color: '#EEEEF8', wordBreak: 'break-all' }}>
-            /receipts/{id}?d=eyJpZCI6Ii4u…
-          </code>
-          {' '}— the <code style={{ fontFamily: 'monospace', color: '#EEEEF8' }}>?d=</code> makes them self-contained.
-        </div>
 
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
           <Link href="/demo" style={{

@@ -157,9 +157,9 @@ export default function DemoPage() {
           padding: '8px 40px', display: 'flex', alignItems: 'center', gap: 10,
         }}>
           <span style={{ fontSize: 10, fontWeight: 700, color: '#3B82F6', background: 'rgba(59,130,246,.1)', border: '1px solid rgba(59,130,246,.25)', borderRadius: 3, padding: '2px 6px', letterSpacing: '.08em', textTransform: 'uppercase' }}>
-            Stripe Test Mode
+            Sandbox
           </span>
-          <span style={{ fontSize: 12, color: '#94A3B8' }}>Real PaymentIntents, test cards — no real money</span>
+          <span style={{ fontSize: 12, color: '#94A3B8' }}>Stripe sandbox — real PaymentIntents, real escrow lifecycle, test cards</span>
         </div>
       )}
 

@@ -1,5 +1,6 @@
 import { getDb } from './client'
 import { generatePQCKeyBundle } from '../pqc'
+import { redisSaveTrustScores, redisGetAllTrustScores } from '../redis'
 
 export interface Agent {
   id: string
@@ -157,8 +158,22 @@ export const agentQueries = {
       WHERE id = ?
     `).run(newTotal, newSuccessful, newAvgJudge, newEscrowRate, newTrustScore, success ? revenueCents : 0, id)
 
+    redisSaveTrustScores({ [id]: newTrustScore }).catch(() => {})
     return { oldScore: agent.trust_score, newScore: newTrustScore, delta: newTrustScore - agent.trust_score }
   },
+}
+
+export async function syncTrustScoresFromRedis(): Promise<void> {
+  const scores = await redisGetAllTrustScores()
+  if (Object.keys(scores).length === 0) return
+  const db = getDb()
+  const stmt = db.prepare('UPDATE agents SET trust_score = ? WHERE id = ?')
+  const update = db.transaction(() => {
+    for (const [agentId, score] of Object.entries(scores)) {
+      stmt.run(score, agentId)
+    }
+  })
+  update()
 }
 
 // Contracts

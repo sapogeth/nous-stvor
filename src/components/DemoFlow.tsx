@@ -131,7 +131,8 @@ export function DemoFlow({ currentStep, events }: Props) {
       )}
 
       {r1Scores.length > 0 && (
-        <StepCard label="Judge Agent Evaluating" active={currentStep === 5} done={currentStep > 5}>
+        <StepCard label="Nemotron-3 Ultra · Autonomous Judge Agent" active={currentStep === 5} done={currentStep > 5}>
+          <NvidiaJudgeHeader model="nvidia/nemotron-3-super-120b-a12b" count={r1Scores.length} />
           <div style={{ display:'flex', gap:8 }}>
             {r1Scores.map(s => (
               <JudgeScoreCard
@@ -139,6 +140,7 @@ export function DemoFlow({ currentStep, events }: Props) {
                 agentName={s.data.agentName}
                 score={s.data.judgeScore}
                 breakdown={s.data.breakdown}
+                reasoning={s.data.reasoning}
                 isWinner={r1Winner?.data.winnerId === s.data.agentId}
               />
             ))}
@@ -559,8 +561,28 @@ function NvidiaPanel({ agentCount, model, avgLatency, agentLatencies }: {
   )
 }
 
-function JudgeScoreCard({ agentName, score, breakdown, isWinner }: {
-  agentName:string; score:number; breakdown:Record<string, number>; isWinner?:boolean
+function NvidiaJudgeHeader({ model, count }: { model: string; count: number }) {
+  return (
+    <div style={{
+      display:'flex', alignItems:'center', gap:10, marginBottom:10,
+      padding:'8px 12px',
+      background:'rgba(118,185,0,0.05)', border:'1px solid rgba(118,185,0,0.15)',
+      borderRadius:6,
+    }}>
+      <div style={{ width:20, height:20, borderRadius:4, background:'rgba(118,185,0,0.15)', border:'1px solid rgba(118,185,0,0.3)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+        <span style={{ fontSize:9, fontWeight:700, color:'#76B900', fontFamily:T.mono }}>N</span>
+      </div>
+      <div style={{ flex:1 }}>
+        <span style={{ fontSize:11, fontWeight:600, color:'#76B900', letterSpacing:'.01em' }}>NVIDIA NIM · {model.split('/').pop()}</span>
+        <span style={{ fontSize:10, color:T.text3, marginLeft:10 }}>Evaluating {count} submissions in parallel</span>
+      </div>
+      <span style={{ fontSize:10, fontFamily:T.mono, color:T.text3 }}>nemotron-super-120b · reasoning model</span>
+    </div>
+  )
+}
+
+function JudgeScoreCard({ agentName, score, breakdown, reasoning, isWinner }: {
+  agentName:string; score:number; breakdown:Record<string, number>; reasoning?:string; isWinner?:boolean
 }) {
   return (
     <div style={{
@@ -585,6 +607,15 @@ function JudgeScoreCard({ agentName, score, breakdown, isWinner }: {
           </div>
         </div>
       ))}
+      {reasoning && (
+        <div style={{
+          marginTop:8, paddingTop:8, borderTop:`1px solid ${T.border}`,
+          fontSize:10, color:T.text3, lineHeight:1.55, fontStyle:'italic',
+        }}>
+          <span style={{ color:'#76B900', fontStyle:'normal', fontWeight:600, fontSize:9, fontFamily:T.mono, marginRight:5 }}>NIM:</span>
+          {reasoning}
+        </div>
+      )}
     </div>
   )
 }

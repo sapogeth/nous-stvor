@@ -63,7 +63,7 @@ function getSummary(event: StvorEvent): string {
     case 'BUYER_REASONING':    return event.data.winnerName + ' selected · autonomous'
     case 'TRUST_GATE_REJECTED': return `${event.data.agentName} ${event.data.trustScore.toFixed(1)} < ${event.data.minRequired}`
     case 'WORK_DELIVERED':     return `${event.data.agentName} · ${(event.data.latencyMs / 1000).toFixed(1)}s`
-    case 'BID_SCORED':         return `${event.data.agentName}: ${event.data.judgeScore.toFixed(1)}/100`
+    case 'BID_SCORED':         return `${event.data.agentName}: ${event.data.judgeScore.toFixed(1)}/100 — ${event.data.reasoning?.slice(0, 60)}${(event.data.reasoning?.length ?? 0) > 60 ? '…' : ''}`
     case 'WINNER_SELECTED':    return `${event.data.winnerName} · ${event.data.score.toFixed(1)} · $${(event.data.priceCents/100).toFixed(2)}`
     case 'ESCROW_RELEASED':    return `$${(event.data.amountCents/100).toFixed(2)} → ${event.data.agentName}`
     case 'TRUST_UPDATED':      return `${event.data.agentName} ${event.data.before.toFixed(1)} → ${event.data.after.toFixed(1)}`
@@ -125,6 +125,9 @@ export function LiveFeed({ events }: { events: StvorEvent[] }) {
 
               const receiptId = event.type === 'RECEIPT_GENERATED' ? event.data.id : null
 
+              const isScoreEvent = event.type === 'BID_SCORED'
+              const nimReasoning = isScoreEvent ? (event.data as any).reasoning as string | undefined : undefined
+
               return (
                 <motion.div
                   key={i}
@@ -136,8 +139,8 @@ export function LiveFeed({ events }: { events: StvorEvent[] }) {
                     padding: '9px 16px',
                     borderBottom: `1px solid ${T.bg}`,
                     display: 'flex', alignItems: 'flex-start', gap: 9,
-                    background: cls === 'attack' ? 'rgba(239,68,68,.03)' : receiptId ? 'rgba(34,197,94,.03)' : 'transparent',
-                    borderLeft: cls === 'attack' ? `2px solid rgba(239,68,68,.3)` : receiptId ? '2px solid rgba(34,197,94,.3)' : '2px solid transparent',
+                    background: cls === 'attack' ? 'rgba(239,68,68,.03)' : receiptId ? 'rgba(34,197,94,.03)' : isScoreEvent ? 'rgba(118,185,0,0.02)' : 'transparent',
+                    borderLeft: cls === 'attack' ? `2px solid rgba(239,68,68,.3)` : receiptId ? '2px solid rgba(34,197,94,.3)' : isScoreEvent ? '2px solid rgba(118,185,0,0.2)' : '2px solid transparent',
                   }}
                 >
                   <div style={{ width: 5, height: 5, borderRadius: '50%', background: dotColor, flexShrink: 0, marginTop: 4 }} />
@@ -147,7 +150,13 @@ export function LiveFeed({ events }: { events: StvorEvent[] }) {
                     </div>
                     {summary && (
                       <div style={{ fontSize: 10, color: T.text3, fontFamily: 'var(--font-geist-mono)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {summary}
+                        {(event.data as any)?.agentName ? `${(event.data as any).agentName}: ${(event.data as any).judgeScore?.toFixed(1)}/100` : summary}
+                      </div>
+                    )}
+                    {nimReasoning && (
+                      <div style={{ fontSize: 10, color: '#76B900', marginTop: 3, lineHeight: 1.5, opacity: 0.85 }}>
+                        <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 9, opacity: 0.7 }}>NIM: </span>
+                        {nimReasoning}
                       </div>
                     )}
                   </div>

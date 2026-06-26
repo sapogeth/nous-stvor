@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid'
-import { agentQueries, bidQueries, contractQueries, auditQueries } from '../db/queries'
+import { agentQueries, bidQueries, contractQueries, auditQueries, syncTrustScoresFromRedis } from '../db/queries'
 import { sha256 } from '../crypto'
 import { transitionContract } from '../commerce/escrow'
 import { generateReceipt } from '../commerce/receipt'
@@ -124,6 +124,10 @@ function computeExpectedValue(trustScore: number, avgJudgeScore: number, priceCe
 }
 
 export async function runDemo(): Promise<string> {
+  // Restore persisted trust scores from Redis before each run
+  // (Vercel ephemeral SQLite resets on cold start; Redis is the durable store)
+  await syncTrustScoresFromRedis()
+
   const DEMO_TASK = pickTask()
 
   const allDb = agentQueries.getAll()
