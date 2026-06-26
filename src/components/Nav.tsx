@@ -4,13 +4,13 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const C = {
-  bg:     '#04040A',
+  bg:     '#09090B',
   border: 'rgba(255,255,255,0.07)',
-  text1:  '#F0F4FF',
-  text2:  '#8892B0',
-  text3:  '#4A5568',
-  green:  '#00FF9D',
-  blue:   '#00C8FF',
+  text1:  '#FAFAFA',
+  text2:  '#A1A1AA',
+  text3:  '#52525B',
+  green:  '#22C55E',
+  accent: '#3B72FF',
 }
 
 const links = [
@@ -40,11 +40,10 @@ export function Nav({ connected }: { connected?: boolean }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
         <Link href="/" style={{ display:'flex', alignItems:'center', gap:10, textDecoration:'none' }}>
           <div style={{
-            width: 24, height: 24, borderRadius: 6,
-            background: 'linear-gradient(135deg, #00C8FF, #8B5CF6)',
+            width: 22, height: 22, borderRadius: 5,
+            background: C.accent,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 10, fontWeight: 900, color: '#fff', letterSpacing: '-0.02em',
-            boxShadow: '0 0 12px rgba(0,200,255,0.4)',
+            fontSize: 11, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em',
           }}>S</div>
           <span style={{ fontWeight: 700, fontSize: 14, letterSpacing: '-0.03em', color: C.text1 }}>Stvor</span>
         </Link>
