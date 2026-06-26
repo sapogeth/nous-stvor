@@ -11,7 +11,7 @@ const C = {
   border:  '#1C1C28',
   text1:   '#F1F5F9',
   text2:   '#94A3B8',
-  text3:   '#475569',
+  text3:   '#7A8FA8',
   green:   '#22C55E',
   red:     '#EF4444',
   mono:    'var(--font-geist-mono), ui-monospace, monospace',
@@ -258,7 +258,7 @@ console.log('valid:', c.verify('sha256', Buffer.from(payload), pub, sig));
             PQC transport — ML-KEM-768 + ECDH P-256 hybrid key exchange, AES-256-GCM payload encryption.
             Verified against NIST FIPS 203 test vectors. A quantum adversary who breaks P-256 cannot decrypt
             the task payload.{' '}
-            <code style={{ color: '#7575A0', background: 'rgba(255,255,255,.03)', padding: '1px 5px', borderRadius: 3, fontSize: 10 }}>
+            <code style={{ color: '#9898C0', background: 'rgba(255,255,255,.03)', padding: '1px 5px', borderRadius: 3, fontSize: 10 }}>
               Stvor.connect(&#123; pqc: true &#125;)
             </code>
           </div>

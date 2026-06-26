@@ -9,7 +9,7 @@ const C = {
   border:  '#1C1C28',
   text1:   '#F1F5F9',
   text2:   '#94A3B8',
-  text3:   '#475569',
+  text3:   '#7A8FA8',
   green:   '#22C55E',
   blue:    '#3B82F6',
   purple:  '#8B5CF6',

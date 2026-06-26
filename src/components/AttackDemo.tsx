@@ -10,7 +10,7 @@ const T = {
   borderHi:'#2C2C3E',
   text1:   '#F1F5F9',
   text2:   '#94A3B8',
-  text3:   '#475569',
+  text3:   '#7A8FA8',
   green:   '#22C55E',
   red:     '#EF4444',
   redDim:  'rgba(239,68,68,.06)',

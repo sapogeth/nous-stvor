@@ -21,8 +21,8 @@ const C = {
   surface2:'#101020',
   border:  'rgba(100,100,200,0.08)',
   text1:   '#EEEEF8',
-  text2:   '#7575A0',
-  text3:   '#3A3A55',
+  text2:   '#9898C0',
+  text3:   '#6868A0',
   green:   '#00DDA0',
   red:     '#FF4555',
   mono:    'var(--font-geist-mono), ui-monospace, monospace',
@@ -349,7 +349,7 @@ export default function DemoPage() {
               </div>
             </div>
             <button onClick={() => setTransfer(null)} style={{
-              background: 'none', border: 'none', color: '#475569',
+              background: 'none', border: 'none', color: '#7A8FA8',
               cursor: 'pointer', fontSize: 18, lineHeight: 1, flexShrink: 0,
             }}>×</button>
           </motion.div>

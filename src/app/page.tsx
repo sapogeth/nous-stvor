@@ -20,8 +20,8 @@ const D = {
   red:   '#FF4555',
   redD:  'rgba(255,69,85,0.08)',
   t1:    '#EEEEF8',
-  t2:    '#7575A0',
-  t3:    '#3A3A55',
+  t2:    '#9898C0',
+  t3:    '#6868A0',
   b1:    'rgba(100,100,200,0.07)',
   b2:    'rgba(100,100,200,0.16)',
   mono:  "var(--font-geist-mono), ui-monospace, monospace",
@@ -343,7 +343,7 @@ function AnimatedDemoPreview() {
             {s.lines.map((line, i) => (
               <div key={i} style={{
                 fontSize: 11, fontFamily: 'var(--font-geist-mono, monospace)',
-                color: line.includes('← winner') ? '#00DDA0' : line.startsWith('>') ? '#EEEEF8' : '#3A3A55',
+                color: line.includes('← winner') ? '#00DDA0' : line.startsWith('>') ? '#EEEEF8' : '#6868A0',
                 lineHeight: 1.65,
                 fontWeight: line.includes('← winner') ? 600 : 400,
               }}>{line}</div>

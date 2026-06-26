@@ -33,7 +33,7 @@ export function ReceiptFallback({ id }: { id: string }) {
         }}>
           Receipt link expired
         </h1>
-        <p style={{ fontSize: 13, color: '#7575A0', lineHeight: 1.75, marginBottom: 28 }}>
+        <p style={{ fontSize: 13, color: '#9898C0', lineHeight: 1.75, marginBottom: 28 }}>
           This receipt link doesn't include its embedded data payload.
           Permanent receipt links from the demo encode all data directly in the URL
           and work anywhere, forever — no server required.
@@ -51,7 +51,7 @@ export function ReceiptFallback({ id }: { id: string }) {
             Run Demo →
           </Link>
           <Link href="/" style={{
-            fontSize: 13, color: '#7575A0',
+            fontSize: 13, color: '#9898C0',
             border: '1px solid rgba(100,100,200,0.16)',
             borderRadius: 7, padding: '10px 22px',
             textDecoration: 'none',
@@ -60,7 +60,7 @@ export function ReceiptFallback({ id }: { id: string }) {
           </Link>
         </div>
 
-        <p style={{ fontSize: 10, color: '#3A3A55', marginTop: 36, fontFamily: 'monospace' }}>
+        <p style={{ fontSize: 10, color: '#6868A0', marginTop: 36, fontFamily: 'monospace' }}>
           id: {id}
         </p>
       </div>
