@@ -1,0 +1,39 @@
+graph TD
+    BA["Buyer Agent\nHermes / any LLM"]
+
+    subgraph StvorZone["Stvor — Trust Infrastructure Layer"]
+        SIGN["Sign Task\nSHA-256 commitment"]
+        ESC["Stripe Escrow\ncapture_method: manual"]
+        VER{"Verify Payload\nHMAC-SHA256"}
+        REP["Trust Score\n0-100"]
+        RCPT["Trust Receipt\nsigned + portable"]
+        AUD["Audit Log\nimmutable"]
+    end
+
+    SA["Seller Agent\nNemotron-3 Ultra / NVIDIA NIM"]
+
+    BA -->|"1. create task"| SIGN
+    SIGN -->|"commitment"| BA
+    BA -->|"2. lock funds"| ESC
+    BA -->|"3. send task + commitment"| SA
+    SA -->|"4. verify before run"| VER
+    VER -->|"VALID"| SA
+    VER -->|"TAMPERED - block"| ESC
+    SA -->|"5. deliver result"| BA
+    BA -->|"6. approve release"| ESC
+    ESC -->|"payment to seller"| SA
+    VER --> REP
+    VER --> AUD
+    ESC --> AUD
+    ESC --> RCPT
+    RCPT -->|"proof of completion"| BA
+
+    style StvorZone fill:#0E0F1C,stroke:#7C3AED,color:#A78BFA
+    style SIGN fill:#1A1040,stroke:#7C3AED,color:#C4B5FD
+    style VER fill:#0A1A30,stroke:#06B6D4,color:#67E8F9
+    style ESC fill:#0A0A2A,stroke:#635BFF,color:#A5B4FC
+    style REP fill:#0A1A20,stroke:#22D3EE,color:#67E8F9
+    style AUD fill:#111328,stroke:#475569,color:#94A3B8
+    style RCPT fill:#0A1A18,stroke:#10B981,color:#6EE7B7
+    style BA fill:#07080F,stroke:#7C3AED,color:#F1F5F9
+    style SA fill:#07080F,stroke:#76B900,color:#F1F5F9

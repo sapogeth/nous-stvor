@@ -1,0 +1,33 @@
+{
+  "name": "nous-hackathon",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "node node_modules/next/dist/bin/next dev",
+    "build": "node node_modules/next/dist/bin/next build",
+    "start": "node node_modules/next/dist/bin/next start"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.36.3",
+    "@next/swc-darwin-arm64": "^15.5.19",
+    "@noble/post-quantum": "^0.6.1",
+    "@stvor/sdk": "^3.5.4",
+    "better-sqlite3": "^11.10.0",
+    "framer-motion": "^12.41.0",
+    "geist": "^1.7.2",
+    "next": "^15.3.3",
+    "openai": "^6.45.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "stripe": "^17.7.0",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.15.30",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.5",
+    "@types/uuid": "^10.0.0",
+    "tailwindcss": "^4.1.10",
+    "typescript": "^5.8.3"
+  }
+}
