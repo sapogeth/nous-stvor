@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { agentQueries, syncTrustScoresFromRedis } from '@/lib/db/queries'
 import { getDb } from '@/lib/db/client'
+import { redisGetVolume } from '@/lib/redis'
 
 export const dynamic = 'force-dynamic'
 
@@ -69,21 +70,29 @@ export async function GET() {
   }
   const allDays = Object.keys(completedByDate).sort()
 
-  // If fewer than 6 data points, pad with synthetic growth for demo
+  // Merge local SQLite data with Redis-persisted volume (survives cold starts)
+  const redisVolume = await redisGetVolume()
+  for (const [day, cents] of Object.entries(redisVolume)) {
+    completedByDate[day] = (completedByDate[day] ?? 0) + cents
+  }
+  const mergedDays = [...new Set([...Object.keys(completedByDate), ...Object.keys(redisVolume)])].sort()
+
   const volumePoints: { label: string; valueCents: number }[] = []
-  if (allDays.length >= 2) {
-    for (const d of allDays.slice(-7)) {
-      const date = new Date(d)
+  const realDays = mergedDays.filter(d => (completedByDate[d] ?? 0) > 0)
+  if (realDays.length >= 1) {
+    for (const d of realDays.slice(-7)) {
+      const date = new Date(d + 'T12:00:00Z')
       const label = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-      volumePoints.push({ label, valueCents: completedByDate[d] })
+      volumePoints.push({ label, valueCents: completedByDate[d] ?? 0 })
     }
-  } else {
-    // Seed demo volume data when no real runs yet
-    const base = [0, 4500, 7200, 5800, 9100, 12400, 8700]
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(); d.setDate(d.getDate() - (6 - i))
+  }
+  if (volumePoints.length < 2) {
+    // No real data yet — show last 7 days as zero baseline with today's placeholder
+    volumePoints.length = 0
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(); d.setDate(d.getDate() - i)
       const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-      volumePoints.push({ label, valueCents: base[i] })
+      volumePoints.push({ label, valueCents: 0 })
     }
   }
 

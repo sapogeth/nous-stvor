@@ -66,3 +66,65 @@ export async function redisGetAllTrustScores(): Promise<Record<string, number>> 
   }
   return result
 }
+
+// ── Receipt persistence ────────────────────────────────────────────────────────
+const RECEIPT_KEY = 'stvor:receipts'
+
+export async function redisSaveReceipt(receipt: {
+  id: string; contract_id: string; agent_id: string; agent_name: string
+  trust_score_before: number; trust_score_after: number; trust_delta: number
+  judge_score: number; escrow_status: string; task_hash: string
+  work_hash: string; signature: string; generated_at: string
+}): Promise<void> {
+  const r = getRedis()
+  if (!r) return
+  try {
+    await r.hset(RECEIPT_KEY, { [receipt.id]: JSON.stringify(receipt) })
+    await r.expire(RECEIPT_KEY, 86400 * 7) // 7-day TTL
+  } catch {}
+}
+
+export async function redisGetReceipts(): Promise<Array<{
+  id: string; contract_id: string; agent_id: string; agent_name: string
+  trust_score_before: number; trust_score_after: number; trust_delta: number
+  judge_score: number; escrow_status: string; task_hash: string
+  work_hash: string; signature: string; generated_at: string
+}>> {
+  const r = getRedis()
+  if (!r) return []
+  try {
+    const all = await r.hgetall(RECEIPT_KEY) as Record<string, string> | null
+    if (!all) return []
+    return Object.values(all)
+      .map(v => { try { return JSON.parse(v) } catch { return null } })
+      .filter(Boolean)
+      .sort((a, b) => new Date(b.generated_at).getTime() - new Date(a.generated_at).getTime())
+  } catch { return [] }
+}
+
+// ── Escrow volume persistence (daily totals) ───────────────────────────────────
+const VOLUME_KEY = 'stvor:volume'
+
+export async function redisAddVolume(datePart: string, cents: number): Promise<void> {
+  const r = getRedis()
+  if (!r) return
+  try {
+    await r.hset(VOLUME_KEY, { [datePart]: String(cents) })
+    await r.expire(VOLUME_KEY, 86400 * 30)
+  } catch {}
+}
+
+export async function redisGetVolume(): Promise<Record<string, number>> {
+  const r = getRedis()
+  if (!r) return {}
+  try {
+    const all = await r.hgetall(VOLUME_KEY) as Record<string, string> | null
+    if (!all) return {}
+    const result: Record<string, number> = {}
+    for (const [k, v] of Object.entries(all)) {
+      const n = parseInt(v, 10)
+      if (!isNaN(n)) result[k] = (result[k] ?? 0) + n
+    }
+    return result
+  } catch { return {} }
+}

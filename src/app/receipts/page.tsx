@@ -37,7 +37,7 @@ export default async function ReceiptsIndexPage() {
   let receipts: Receipt[] = []
   try {
     receipts = getDb()
-      .prepare('SELECT id, agent_id, agent_name, judge_score, escrow_status, generated_at FROM trust_receipts ORDER BY generated_at DESC')
+      .prepare("SELECT id, agent_id, agent_name, judge_score, escrow_status, generated_at FROM trust_receipts WHERE agent_id != 'hermes-veteran' ORDER BY generated_at DESC")
       .all() as Receipt[]
   } catch { receipts = [] }
 

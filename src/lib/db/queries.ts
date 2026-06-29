@@ -164,16 +164,54 @@ export const agentQueries = {
 }
 
 export async function syncTrustScoresFromRedis(): Promise<void> {
-  const scores = await redisGetAllTrustScores()
-  if (Object.keys(scores).length === 0) return
   const db = getDb()
-  const stmt = db.prepare('UPDATE agents SET trust_score = ? WHERE id = ?')
-  const update = db.transaction(() => {
-    for (const [agentId, score] of Object.entries(scores)) {
-      stmt.run(score, agentId)
+
+  // 1. Restore external agents that may have been lost on cold start
+  try {
+    const { redisGetExternalAgents } = await import('../redis')
+    const externalAgents = await redisGetExternalAgents()
+    for (const a of externalAgents) {
+      const exists = db.prepare('SELECT id FROM agents WHERE id = ?').get(a.id)
+      if (!exists) {
+        agentQueries.register({
+          id: a.id, name: a.name, organization: a.organization,
+          specialty: a.specialty, endpoint_url: a.endpoint_url,
+          api_key: a.api_key, system_prompt: a.system_prompt,
+          initial_trust: a.initial_trust, pqc: a.pqc,
+        })
+      }
     }
-  })
-  update()
+  } catch {}
+
+  // 2. Restore trust scores
+  const scores = await redisGetAllTrustScores()
+  if (Object.keys(scores).length > 0) {
+    const stmt = db.prepare('UPDATE agents SET trust_score = ? WHERE id = ?')
+    db.transaction(() => {
+      for (const [agentId, score] of Object.entries(scores)) {
+        stmt.run(score, agentId)
+      }
+    })()
+  }
+
+  // 3. Restore receipts that may have been lost on cold start
+  try {
+    const { redisGetReceipts } = await import('../redis')
+    const receipts = await redisGetReceipts()
+    const insertReceipt = db.prepare(`
+      INSERT OR IGNORE INTO trust_receipts
+        (id, contract_id, agent_id, agent_name, trust_score_before, trust_score_after,
+         trust_delta, judge_score, escrow_status, task_hash, work_hash, signature, generated_at)
+      VALUES
+        (@id, @contract_id, @agent_id, @agent_name, @trust_score_before, @trust_score_after,
+         @trust_delta, @judge_score, @escrow_status, @task_hash, @work_hash, @signature, @generated_at)
+    `)
+    db.transaction(() => {
+      for (const r of receipts) {
+        try { insertReceipt.run(r) } catch {}
+      }
+    })()
+  } catch {}
 }
 
 // Contracts

@@ -1,6 +1,7 @@
 import { v4 as uuid } from 'uuid'
 import { ecdsaSign } from '../crypto'
 import { receiptQueries, TrustReceipt } from '../db/queries'
+import { redisSaveReceipt } from '../redis'
 
 interface ReceiptInput {
   contractId: string
@@ -34,7 +35,7 @@ export function generateReceipt(input: ReceiptInput): TrustReceipt {
 
   const signature = ecdsaSign(payload)
 
-  return receiptQueries.create({
+  const row = {
     id,
     contract_id: input.contractId,
     agent_id: input.agentId,
@@ -47,5 +48,13 @@ export function generateReceipt(input: ReceiptInput): TrustReceipt {
     task_hash: input.taskHash,
     work_hash: input.workHash,
     signature,
-  })
+  }
+
+  const saved = receiptQueries.create(row)
+  // Persist to Redis so receipts survive Vercel cold starts / new function instances
+  redisSaveReceipt({
+    ...row,
+    generated_at: saved.generated_at,
+  }).catch(() => {})
+  return saved
 }

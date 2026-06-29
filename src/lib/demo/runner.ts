@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid'
 import { agentQueries, bidQueries, contractQueries, auditQueries, syncTrustScoresFromRedis } from '../db/queries'
-import { redisGetExternalAgents, redisIncrDemoRunCount } from '../redis'
+import { redisGetExternalAgents, redisIncrDemoRunCount, redisAddVolume } from '../redis'
 import { sha256 } from '../crypto'
 import { transitionContract } from '../commerce/escrow'
 import { generateReceipt } from '../commerce/receipt'
@@ -704,6 +704,10 @@ export async function runDemo(): Promise<string> {
   await delay(300)
 
   emit({ type: 'DEMO_COMPLETE', data: { contractId, contract2Id } })
+
+  // Persist volume to Redis so it survives cold starts and accumulates across judges
+  const today = new Date().toISOString().slice(0, 10)
+  redisAddVolume(today, DEMO_TASK.budget_cents * 2).catch(() => {})
 
   return contractId
 }

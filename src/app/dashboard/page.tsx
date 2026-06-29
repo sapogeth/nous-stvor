@@ -67,13 +67,13 @@ function timeAgo(iso: string) {
 
 // ── Sidebar ───────────────────────────────────────────────────────────────────
 const NAV_ITEMS = [
-  { href: '/dashboard',    label: 'Overview',   icon: GridIcon  },
-  { href: '/receipts',     label: 'Receipts',   icon: ReceiptIcon },
-  { href: '/demo',         label: 'Escrow',     icon: EscrowIcon },
-  { href: '/attack',       label: 'Disputes',   icon: DisputeIcon },
-  { href: '/api/v1/trust', label: 'Agents',     icon: AgentIcon },
-  { href: '/arena',        label: 'Arena',      icon: ArenaIcon },
-  { href: '/ats-1',        label: 'Protocol',   icon: SettingsIcon },
+  { href: '/dashboard',  label: 'Overview',  icon: GridIcon     },
+  { href: '/receipts',   label: 'Receipts',  icon: ReceiptIcon  },
+  { href: '/demo',       label: 'Escrow',    icon: EscrowIcon   },
+  { href: '/disputes',   label: 'Disputes',  icon: DisputeIcon  },
+  { href: '/agents',     label: 'Agents',    icon: AgentIcon    },
+  { href: '/arena',      label: 'Arena',     icon: ArenaIcon    },
+  { href: '/ats-1',      label: 'Protocol',  icon: SettingsIcon },
 ]
 
 function Sidebar() {
