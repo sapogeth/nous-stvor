@@ -12,8 +12,8 @@ export async function GET() {
   // ── Top Agents ────────────────────────────────────────────────────────────
   const agents = agentQueries.getAll()
   const topAgents = agents
-    .filter(a => a.source !== 'external' || a.total_contracts > 0)
-    .slice(0, 8)
+    .filter(a => a.source !== 'external' || (a.trust_score >= 60 && a.total_contracts > 0))
+    .slice(0, 5)
     .map(a => ({
       id: a.id,
       name: a.name,
@@ -98,7 +98,7 @@ export async function GET() {
 
   const contractVolumeCents = contracts.filter(c => c.status === 'COMPLETE').reduce((s, c) => s + c.budget_cents, 0)
   const agentRevenueCents = agents.reduce((s, a) => s + a.total_revenue_cents, 0)
-  const totalVolumeCents = contractVolumeCents || agentRevenueCents
+  const totalVolumeCents = Math.max(contractVolumeCents, agentRevenueCents)
 
   return NextResponse.json({
     topAgents: topAgents.map(a => ({ ...a, revenuePct: Math.round((a.totalRevenueCents / maxRevenue) * 100) })),

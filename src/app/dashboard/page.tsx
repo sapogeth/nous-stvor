@@ -81,7 +81,7 @@ const NAV_ITEMS = [
 function Sidebar() {
   const path = usePathname()
   return (
-    <aside style={{
+    <aside className="dash-sidebar" style={{
       width: 220, flexShrink: 0,
       background: C.surface,
       borderRight: `1px solid ${C.border}`,
@@ -599,9 +599,24 @@ export default function DashboardPage() {
       <Sidebar />
 
       {/* Main */}
-      <div style={{ flex: 1, overflow: 'auto' }}>
+      <div style={{ flex: 1, overflow: 'auto', minWidth: 0 }}>
+        {/* Mobile top nav (hidden on desktop via CSS) */}
+        <div className="dash-mobile-nav">
+          <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6, marginRight: 8 }}>
+            <div style={{ width: 24, height: 24, borderRadius: 6, background: C.blue, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color: '#fff' }}>S</div>
+          </Link>
+          {NAV_ITEMS.map(item => (
+            <Link key={item.href} href={item.href} style={{ textDecoration: 'none', whiteSpace: 'nowrap' }}>
+              <div style={{
+                padding: '5px 10px', borderRadius: 6, fontSize: 12, fontWeight: 500,
+                color: C.text2, background: C.surface, border: `1px solid ${C.border}`,
+              }}>{item.label}</div>
+            </Link>
+          ))}
+        </div>
+
         {/* Header */}
-        <div style={{
+        <div className="dash-header-bar" style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '20px 28px', borderBottom: `1px solid ${C.border}`,
           position: 'sticky', top: 0, background: C.bg, zIndex: 10,
@@ -629,7 +644,7 @@ export default function DashboardPage() {
               background: C.surface, border: `1px solid ${C.border}`,
               borderRadius: 7, padding: '7px 12px', fontSize: 12, color: C.text2,
             }}>
-              <span style={{ fontSize: 11 }}>📅</span>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: C.mint, display: 'inline-block', flexShrink: 0 }} />
               Live · refreshes every 15s
             </div>
             <a href="/api/dashboard" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
@@ -656,7 +671,7 @@ export default function DashboardPage() {
               Failed to load. <Link href="/demo" style={{ color: C.blue, marginLeft: 6 }}>Run demo first →</Link>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div className="dash-grid">
               {/* Row 1 */}
               <TopAgentsCard agents={data.topAgents} />
               <RecentReceiptsCard receipts={data.recentReceipts} />

@@ -46,7 +46,7 @@ function fmtUSD(cents: number) {
 export default async function AgentsPage() {
   await syncTrustScoresFromRedis()
   const allAgents = agentQueries.getAll()
-  const agents = allAgents.filter(a => a.source !== 'external' || a.total_contracts > 0)
+  const agents = allAgents.filter(a => a.source !== 'external' || (a.trust_score >= 60 && a.total_contracts > 0))
 
   const builtIn  = agents.filter(a => a.source !== 'external')
   const external = agents.filter(a => a.source === 'external')
@@ -149,15 +149,11 @@ function AgentRow({ agent: a, rank, highlight }: {
     : 0
 
   return (
-    <div style={{
+    <div className="agent-row-grid" style={{
       background: highlight ? 'rgba(0,221,160,0.03)' : C.surface,
       border: `1px solid ${highlight ? 'rgba(0,221,160,0.18)' : C.border}`,
       borderRadius: 10,
-      padding: '16px 20px',
-      display: 'grid',
-      gridTemplateColumns: '32px 1fr 90px 90px 90px 100px',
-      gap: 12,
-      alignItems: 'center',
+      padding: '14px 16px',
     }}>
       {/* Rank */}
       <div style={{
@@ -171,22 +167,22 @@ function AgentRow({ agent: a, rank, highlight }: {
       }}>{rank}</div>
 
       {/* Name + meta */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
         <div style={{
-          width: 38, height: 38, borderRadius: 10, flexShrink: 0,
+          width: 36, height: 36, borderRadius: 9, flexShrink: 0,
           background: highlight
             ? 'rgba(0,221,160,0.1)'
             : `hsl(${(rank * 43 + 200) % 360}, 55%, 20%)`,
           border: `1px solid ${highlight ? 'rgba(0,221,160,0.25)' : C.border2}`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 12, fontWeight: 700,
+          fontSize: 11, fontWeight: 700,
           color: highlight ? C.mint : C.text2,
           fontFamily: C.mono,
         }}>
           {a.name.slice(0, 2).toUpperCase()}
         </div>
         <div style={{ minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 2, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 13, fontWeight: 700, color: C.text1, fontFamily: C.disp, letterSpacing: '-0.02em' }}>
               {a.name}
             </span>
@@ -209,30 +205,30 @@ function AgentRow({ agent: a, rank, highlight }: {
 
       {/* Trust score */}
       <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: 22, fontWeight: 800, fontFamily: C.mono, color: trustColor(a.trust_score), letterSpacing: '-0.04em', lineHeight: 1 }}>
+        <div style={{ fontSize: 20, fontWeight: 800, fontFamily: C.mono, color: trustColor(a.trust_score), letterSpacing: '-0.04em', lineHeight: 1 }}>
           {a.trust_score.toFixed(1)}
         </div>
         <div style={{ fontSize: 9, color: C.text3, marginTop: 2 }}>trust score</div>
       </div>
 
-      {/* Contracts */}
-      <div style={{ textAlign: 'center' }}>
+      {/* Contracts (hidden on mobile) */}
+      <div className="agent-row-hide-mobile" style={{ textAlign: 'center' }}>
         <div style={{ fontSize: 15, fontWeight: 700, fontFamily: C.mono, color: C.text1, lineHeight: 1 }}>
           {a.total_contracts}
         </div>
         <div style={{ fontSize: 9, color: C.text3, marginTop: 2 }}>{successRate}% success</div>
       </div>
 
-      {/* Revenue */}
-      <div style={{ textAlign: 'center' }}>
+      {/* Revenue (hidden on mobile) */}
+      <div className="agent-row-hide-mobile" style={{ textAlign: 'center' }}>
         <div style={{ fontSize: 15, fontWeight: 700, fontFamily: C.mono, color: C.text1, lineHeight: 1 }}>
           {fmtUSD(a.total_revenue_cents)}
         </div>
         <div style={{ fontSize: 9, color: C.text3, marginTop: 2 }}>earned</div>
       </div>
 
-      {/* Trust score bar */}
-      <div>
+      {/* Trust bar (hidden on mobile) */}
+      <div className="agent-row-hide-mobile">
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 9, color: C.text3 }}>
           <span>0</span><span>100</span>
         </div>
