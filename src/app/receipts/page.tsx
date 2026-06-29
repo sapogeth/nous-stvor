@@ -1,8 +1,13 @@
-import { receiptQueries } from '@/lib/db/queries'
+import { getDb } from '@/lib/db/client'
 import { Nav } from '@/components/Nav'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
+
+interface Receipt {
+  id: string; agent_id: string; agent_name: string
+  judge_score: number; escrow_status: string; generated_at: string
+}
 
 const C = {
   bg:      '#0A0A0F',
@@ -29,8 +34,12 @@ function timeAgo(iso: string) {
 }
 
 export default async function ReceiptsIndexPage() {
-  let receipts: ReturnType<typeof receiptQueries.getAll> = []
-  try { receipts = receiptQueries.getAll() } catch { receipts = [] }
+  let receipts: Receipt[] = []
+  try {
+    receipts = getDb()
+      .prepare('SELECT id, agent_id, agent_name, judge_score, escrow_status, generated_at FROM trust_receipts ORDER BY generated_at DESC')
+      .all() as Receipt[]
+  } catch { receipts = [] }
 
   return (
     <div style={{ background: C.bg, minHeight: '100vh', color: C.text1 }}>
