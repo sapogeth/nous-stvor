@@ -762,35 +762,6 @@ export default function Home() {
             borderRadius: 12, padding: '28px 32px',
           }}>
             <div style={{ fontSize: 11, color: D.t3, letterSpacing: '.08em', textTransform: 'uppercase', fontFamily: D.mono, marginBottom: 16 }}>
-              Partners
-            </div>
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', marginBottom: 28 }}>
-              {[
-                { name: 'Orbserv', desc: 'Agent wallets & payments', url: 'https://orbserv.xyz', accent: '#6366F1' },
-              ].map(p => (
-                <a key={p.name} href={p.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                  <div style={{
-                    display: 'flex', alignItems: 'center', gap: 10,
-                    background: D.ink2, border: `1px solid rgba(99,102,241,0.25)`,
-                    borderRadius: 8, padding: '10px 16px',
-                    transition: 'border-color .15s',
-                  }}
-                    onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(99,102,241,0.5)')}
-                    onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(99,102,241,0.25)')}
-                  >
-                    <div style={{
-                      width: 28, height: 28, borderRadius: 6,
-                      background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)',
-                    }} />
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: D.t1, fontFamily: D.disp, letterSpacing: '-0.02em' }}>{p.name}</div>
-                      <div style={{ fontSize: 10, color: D.t3, marginTop: 1 }}>{p.desc}</div>
-                    </div>
-                  </div>
-                </a>
-              ))}
-            </div>
-            <div style={{ fontSize: 11, color: D.t3, letterSpacing: '.08em', textTransform: 'uppercase', fontFamily: D.mono, marginBottom: 16 }}>
               Built on
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
