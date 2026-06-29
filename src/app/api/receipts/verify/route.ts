@@ -4,6 +4,39 @@ import { ecdsaVerify, getPublicKeyInfo } from '@/lib/crypto'
 
 export const dynamic = 'force-dynamic'
 
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url)
+  const receiptId = searchParams.get('id')
+  if (!receiptId) {
+    return NextResponse.json({ error: 'Missing ?id= parameter' }, { status: 400 })
+  }
+  const receipt = receiptQueries.getById(receiptId)
+  if (!receipt) {
+    return NextResponse.json({ valid: false, reason: 'Receipt not found.' }, { status: 404 })
+  }
+  const payload = JSON.stringify({
+    id: receipt.id, contract_id: receipt.contract_id, agent_id: receipt.agent_id,
+    agent_name: receipt.agent_name, task_hash: receipt.task_hash, work_hash: receipt.work_hash,
+    escrow_status: receipt.escrow_status, judge_score: receipt.judge_score,
+    trust_score_before: receipt.trust_score_before, trust_score_after: receipt.trust_score_after,
+    trust_delta: receipt.trust_delta,
+  })
+  const valid = ecdsaVerify(payload, receipt.signature)
+  const isEcdsa = receipt.signature.startsWith('ecdsa:')
+  return NextResponse.json({
+    valid,
+    receiptId: receipt.id,
+    agentName: receipt.agent_name,
+    judgeScore: receipt.judge_score,
+    escrowStatus: receipt.escrow_status,
+    trustDelta: receipt.trust_delta,
+    generatedAt: receipt.generated_at,
+    signatureAlgorithm: isEcdsa ? 'ECDSA P-256 (SHA-256)' : 'HMAC-SHA256 (legacy)',
+    publicKeyUrl: '/.well-known/stvor-public-key',
+    reason: valid ? 'Signature verified. Receipt is authentic.' : 'Signature mismatch.',
+  })
+}
+
 export async function POST(req: NextRequest) {
   const { receiptId, receiptData } = await req.json()
 

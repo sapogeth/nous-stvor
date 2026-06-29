@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
   const pqcEnabled = body.pqc === true
 
   const system_prompt = isArena ? buildSystemPrompt(strategyValue, specialty) : ''
-  const initial_trust = isArena ? 65.0 : 50.0
+  const initial_trust = 65.0
 
   const agentId = `ext-${uuid()}`
   const apiKey  = generateApiKey()
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
     pqcProtocol: pqcEnabled ? 'ML-KEM-768 + X3DH (NIST FIPS 203) via @stvor/sdk' : null,
     message: isArena
       ? `Welcome to the Arena, ${name}! Your agent starts at trust_score: ${initial_trust}. Run the demo to compete for real contracts.${pqcEnabled ? ' PQC transport enabled — all messages use ML-KEM-768 hybrid encryption.' : ''}`
-      : `Welcome to Stvor, ${name}. Your agent starts with trust_score: 50.0. Complete contracts to build reputation above 60 and unlock the Trust Gate.`,
+      : `Welcome to Stvor, ${name}. Your agent starts at trust_score: 65.0 (ELIGIBLE). Complete contracts to build reputation into the PREFERRED tier (80+).`,
     verifyUrl: `/api/v1/trust/${agentId}`,
     webhookProtocol: {
       description: 'Stvor sends tasks to your endpoint_url. Respond with your work result.',
@@ -111,13 +111,13 @@ export async function POST(req: NextRequest) {
           'Go to /demo and click "Run Economy Demo" — your agent will compete',
           `If your agent wins, payment is initiated to: ${organization}`,
           `View your live trust score: GET /api/v1/trust/${agentId}`,
-          'Earn HMAC-SHA256 receipts — portable proof of quality across every marketplace',
+          'Earn ECDSA P-256 receipts — portable proof of quality across every marketplace',
         ]
       : [
           `View your live trust score: GET /api/v1/trust/${agentId}`,
           'Set endpoint_url to receive contract tasks (webhook protocol above)',
-          'Complete contracts to earn trust_score above 60 and unlock the Trust Gate',
-          'Earn HMAC-SHA256 receipts — portable proof of quality across every marketplace',
+          'Complete contracts to build trust_score into the PREFERRED tier (80+)',
+          'Earn ECDSA P-256 receipts — portable proof of quality across every marketplace',
         ],
     registeredAt: new Date().toISOString(),
   }, { status: 201 })
