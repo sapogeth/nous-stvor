@@ -427,28 +427,28 @@ const results = await Promise.all(
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {[
               {
-                label: 'Bybit hack (Feb 2025)',
-                desc: 'Lazarus Group compromised Safe{Wallet} UI to inject malicious JS, altering Bybit cold-to-warm wallet transfer. $1.5B ETH stolen. Reference implementation of the tampered-payload attack Stvor prevents.',
-                href: 'https://www.chainalysis.com/blog/bybit-hack-february-2025/',
+                label: 'Bybit hack — NCC Group technical analysis (Feb 2025)',
+                desc: 'Lazarus Group (TraderTraitor/APT38) compromised a Safe{Wallet} developer\'s workstation via social engineering, stole AWS session tokens, then injected malicious JavaScript into the UI to silently redirect Bybit\'s $1.5B ETH cold-to-warm transfer. Confirmed by FBI. Largest crypto theft in history. Reference implementation of the tampered-payload attack Stvor prevents at the contract layer.',
+                href: 'https://www.nccgroup.com/research/in-depth-technical-analysis-of-the-bybit-hack/',
               },
               {
-                label: 'Gartner: AI Agent Threat Landscape 2025–2026',
-                desc: '"Through 2029, over 50% of successful cybersecurity attacks against AI agents will exploit access control issues via direct or indirect prompt injection." — Gartner Strategic Planning Assumption.',
-                href: 'https://www.gartner.com/en/articles/what-is-agentic-ai',
+                label: 'JaredFromSubway MEV Bot — $7.5M counter-MEV exploit',
+                desc: 'Autonomous trading bot responsible for ~70% of Ethereum sandwich attacks was drained via a counter-MEV honeypot: 66 fake token contracts accumulated standing token approvals over weeks, then swept the bot\'s real assets in one transaction. Zero human involvement — the exploit targeted the bot\'s decision-making logic directly.',
+                href: 'https://cointelegraph.com/news/notorious-sandwich-attack-bot-jaredfromsubwayeth-exploited-for-75m',
               },
               {
                 label: 'Practical DevSecOps — AI Security Statistics 2026',
-                desc: 'Prompt injection found in 73% of production AI deployments. Estimated $2.3B+ in losses globally from AI-targeted attacks in 2025.',
+                desc: 'Prompt injection found in 73% of production AI deployments. Estimated $2.3B+ in losses from AI-targeted attacks in 2025. Gartner: "Through 2029, over 50% of successful cybersecurity attacks against AI agents will exploit prompt injection."',
                 href: 'https://www.practical-devsecops.com/ai-security-statistics-2026-research-report/',
               },
               {
-                label: 'IBM Cost of a Data Breach 2025',
-                desc: 'Third-party/supply chain compromise: $4.91M average breach cost. Supply chain attacks cost 17× more to remediate than direct breaches.',
-                href: 'https://www.ibm.com/reports/data-breach',
+                label: 'CSO Online — Bybit hack linked to Lazarus Group',
+                desc: 'Coverage of FBI attribution and technical breakdown of the supply chain attack vector. Demonstrates the exact class of payload-tampering Stvor prevents via SHA-256 commitment at contract creation.',
+                href: 'https://www.csoonline.com/article/3831315/bybits-1-5b-hack-linked-to-north-koreas-lazarus-group.html',
               },
               {
-                label: 'ATS-1 Open Standard — Agent Trust Standard v0.1.0',
-                desc: 'Stvor reference specification for portable cryptographic trust receipts across agent marketplaces.',
+                label: 'ATS-1 — Agent Trust Standard v0.1.0 (Stvor draft spec)',
+                desc: 'Open specification for portable cryptographic trust receipts. Any agent marketplace can implement ATS-1 to make trust scores portable across platforms — no Stvor SDK required.',
                 href: '/ats-1',
               },
             ].map((ref, i) => (
