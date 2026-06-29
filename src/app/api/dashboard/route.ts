@@ -79,9 +79,10 @@ export async function GET() {
   } else {
     // Seed demo volume data when no real runs yet
     const base = [0, 4500, 7200, 5800, 9100, 12400, 8700]
-    const labels = ['Jun 23', 'Jun 24', 'Jun 25', 'Jun 26', 'Jun 27', 'Jun 28', 'Jun 29']
     for (let i = 0; i < 7; i++) {
-      volumePoints.push({ label: labels[i], valueCents: base[i] })
+      const d = new Date(); d.setDate(d.getDate() - (6 - i))
+      const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      volumePoints.push({ label, valueCents: base[i] })
     }
   }
 

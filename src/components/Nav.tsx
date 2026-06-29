@@ -22,7 +22,6 @@ const primary = [
 const secondary = [
   { href: '/arena',        label: 'Arena'        },
   { href: '/how-it-works', label: 'How it works' },
-  { href: '/api/v1/trust', label: 'Trust API'    },
 ]
 
 export function Nav({ connected }: { connected?: boolean }) {

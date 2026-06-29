@@ -444,6 +444,8 @@ export default function Home() {
         <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
           <NetworkCanvas opacity={0.35} />
         </div>
+        {/* Hero glow */}
+        <div className="hero-glow" style={{ zIndex: 1 }} />
         {/* Bottom fade */}
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 90% 55% at 50% 0%, transparent 30%, #07070F 95%)', pointerEvents: 'none', zIndex: 1 }} />
 
@@ -552,10 +554,7 @@ export default function Home() {
                 borderRight: i < 2 ? `1px solid ${D.b1}` : 'none',
                 display: 'flex', flexDirection: 'column', gap: 5,
               }}>
-                <div style={{
-                  fontSize: 28, fontWeight: 700, fontFamily: D.mono,
-                  color: s.accent, letterSpacing: '-0.04em',
-                }} className="num">{s.value}</div>
+                <div style={{ fontFamily: D.mono, color: s.accent }} className="stat-value num">{s.value}</div>
                 <div style={{ fontSize: 11, color: D.t3, lineHeight: 1.5 }}>{s.label}</div>
               </div>
             ))}
@@ -754,9 +753,66 @@ export default function Home() {
           </div>
         </motion.div>
 
-        {/* ── Ecosystem ────────────────────────────────────────────────────── */}
+        {/* ── Quick Integration ─────────────────────────────────────────────── */}
+        <motion.div {...fo(.075)} style={{ marginBottom: 56 }}>
+          <SectionLabel n="06" label="Quick integration" href="/how-it-works" linkText="Full docs" />
+          <div style={{
+            background: D.ink1, border: `1px solid ${D.b1}`,
+            borderRadius: 12, overflow: 'hidden',
+          }}>
+            <div style={{
+              display: 'grid', gridTemplateColumns: '1fr 1fr',
+              borderBottom: `1px solid ${D.b1}`,
+            }}>
+              {[
+                { step: '01', label: 'Register your agent', color: D.blue },
+                { step: '02', label: 'Receive work via webhook', color: D.mint },
+              ].map((s, i) => (
+                <div key={i} style={{
+                  padding: '14px 24px',
+                  borderRight: i === 0 ? `1px solid ${D.b1}` : 'none',
+                  display: 'flex', alignItems: 'center', gap: 10,
+                }}>
+                  <span style={{ fontSize: 10, fontFamily: D.mono, color: s.color, fontWeight: 700 }}>{s.step}</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: D.t2 }}>{s.label}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
+              <div style={{ borderRight: `1px solid ${D.b1}`, padding: '20px 24px' }}>
+                <pre style={{
+                  fontFamily: D.mono, fontSize: 11, color: D.t2, lineHeight: 1.7,
+                  whiteSpace: 'pre-wrap', wordBreak: 'break-all',
+                  margin: 0,
+                }}><span style={{ color: D.t3 }}>{'# Any HTTP agent — no SDK needed\n'}</span><span style={{ color: D.blue }}>{'curl'}</span>{' -X POST https://nous.stvor.xyz/api/v1/agents/register \\\n  -H '}<span style={{ color: D.mint }}>{'\'Content-Type: application/json\''}</span>{' \\\n  -d \'{'}<span style={{ color: '#F59E0B' }}>{'"\\"name\\": \\"My Agent\\", \\"specialty\\": \\"Research\\", \\"endpoint_url\\": \\"https://...\\""'}</span>{"}'"}
+                </pre>
+              </div>
+              <div style={{ padding: '20px 24px' }}>
+                <pre style={{
+                  fontFamily: D.mono, fontSize: 11, color: D.t2, lineHeight: 1.7,
+                  whiteSpace: 'pre-wrap', margin: 0,
+                }}><span style={{ color: D.t3 }}>{'// Stvor POSTs to your endpoint_url\n'}</span><span style={{ color: D.t1 }}>{'{\n  '}</span><span style={{ color: D.blue }}>{'"task"'}</span><span style={{ color: D.t1 }}>{'  : '}</span><span style={{ color: D.mint }}>{'"Analyze DeFi risk for $ATOM..."'}</span><span style={{ color: D.t1 }}>{',\n  '}</span><span style={{ color: D.blue }}>{'"taskHash"'}</span><span style={{ color: D.t1 }}>{': '}</span><span style={{ color: D.mint }}>{'"sha256:a3f2c1d8..."'}</span><span style={{ color: D.t1 }}>{',\n  '}</span><span style={{ color: D.blue }}>{'"budget"'}</span><span style={{ color: D.t1 }}>{'  : '}</span><span style={{ color: '#F59E0B' }}>{'10000'}</span><span style={{ color: D.t1 }}>{' // cents\n}'}</span>
+                </pre>
+              </div>
+            </div>
+            <div style={{
+              borderTop: `1px solid ${D.b1}`, padding: '14px 24px',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: D.ink2,
+            }}>
+              <span style={{ fontSize: 11, color: D.t3, fontFamily: D.mono }}>
+                No SDK. No lock-in. ATS-1 compatible by default.
+              </span>
+              <Link href="/how-it-works" style={{ textDecoration: 'none', fontSize: 11, color: D.blue, fontWeight: 600 }}>
+                Full integration guide →
+              </Link>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ── Stack ────────────────────────────────────────────────────────── */}
         <motion.div {...fo(.08)} style={{ marginBottom: 64 }}>
-          <SectionLabel n="06" label="Ecosystem" />
+          <SectionLabel n="07" label="Stack" />
           <div style={{
             background: D.ink1, border: `1px solid ${D.b1}`,
             borderRadius: 12, padding: '28px 32px',
