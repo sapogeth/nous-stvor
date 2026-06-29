@@ -1,51 +1,54 @@
 import { NextResponse } from 'next/server'
-import { getDb } from '@/lib/db/client'
-import { redisGetReceipts } from '@/lib/redis'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    // Call redisGetReceipts directly (same as syncTrustScoresFromRedis does internally)
-    const receipts = await redisGetReceipts()
+    const upstashUrl   = process.env.UPSTASH_REDIS_REST_URL
+    const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN
+    const kvUrl        = process.env.KV_REST_API_URL
+    const kvToken      = process.env.KV_REST_API_TOKEN
 
-    const db = getDb()
-    const totalRows = (db.prepare('SELECT COUNT(*) as c FROM trust_receipts').get() as { c: number }).c
+    const effectiveUrl   = upstashUrl   ?? kvUrl
+    const effectiveToken = upstashToken ?? kvToken
 
-    // Try inserting all receipts and count successes/failures
-    let inserted = 0
-    let skipped = 0
-    let errors: string[] = []
+    // Try to connect and query directly
+    let hlen = 0
+    let hgetallCount = 0
+    let connectError: string | null = null
+    let firstField: string | null = null
 
-    const insertReceipt = db.prepare(`
-      INSERT OR IGNORE INTO trust_receipts
-        (id, contract_id, agent_id, agent_name, trust_score_before, trust_score_after,
-         trust_delta, judge_score, escrow_status, task_hash, work_hash, signature, generated_at)
-      VALUES
-        (@id, @contract_id, @agent_id, @agent_name, @trust_score_before, @trust_score_after,
-         @trust_delta, @judge_score, @escrow_status, @task_hash, @work_hash, @signature, @generated_at)
-    `)
-
-    for (const r of receipts) {
+    if (effectiveUrl && effectiveToken) {
       try {
-        const result = insertReceipt.run(r)
-        if (result.changes > 0) inserted++
-        else skipped++
+        const { Redis } = await import('@upstash/redis')
+        const r = new Redis({ url: effectiveUrl, token: effectiveToken })
+
+        // Check the stvor:receipts hash length
+        hlen = (await r.hlen('stvor:receipts')) as number
+
+        // Attempt hgetall
+        const all = await r.hgetall('stvor:receipts') as Record<string, string> | null
+        if (all) {
+          hgetallCount = Object.keys(all).length
+          firstField = Object.keys(all)[0] ?? null
+        }
       } catch (e) {
-        errors.push(String(e))
+        connectError = String(e)
       }
     }
 
-    const afterRows = (db.prepare('SELECT COUNT(*) as c FROM trust_receipts WHERE agent_id != ?').get('hermes-veteran') as { c: number }).c
-
     return NextResponse.json({
-      redisReceiptCount: receipts.length,
-      rowsBeforeInsert: totalRows,
-      inserted,
-      skipped,
-      errors: errors.slice(0, 3),
-      nonVeteranRowsAfter: afterRows,
-      firstReceipt: receipts[0] ? { id: receipts[0].id, agent_id: receipts[0].agent_id, escrow_status: receipts[0].escrow_status } : null,
+      envVars: {
+        UPSTASH_REDIS_REST_URL:   upstashUrl   ? `set (${upstashUrl.slice(0, 30)}...)` : 'MISSING',
+        UPSTASH_REDIS_REST_TOKEN: upstashToken ? 'set' : 'MISSING',
+        KV_REST_API_URL:          kvUrl        ? `set (${kvUrl.slice(0, 30)}...)` : 'MISSING',
+        KV_REST_API_TOKEN:        kvToken      ? 'set' : 'MISSING',
+      },
+      effectiveUrl: effectiveUrl ? `${effectiveUrl.slice(0, 40)}...` : 'NONE',
+      hlen,
+      hgetallCount,
+      firstField,
+      connectError,
     })
   } catch (e) {
     return NextResponse.json({ error: String(e) })
