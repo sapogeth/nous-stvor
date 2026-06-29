@@ -46,6 +46,10 @@ export default function DemoPage() {
   const [myAgentUpdate,  setMyAgentUpdate]  = useState<{ before: number; after: number; delta: number } | null>(null)
   const [receiptId,      setReceiptId]      = useState<string | null>(null)
   const eventsRef = useRef<StvorEvent[]>([])
+  const esRef = useRef<EventSource | null>(null)
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const sessionIdRef = useRef<string>('__idle')
+  const connectFnRef = useRef<(() => void) | null>(null)
 
   const fetchAgents = useCallback(async () => {
     try { const res = await fetch('/api/agents'); setAgents(await res.json()) } catch {}
@@ -56,7 +60,6 @@ export default function DemoPage() {
       .then(r => r.json())
       .then(d => setStripeMode(d.stripe?.mode ?? null))
       .catch(() => {})
-    // Pick up agent registered on /integrate
     try {
       const stored = sessionStorage.getItem('stvor_my_agent')
       if (stored) setMyAgent(JSON.parse(stored))
@@ -65,16 +68,16 @@ export default function DemoPage() {
 
   useEffect(() => {
     fetchAgents()
-    let es: EventSource
-    let reconnectTimer: ReturnType<typeof setTimeout>
 
     function connect() {
-      es = new EventSource('/api/events')
+      esRef.current?.close()
+      const es = new EventSource(`/api/events?sessionId=${sessionIdRef.current}`)
+      esRef.current = es
       es.onopen  = () => setConnected(true)
       es.onerror = () => {
         setConnected(false)
         es.close()
-        reconnectTimer = setTimeout(connect, 3000)
+        reconnectTimerRef.current = setTimeout(connect, 3000)
       }
       es.onmessage = (e) => {
         const event: StvorEvent = JSON.parse(e.data)
@@ -105,17 +108,18 @@ export default function DemoPage() {
             setCurrentStep(p => Math.max(p, 6))
             setReceipt(r)
             setReceiptId(r.id)
-            // Save to sessionStorage so receipt page can load it even after Vercel
-            // routes the next request to a different function instance (ephemeral SQLite)
             try { sessionStorage.setItem(`stvor:receipt:${r.id}`, JSON.stringify(r)) } catch {}
             setTimeout(() => setShowReceipt(true), 1000)
             break
           }
           case 'TRUST_UPDATED':
             fetchAgents()
-            if (myAgent && event.data.agentId === myAgent.agentId) {
-              setMyAgentUpdate({ before: event.data.before, after: event.data.after, delta: event.data.delta })
-            }
+            setMyAgent(prev => {
+              if (prev && event.data.agentId === prev.agentId) {
+                setMyAgentUpdate({ before: event.data.before, after: event.data.after, delta: event.data.delta })
+              }
+              return prev
+            })
             break
           case 'TRANSFER_INITIATED':
             setTransfer({ agentName: event.data.agentName, recipientEmail: event.data.recipientEmail, amountCents: event.data.amountCents })
@@ -127,8 +131,9 @@ export default function DemoPage() {
       }
     }
 
+    connectFnRef.current = connect
     connect()
-    return () => { es?.close(); clearTimeout(reconnectTimer) }
+    return () => { esRef.current?.close(); clearTimeout(reconnectTimerRef.current) }
   }, [fetchAgents])
 
   const reset = () => {
@@ -141,7 +146,13 @@ export default function DemoPage() {
   const run = async () => {
     if (isRunning) return
     reset(); setIsRunning(true)
-    await fetch('/api/demo/run', { method: 'POST' })
+    const res = await fetch('/api/demo/run', { method: 'POST' })
+    const data = await res.json()
+    if (data.sessionId) {
+      sessionIdRef.current = data.sessionId
+      clearTimeout(reconnectTimerRef.current)
+      connectFnRef.current?.()
+    }
   }
 
   const totalVolume    = agents.reduce((s, a) => s + a.total_revenue_cents, 0)
@@ -230,8 +241,6 @@ export default function DemoPage() {
       )}
 
       {receiptId && isDone && (() => {
-        // Always include ?d= so the receipt page works across Vercel instances.
-        // sessionStorage is also saved above as a same-browser fallback.
         const receiptUrl = receipt
           ? `/receipts/${receiptId}?d=${encodeURIComponent(btoa(JSON.stringify(receipt)))}`
           : `/receipts/${receiptId}`
@@ -278,7 +287,7 @@ export default function DemoPage() {
                 Live Agent Economy
               </p>
               <h1 style={{ fontSize: 32, fontWeight: 800, letterSpacing: '-0.04em', color: C.text1, marginBottom: 8 }}>
-                {agents.length || 5} agents. 2 rounds.{' '}
+                {agents.length || 6} agents. 2 rounds.{' '}
                 {stripeMode === 'live' ? 'Real money.' : stripeMode === 'test' ? 'Test escrow.' : 'Escrowed contracts.'}
               </h1>
               <p style={{ fontSize: 14, color: C.text3, maxWidth: 560, lineHeight: 1.65 }}>

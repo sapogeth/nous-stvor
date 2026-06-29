@@ -1,13 +1,15 @@
+import { NextRequest } from 'next/server'
 import { eventBus, StvorEvent } from '@/lib/events'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url)
+  const sessionId = searchParams.get('sessionId') ?? '__unknown'
   const encoder = new TextEncoder()
 
   const stream = new ReadableStream({
     start(controller) {
-      // Send connected ping
       controller.enqueue(encoder.encode('data: {"type":"CONNECTED"}\n\n'))
 
       const unsubscribe = eventBus.subscribe((event: StvorEvent) => {
@@ -16,9 +18,8 @@ export async function GET() {
         } catch {
           // client disconnected
         }
-      })
+      }, sessionId)
 
-      // Heartbeat every 15s
       const heartbeat = setInterval(() => {
         try {
           controller.enqueue(encoder.encode(': heartbeat\n\n'))

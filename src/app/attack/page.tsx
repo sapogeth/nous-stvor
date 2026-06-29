@@ -28,18 +28,21 @@ export default function AttackPage() {
   const [isDone,      setIsDone]      = useState(false)
   const [connected,   setConnected]   = useState(false)
   const eventsRef = useRef<StvorEvent[]>([])
+  const esRef = useRef<EventSource | null>(null)
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const sessionIdRef = useRef<string>('__idle')
+  const connectFnRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
-    let es: EventSource
-    let reconnectTimer: ReturnType<typeof setTimeout>
-
     function connect() {
-      es = new EventSource('/api/events')
+      esRef.current?.close()
+      const es = new EventSource(`/api/events?sessionId=${sessionIdRef.current}`)
+      esRef.current = es
       es.onopen  = () => setConnected(true)
       es.onerror = () => {
         setConnected(false)
         es.close()
-        reconnectTimer = setTimeout(connect, 3000)
+        reconnectTimerRef.current = setTimeout(connect, 3000)
       }
       es.onmessage = (e) => {
         const event: StvorEvent = JSON.parse(e.data)
@@ -61,8 +64,9 @@ export default function AttackPage() {
       }
     }
 
+    connectFnRef.current = connect
     connect()
-    return () => { es?.close(); clearTimeout(reconnectTimer) }
+    return () => { esRef.current?.close(); clearTimeout(reconnectTimerRef.current) }
   }, [])
 
   const reset = () => {
@@ -73,7 +77,13 @@ export default function AttackPage() {
   const run = async () => {
     if (isRunning) return
     reset(); setIsRunning(true)
-    await fetch('/api/demo/tampered', { method: 'POST' })
+    const res = await fetch('/api/demo/tampered', { method: 'POST' })
+    const data = await res.json()
+    if (data.sessionId) {
+      sessionIdRef.current = data.sessionId
+      clearTimeout(reconnectTimerRef.current)
+      connectFnRef.current?.()
+    }
   }
 
   return (
@@ -238,7 +248,7 @@ function Spin() {
 
 function DefensePanel() {
   return (
-    <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, padding: '16px 18px' }}>
+    <div style={{ background: C.surface, border: `1px solid C.border`, borderRadius: 8, padding: '16px 18px' }}>
       <div style={{ fontSize: 10, color: C.text3, textTransform: 'uppercase', letterSpacing: '.1em', fontWeight: 500, marginBottom: 14 }}>Stvor defense layer</div>
       {[
         { label: 'Commit',   value: 'SHA-256(task_json) at creation' },

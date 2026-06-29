@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { v4 as uuid } from 'uuid'
 import { runDemo } from '@/lib/demo/runner'
 import { emit } from '@/lib/events'
 
 export const dynamic = 'force-dynamic'
 
-let isRunning = false
-
-// Per-IP cooldown: one run per IP per 60s
 const lastRunByIp = new Map<string, number>()
 const COOLDOWN_MS = 60_000
 
@@ -20,20 +18,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Rate limited. Try again in ${remainS}s.` }, { status: 429 })
   }
 
-  if (isRunning) {
-    return NextResponse.json({ error: 'Demo already running' }, { status: 409 })
-  }
-
   lastRunByIp.set(ip, now)
-  isRunning = true
+  const sessionId = uuid()
 
-  runDemo()
+  runDemo(sessionId)
     .catch((err) => {
-      emit({ type: 'DEMO_ERROR', data: { message: err.message } })
-    })
-    .finally(() => {
-      isRunning = false
+      emit({ type: 'DEMO_ERROR', data: { message: err.message } }, sessionId)
     })
 
-  return NextResponse.json({ started: true })
+  return NextResponse.json({ started: true, sessionId })
 }

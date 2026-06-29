@@ -133,7 +133,7 @@ function computeExpectedValue(trustScore: number, avgJudgeScore: number, priceCe
   return (trustScore * avgJudgeScore) / priceCents
 }
 
-export async function runDemo(): Promise<string> {
+export async function runDemo(sessionId: string): Promise<string> {
   // Restore persisted trust scores from Redis before each run
   // (Vercel ephemeral SQLite resets on cold start; Redis is the durable store)
   await syncTrustScoresFromRedis()
@@ -157,7 +157,7 @@ export async function runDemo(): Promise<string> {
 
   const allDb = agentQueries.getAll()
   const builtinPool = allDb.filter(a => (a.source ?? 'builtin') !== 'external' && a.source !== 'historical').slice(0, 4)
-  const arenaPool   = allDb.filter(a => a.source === 'external').slice(0, 2)
+  const arenaPool   = allDb.filter(a => a.source === 'external' && a.trust_score >= 60).slice(0, 2)
   const competingPool = allDb.filter(a => a.source !== 'historical')
   const agents = arenaPool.length > 0 ? [...builtinPool, ...arenaPool] : competingPool.slice(0, 5)
   if (agents.length < 3) throw new Error('Need at least 3 agents seeded')
@@ -186,7 +186,7 @@ export async function runDemo(): Promise<string> {
     budgetCents: DEMO_TASK.budget_cents,
     taskHash,
     round: 1,
-  }})
+  }}, sessionId)
   auditQueries.log('CONTRACT_CREATED', { contractId, taskHash, round: 1 }, contractId)
   await delay(700)
 
@@ -198,7 +198,7 @@ export async function runDemo(): Promise<string> {
     contractId,
     amountCents: DEMO_TASK.budget_cents,
     paymentIntentId: paymentIntent.id,
-  }})
+  }}, sessionId)
   await delay(500)
 
   // Agents bid with Expected Value calculation
@@ -221,7 +221,7 @@ export async function runDemo(): Promise<string> {
       round: 1,
       expectedValue: Math.round(ev * 1000) / 1000,
       model: agent.model,
-    }})
+    }}, sessionId)
     await delay(450)
   }
 
@@ -231,12 +231,12 @@ export async function runDemo(): Promise<string> {
     agentCount: agents.length,
     model: WORKER_MODEL,
     parallelThreads: agents.length,
-  }})
+  }}, sessionId)
   transitionContract(contractId, 'SUBMITTED')
 
   const workResults = await Promise.all(
     round1Bids.map(async ({ bidId, agent }) => {
-      emit({ type: 'AGENT_INFERENCE_STARTED', data: { agentId: agent.id, agentName: agent.name, round: 1 } })
+      emit({ type: 'AGENT_INFERENCE_STARTED', data: { agentId: agent.id, agentName: agent.name, round: 1 } }, sessionId)
 
       // PQC: seal task for quantum-safe delivery, open on agent side
       let taskPayload = DEMO_TASK.description
@@ -255,7 +255,7 @@ export async function runDemo(): Promise<string> {
           taskEncryption: 'AES-256-GCM',
           hybridKdf: 'HKDF-SHA256(ECDH_SS || ML-KEM_SS)',
           library: '@stvor/sdk',
-        }})
+        }}, sessionId)
       }
 
       const webhookCtx: WebhookContext = { contractId, taskHash, budgetCents: DEMO_TASK.budget_cents, round: 1 }
@@ -270,7 +270,7 @@ export async function runDemo(): Promise<string> {
         contractId,
         taskHash,
         agentName: agent.name,
-      }})
+      }}, sessionId)
 
       emit({ type: 'WORK_DELIVERED', data: {
         bidId,
@@ -280,7 +280,7 @@ export async function runDemo(): Promise<string> {
         latencyMs: work.inferenceMs,
         deliveryMethod: work.deliveryMethod,
         round: 1,
-      }})
+      }}, sessionId)
 
       return { bidId, agent, work, workHash, latencyMs: work.inferenceMs, attestation }
     })
@@ -291,11 +291,11 @@ export async function runDemo(): Promise<string> {
     avgLatencyMs: Math.round(workResults.reduce((s, r) => s + r.latencyMs, 0) / workResults.length),
     parallelThreads: agents.length,
     model: WORKER_MODEL,
-  }})
+  }}, sessionId)
   await delay(300)
 
   // Judge evaluates all in parallel
-  emit({ type: 'JUDGE_STARTED', data: { contractId, round: 1 } })
+  emit({ type: 'JUDGE_STARTED', data: { contractId, round: 1 } }, sessionId)
 
   const judgeResults = await Promise.all(
     workResults.map(async ({ bidId, agent, work }) => {
@@ -310,7 +310,7 @@ export async function runDemo(): Promise<string> {
         breakdown: result.breakdown,
         reasoning: result.reasoning,
         round: 1,
-      }})
+      }}, sessionId)
       await delay(250)
 
       return { bidId, agent, result }
@@ -335,7 +335,7 @@ export async function runDemo(): Promise<string> {
     score: winner.result.totalScore,
     priceCents: winnerBid.priceCents,
     round: 1,
-  }})
+  }}, sessionId)
 
   // CEO Buyer Agent: explain the selection decision with actual EV data
   const r1Ranked = judgeResults.map(jr => {
@@ -352,7 +352,7 @@ export async function runDemo(): Promise<string> {
     winnerScore: winner.result.totalScore,
     winnerPrice: winnerBid.priceCents,
     reasoning: `Autonomous selection: ${winner.agent.name} (trust ${winner.agent.trust_score.toFixed(1)}) from ${agents.length} competitors. Composite EV ${winnerEntry.finalEV.toFixed(3)} outperforms next-best ${nextBestEntry.finalEV.toFixed(3)} (${nextBestEntry.name}). At $50K deployment risk, ${(winner.agent.escrow_success_rate * 100).toFixed(0)}% escrow success rate across ${winner.agent.total_contracts} prior contracts is the decisive signal — not price.`,
-  }})
+  }}, sessionId)
   await delay(600)
 
   // Release escrow
@@ -366,7 +366,7 @@ export async function runDemo(): Promise<string> {
     amountCents: winnerBid.priceCents,
     paymentIntentId: paymentIntent.id,
     round: 1,
-  }})
+  }}, sessionId)
   auditQueries.log('ESCROW_RELEASED', { winnerId: winner.agent.id, amountCents: winnerBid.priceCents }, contractId)
 
   // If winner is an arena agent, emit transfer initiated
@@ -378,7 +378,7 @@ export async function runDemo(): Promise<string> {
       recipientEmail: winner.agent.organization,
       amountCents: winnerBid.priceCents,
       note: `Your agent ${winner.agent.name} beat ${agents.length - 1} established agents. Escrow released — check your Stripe dashboard for the captured payment.`,
-    }})
+    }}, sessionId)
   }
 
   await delay(500)
@@ -398,7 +398,7 @@ export async function runDemo(): Promise<string> {
       after: update.newScore,
       delta: update.delta,
       round: 1,
-    }})
+    }}, sessionId)
     await delay(280)
   }
 
@@ -419,7 +419,7 @@ export async function runDemo(): Promise<string> {
     trustDelta: freshWinner.trust_score - winner.agent.trust_score,
   })
 
-  emit({ type: 'RECEIPT_GENERATED', data: receipt })
+  emit({ type: 'RECEIPT_GENERATED', data: receipt }, sessionId)
   auditQueries.log('RECEIPT_GENERATED', { receiptId: receipt.id }, contractId, winner.agent.id)
   await delay(800)
 
@@ -428,7 +428,7 @@ export async function runDemo(): Promise<string> {
   emit({ type: 'ROUND2_STARTING', data: {
     contractId,
     message: 'Losing agents analyzing Round 1 results and adapting strategies...',
-  }})
+  }}, sessionId)
   await delay(1000)
 
   const contract2Id = uuid()
@@ -461,14 +461,14 @@ export async function runDemo(): Promise<string> {
         trustScore: agent.trust_score,
         minRequired: TRUST_MINIMUM,
         round: 2,
-      }})
+      }}, sessionId)
       await delay(350)
     }
   }
 
   const freshAgents = allFreshAgents.filter(a => r1AgentIds.has(a.id) && a.trust_score >= TRUST_MINIMUM)
   if (freshAgents.length === 0) {
-    emit({ type: 'DEMO_ERROR', data: { message: 'All agents rejected by trust gate — no Round 2 possible' } })
+    emit({ type: 'DEMO_ERROR', data: { message: 'All agents rejected by trust gate — no Round 2 possible' } }, sessionId)
     return contractId
   }
   const round1WinnerId = winner.agent.id
@@ -520,7 +520,7 @@ export async function runDemo(): Promise<string> {
       expectedValue: Math.round(ev2 * 1000) / 1000,
       adaptationReason,
       model: agent.model,
-    }})
+    }}, sessionId)
     await delay(400)
   }
 
@@ -531,13 +531,13 @@ export async function runDemo(): Promise<string> {
     model: WORKER_MODEL,
     parallelThreads: freshAgents.length,
     round: 2,
-  }})
+  }}, sessionId)
   transitionContract(contract2Id, 'SUBMITTED')
 
   const r2Works = await Promise.all(
     round2Bids.map(async ({ bidId, agent }) => {
       const isR1Winner = agent.id === round1WinnerId
-      emit({ type: 'AGENT_INFERENCE_STARTED', data: { agentId: agent.id, agentName: agent.name, round: 2 } })
+      emit({ type: 'AGENT_INFERENCE_STARTED', data: { agentId: agent.id, agentName: agent.name, round: 2 } }, sessionId)
 
       let taskPayload2 = DEMO_TASK.description
       if (agent.source === 'external' && agent.pqc === 1 && agent.pqc_ek && agent.pqc_dk && agent.pqc_ecdh_pub && agent.pqc_ecdh_priv) {
@@ -555,7 +555,7 @@ export async function runDemo(): Promise<string> {
           taskEncryption: 'AES-256-GCM',
           hybridKdf: 'HKDF-SHA256(ECDH_SS || ML-KEM_SS)',
           library: '@stvor/sdk',
-        }})
+        }}, sessionId)
       }
 
       const webhookCtx2: WebhookContext = { contractId: contract2Id, taskHash: taskHash2, budgetCents: DEMO_TASK.budget_cents, round: 2 }
@@ -572,13 +572,13 @@ export async function runDemo(): Promise<string> {
         latencyMs: work.inferenceMs,
         deliveryMethod: work.deliveryMethod,
         round: 2,
-      }})
+      }}, sessionId)
 
       return { bidId, agent, work, workHash }
     })
   )
 
-  emit({ type: 'JUDGE_STARTED', data: { contractId: contract2Id, round: 2 } })
+  emit({ type: 'JUDGE_STARTED', data: { contractId: contract2Id, round: 2 } }, sessionId)
 
   const r2JudgeResults = await Promise.all(
     r2Works.map(async ({ bidId, agent, work }) => {
@@ -593,7 +593,7 @@ export async function runDemo(): Promise<string> {
         breakdown: result.breakdown,
         reasoning: result.reasoning,
         round: 2,
-      }})
+      }}, sessionId)
       await delay(250)
 
       return { bidId, agent, result }
@@ -617,7 +617,7 @@ export async function runDemo(): Promise<string> {
     score: r2Winner.result.totalScore,
     priceCents: r2WinnerBid.priceCents,
     round: 2,
-  }})
+  }}, sessionId)
   await delay(500)
 
   await captureEscrowPayment(pi2.id, r2WinnerBid.priceCents)
@@ -630,7 +630,7 @@ export async function runDemo(): Promise<string> {
     amountCents: r2WinnerBid.priceCents,
     paymentIntentId: pi2.id,
     round: 2,
-  }})
+  }}, sessionId)
 
   // If R2 winner is an arena agent, emit transfer initiated
   if (r2Winner.agent.source === 'external' && r2Winner.agent.organization) {
@@ -641,7 +641,7 @@ export async function runDemo(): Promise<string> {
       recipientEmail: r2Winner.agent.organization,
       amountCents: r2WinnerBid.priceCents,
       note: `Round 2 win. ${r2Winner.agent.name} adapted strategy. Escrow released — check your Stripe dashboard for the captured payment.`,
-    }})
+    }}, sessionId)
   }
 
   await delay(400)
@@ -659,7 +659,7 @@ export async function runDemo(): Promise<string> {
       after: update.newScore,
       delta: update.delta,
       round: 2,
-    }})
+    }}, sessionId)
     await delay(250)
   }
 
@@ -680,7 +680,7 @@ export async function runDemo(): Promise<string> {
     trustDelta: freshR2Winner.trust_score - r2Winner.agent.trust_score,
   })
 
-  emit({ type: 'RECEIPT_GENERATED', data: receipt2 })
+  emit({ type: 'RECEIPT_GENERATED', data: receipt2 }, sessionId)
 
   // Show adaptation summary (NOUS moment payoff)
   const adaptationSummary = r2JudgeResults.map(r => {
@@ -700,14 +700,17 @@ export async function runDemo(): Promise<string> {
     }
   })
 
-  emit({ type: 'ADAPTATION_SUMMARY', data: { contractId: contract2Id, adaptations: adaptationSummary } })
+  emit({ type: 'ADAPTATION_SUMMARY', data: { contractId: contract2Id, adaptations: adaptationSummary } }, sessionId)
   await delay(300)
 
-  emit({ type: 'DEMO_COMPLETE', data: { contractId, contract2Id } })
+  emit({ type: 'DEMO_COMPLETE', data: { contractId, contract2Id } }, sessionId)
 
   // Persist volume to Redis so it survives cold starts and accumulates across judges
   const today = new Date().toISOString().slice(0, 10)
   redisAddVolume(today, DEMO_TASK.budget_cents * 2).catch(() => {})
+
+  // Suppress unused variable warnings
+  void round1WinnerScore
 
   return contractId
 }

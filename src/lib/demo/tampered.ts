@@ -14,7 +14,7 @@ function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-export async function runTamperedDemo(): Promise<void> {
+export async function runTamperedDemo(sessionId: string): Promise<void> {
   const contractId = uuid()
   const originalHash = sha256(ORIGINAL_TASK)
   const tamperedHash = sha256(TAMPERED_TASK)
@@ -38,7 +38,7 @@ export async function runTamperedDemo(): Promise<void> {
     budgetCents,
     taskHash: originalHash,
     round: 1,
-  }})
+  }}, sessionId)
   auditQueries.log('CONTRACT_CREATED', { contractId, taskHash: originalHash, mode: 'attack_demo' }, contractId)
   await delay(800)
 
@@ -50,7 +50,7 @@ export async function runTamperedDemo(): Promise<void> {
     contractId,
     amountCents: budgetCents,
     paymentIntentId: pi.id,
-  }})
+  }}, sessionId)
   await delay(600)
 
   // Step 3: ATTACK — payload intercepted and modified in transit
@@ -59,19 +59,18 @@ export async function runTamperedDemo(): Promise<void> {
     originalTask: ORIGINAL_TASK,
     tamperedTask: TAMPERED_TASK,
     originalHash,
-  }})
+  }}, sessionId)
   auditQueries.log('ATTACK_DETECTED', { originalHash, tamperedHash, mode: 'supply_chain' }, contractId)
   await delay(1800)
 
   // Step 4: Stvor runs attestation check BEFORE releasing escrow
-  // Agent would have executed tamperedTask — compute what hash that produces
   emit({ type: 'ATTESTATION_FAILED', data: {
     contractId,
     expectedHash: originalHash,   // what buyer signed
     receivedHash: tamperedHash,   // what agent actually got
     originalTask: ORIGINAL_TASK,
     tamperedTask: TAMPERED_TASK,
-  }})
+  }}, sessionId)
   await delay(1200)
 
   // Step 5: Escrow held — funds NOT released
@@ -93,7 +92,7 @@ export async function runTamperedDemo(): Promise<void> {
     amountCents: budgetCents,
     paymentIntentId: pi.id,
     reason: 'Payload hash mismatch. Cryptographic attestation failed. Escrow locked pending review.',
-  }})
+  }}, sessionId)
   auditQueries.log('ESCROW_HELD', { reason: 'attestation_failed', amountCents: budgetCents }, contractId)
   await delay(1000)
 
@@ -102,8 +101,8 @@ export async function runTamperedDemo(): Promise<void> {
     contractId,
     amountSaved: budgetCents,
     attackType: 'supply_chain_payload_substitution',
-  }})
+  }}, sessionId)
   await delay(500)
 
-  emit({ type: 'ATTACK_DEMO_COMPLETE', data: { contractId } })
+  emit({ type: 'ATTACK_DEMO_COMPLETE', data: { contractId } }, sessionId)
 }

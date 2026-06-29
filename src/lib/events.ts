@@ -4,15 +4,22 @@ export type { StvorEvent }
 type Listener = (event: StvorEvent) => void
 
 class EventBus {
-  private listeners = new Set<Listener>()
+  private sessions = new Map<string, Set<Listener>>()
 
-  subscribe(listener: Listener): () => void {
-    this.listeners.add(listener)
-    return () => this.listeners.delete(listener)
+  subscribe(listener: Listener, sessionId: string): () => void {
+    if (!this.sessions.has(sessionId)) this.sessions.set(sessionId, new Set())
+    this.sessions.get(sessionId)!.add(listener)
+    return () => {
+      const set = this.sessions.get(sessionId)
+      if (set) {
+        set.delete(listener)
+        if (set.size === 0) this.sessions.delete(sessionId)
+      }
+    }
   }
 
-  emit(event: StvorEvent) {
-    for (const listener of this.listeners) {
+  emit(event: StvorEvent, sessionId: string) {
+    for (const listener of this.sessions.get(sessionId) ?? []) {
       try { listener(event) } catch {}
     }
   }
@@ -23,6 +30,6 @@ declare global { var __stvor_event_bus__: EventBus | undefined }
 
 export const eventBus: EventBus = global[globalKey] ?? (global[globalKey] = new EventBus())
 
-export function emit(event: StvorEvent) {
-  eventBus.emit(event)
+export function emit(event: StvorEvent, sessionId: string) {
+  eventBus.emit(event, sessionId)
 }
