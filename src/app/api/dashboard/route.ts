@@ -12,7 +12,7 @@ export async function GET() {
   const agents = agentQueries.getAll()
   const topAgents = agents
     .filter(a => a.source !== 'historical')
-    .slice(0, 5)
+    .slice(0, 8)
     .map(a => ({
       id: a.id,
       name: a.name,
@@ -31,6 +31,7 @@ export async function GET() {
             tr.trust_delta, tr.generated_at, a.organization
      FROM trust_receipts tr
      LEFT JOIN agents a ON a.id = tr.agent_id
+     WHERE tr.agent_id != 'hermes-veteran'
      ORDER BY tr.generated_at DESC LIMIT 8`
   ).all() as Array<{
     id: string; agent_id: string; agent_name: string; judge_score: number

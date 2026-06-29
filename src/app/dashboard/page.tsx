@@ -189,7 +189,7 @@ function Card({ title, icon, linkHref, linkLabel, children, style }: {
 // ── Top Agents card ───────────────────────────────────────────────────────────
 function TopAgentsCard({ agents }: { agents: TopAgent[] }) {
   return (
-    <Card title="Top Agents" icon={<AgentIcon size={14} color={C.blue} />} linkHref="/api/v1/trust" linkLabel="View all">
+    <Card title="Top Agents" icon={<AgentIcon size={14} color={C.blue} />} linkHref="/agents" linkLabel="View all">
       <div>
         <div style={{
           display: 'grid', gridTemplateColumns: '36px 1fr 70px 120px',
@@ -346,7 +346,7 @@ function DisputesCard({ d }: { d: DashData['disputes'] }) {
   const gradient   = `conic-gradient(${C.blue} 0% ${openEnd}%, ${C.indigo} ${openEnd}% ${reviewEnd}%, #2D2D44 ${reviewEnd}% 100%)`
 
   return (
-    <Card title="Disputes" icon={<DisputeIcon size={14} color={C.amber} />} linkHref="/attack" linkLabel="View all">
+    <Card title="Disputes" icon={<DisputeIcon size={14} color={C.amber} />} linkHref={(d.cancelled + d.held) > 0 ? '/receipts' : undefined} linkLabel="View all">
       <div style={{ padding: '20px' }}>
         <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
           {/* Stats */}

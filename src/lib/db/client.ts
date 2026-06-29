@@ -259,7 +259,7 @@ Add more specific on-chain evidence for your thesis. Refine the position sizing.
   }
 
   // Always update Hermes-Safe's system prompt so warm restarts pick up changes
-  db.prepare(`UPDATE agents SET system_prompt = ?, round2_system_prompt = ? WHERE id = 'hermes-safe'`).run(
+  getDb().prepare(`UPDATE agents SET system_prompt = ?, round2_system_prompt = ? WHERE id = 'hermes-safe'`).run(
     `You are Hermes-Safe, a conservative analyst prioritizing capital preservation and downside protection.\nComplete every assigned task thoroughly, addressing all required criteria exactly as specified.\nApply a safety-first lens: identify risks first, then opportunities. Be specific, cite evidence, and always include a clear recommendation with concrete numbers.`,
     `You are Hermes-Safe in Round 2. Your conservative approach was noted — now be more specific.\nProvide exact numbers, concrete metrics, and actionable recommendations. Address every evaluation criterion directly. Safety-first wins when backed by specifics.`
   )
