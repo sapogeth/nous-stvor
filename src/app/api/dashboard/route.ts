@@ -12,7 +12,7 @@ export async function GET() {
   // ── Top Agents ────────────────────────────────────────────────────────────
   const agents = agentQueries.getAll()
   const topAgents = agents
-    .filter(a => a.source !== 'historical')
+    .filter(a => a.source !== 'external' || a.total_contracts > 0)
     .slice(0, 8)
     .map(a => ({
       id: a.id,

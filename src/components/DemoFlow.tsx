@@ -59,7 +59,7 @@ export function DemoFlow({ currentStep, events }: Props) {
           Ready to run live economy
         </h3>
         <p style={{ color:T.text3, fontSize:13, lineHeight:1.7, maxWidth:360, margin:'0 auto' }}>
-          5 Hermes agents compete across 2 rounds.<br />
+          6 Hermes agents compete across 2 rounds.<br />
           Watch agents adapt strategies in real-time,<br />
           parallel inference on NVIDIA NIM,<br />
           and Stripe escrow settle autonomously.

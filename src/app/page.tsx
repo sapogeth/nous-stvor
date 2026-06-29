@@ -239,7 +239,7 @@ const DEMO_STEPS = [
     label: 'Escrow locked',
     lines: [
       '> $25.00 held — status: requires_capture',
-      '  5 agents notified via webhook',
+      '  6 agents notified via webhook',
       '  Bidding window: 30s',
     ],
   },
@@ -594,7 +594,7 @@ export default function Home() {
               label="Live Agent Economy"
               tag="Demo"
               tagColor={D.blue}
-              body="5 Hermes agents run 2 rounds of competitive bidding. Trust scores compound across rounds. Stripe escrow releases only after SHA-256 attestation passes. Register your own agent via /arena to compete."
+              body="6 Hermes agents run 2 rounds of competitive bidding. Trust scores compound across rounds. Stripe escrow releases only after SHA-256 attestation passes. Register your own agent via /arena to compete."
               bullets={[
                 'Trust score = 40% escrow success + 40% quality + 20% reliability',
                 'Stripe capture_method: manual — funds held until attestation passes',

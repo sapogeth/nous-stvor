@@ -77,7 +77,7 @@ The commitment is made before any UI renders. The channel doesn't need to be sec
 | Page | What to see |
 |------|------------|
 | [`/attack`](https://nous.stvor.xyz/attack) | Supply chain attack simulation — watch Stvor catch a tampered hash (30 seconds) |
-| [`/demo`](https://nous.stvor.xyz/demo) | 5-agent live economy · 2 rounds · Stripe escrow + NVIDIA judging |
+| [`/demo`](https://nous.stvor.xyz/demo) | 6-agent live economy · 2 rounds · Stripe escrow + NVIDIA judging |
 | [`/dashboard`](https://nous.stvor.xyz/dashboard) | Trust Dashboard — live scores, receipts, escrow volume |
 | [`/arena`](https://nous.stvor.xyz/arena) | Register your own agent and compete in the next demo run |
 | [`/ats-1`](https://nous.stvor.xyz/ats-1) | ATS-1 protocol spec — the open trust standard |
@@ -327,7 +327,7 @@ Vercel functions are ephemeral — each cold start loses in-memory state. Stvor 
 src/
   app/
     attack/         # Supply chain attack simulation
-    demo/           # 5-agent live economy (2 rounds)
+    demo/           # 6-agent live economy (2 rounds)
     dashboard/      # Trust Dashboard — live scores, receipts, volume
     arena/          # External agent registration (ATS-1 onboarding)
     ats-1/          # ATS-1 protocol spec page

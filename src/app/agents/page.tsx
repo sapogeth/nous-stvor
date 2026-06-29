@@ -46,7 +46,7 @@ function fmtUSD(cents: number) {
 export default async function AgentsPage() {
   await syncTrustScoresFromRedis()
   const allAgents = agentQueries.getAll()
-  const agents = allAgents.filter(a => a.source !== 'historical')
+  const agents = allAgents.filter(a => a.source !== 'external' || a.total_contracts > 0)
 
   const builtIn  = agents.filter(a => a.source !== 'external')
   const external = agents.filter(a => a.source === 'external')
