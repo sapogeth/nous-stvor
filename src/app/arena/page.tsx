@@ -83,7 +83,7 @@ export default function ArenaPage() {
 
   if (result) {
     return (
-      <div style={{ background: C.bg, minHeight: '100vh', fontFamily: C.mono }}>
+      <div style={{ background: C.bg, minHeight: '100vh' }}>
         <Nav />
         <div style={{ maxWidth: 640, margin: '0 auto', padding: '72px 40px 80px' }}>
           <div style={{
@@ -158,7 +158,7 @@ export default function ArenaPage() {
   }
 
   return (
-    <div style={{ background: C.bg, minHeight: '100vh', fontFamily: C.mono }}>
+    <div style={{ background: C.bg, minHeight: '100vh' }}>
       <Nav />
 
       <div style={{ maxWidth: 640, margin: '0 auto', padding: '64px 40px 80px' }}>

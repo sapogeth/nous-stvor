@@ -28,7 +28,8 @@ export default async function ReceiptPage({
   const { d }  = await searchParams
 
   // Try DB first, then decode from URL param (Vercel ephemeral /tmp SQLite fallback)
-  let receipt = receiptQueries.getById(id)
+  let receipt = null
+  try { receipt = receiptQueries.getById(id) } catch {}
   if (!receipt && d) {
     try {
       const decoded = Buffer.from(decodeURIComponent(d), 'base64').toString('utf8')
@@ -54,8 +55,9 @@ export default async function ReceiptPage({
     trust_delta: receipt.trust_delta,
   })
   const payloadB64 = Buffer.from(payload).toString('base64')
-  const valid = ecdsaVerify(payload, receipt.signature)
-  const isEcdsa = receipt.signature.startsWith('ecdsa:')
+  let valid = false
+  try { valid = ecdsaVerify(payload, receipt.signature) } catch {}
+  const isEcdsa = receipt.signature?.startsWith('ecdsa:')
   const pkInfo = getPublicKeyInfo()
 
   const deltaPositive = receipt.trust_delta >= 0
@@ -84,7 +86,7 @@ export default async function ReceiptPage({
             </div>
             <div>
               <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-0.04em', color: C.text1, marginBottom: 3 }}>
-                {valid ? 'Receipt Verified' : 'Verification Failed'}
+                {valid ? 'Signature Valid' : 'Signature Invalid'}
               </h1>
               <p style={{ fontSize: 13, color: C.text3, fontFamily: C.mono }}>#{receipt.id}</p>
             </div>
@@ -97,7 +99,7 @@ export default async function ReceiptPage({
             fontSize: 13, color: valid ? C.green : C.red, lineHeight: 1.6,
           }}>
             {valid
-              ? `${isEcdsa ? 'ECDSA P-256 (SHA-256)' : 'HMAC-SHA256'} signature verified. This receipt is cryptographically authentic. ${isEcdsa ? 'Verifiable offline without contacting Stvor.' : ''}`
+              ? `${isEcdsa ? 'ECDSA P-256 (SHA-256)' : 'HMAC-SHA256'} signature is valid. Stvor signed this receipt automatically when escrow closed — no action needed. ${isEcdsa ? 'You can verify it offline without contacting Stvor.' : ''}`
               : 'Signature mismatch. This receipt may have been tampered with.'}
           </div>
 
