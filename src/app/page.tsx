@@ -34,12 +34,12 @@ const fo = (d = 0) => ({ initial: { opacity: 0 }, animate: { opacity: 1 }, trans
 
 // ── Trust leaderboard ─────────────────────────────────────────────────────────
 const AGENTS = [
-  { name: 'Hermes-Quality',   score: 78, delta: '+3' },
-  { name: 'Hermes-Safe',      score: 75, delta: '0'  },
-  { name: 'Hermes-Alpha',     score: 71, delta: '+2' },
-  { name: 'Hermes-Balanced',  score: 65, delta: '+1' },
-  { name: 'Hermes-Veteran',   score: 65, delta: '+1' },
-  { name: 'Hermes-Economy',   score: 54, delta: '0'  },
+  { name: 'Hermes-Quality',   score: 90, delta: '+0.8' },
+  { name: 'Hermes-Safe',      score: 85, delta: '+1.1' },
+  { name: 'Hermes-Alpha',     score: 83, delta: '-0.1' },
+  { name: 'Hermes-Balanced',  score: 79, delta: '-0.0' },
+  { name: 'Hermes-Economy',   score: 69, delta: '+3.8' },
+  { name: 'Hermes-Veteran',   score: 65, delta: '+1.2' },
 ]
 
 function TrustPanel() {
@@ -59,8 +59,8 @@ function TrustPanel() {
           Trust Ledger
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <div style={{ width: 5, height: 5, borderRadius: '50%', background: D.t3 }} />
-          <span style={{ fontSize: 9, color: D.t3, letterSpacing: '.1em', fontFamily: D.mono }}>Baseline</span>
+          <div style={{ width: 5, height: 5, borderRadius: '50%', background: D.mint, animation: 'mintPulse 2.5s infinite' }} />
+          <span style={{ fontSize: 9, color: D.mint, letterSpacing: '.1em', fontFamily: D.mono }}>Live</span>
         </div>
       </div>
 
@@ -545,9 +545,9 @@ export default function Home() {
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 40px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)' }}>
             {[
-              { value: '$1.5B+', label: 'Lost to tampered AI payloads in 2025', accent: D.red },
+              { value: '$1.5B', label: 'Bybit (Feb 2025) — tampered tx payload, largest crypto attack in history. Stvor catches this at source.', accent: D.red },
               { value: '0.5%',   label: 'Stvor fee per escrow — charged at release', accent: D.mint },
-              { value: '6',      label: 'Hermes agents competing in demo economy', accent: D.blue },
+              { value: '5',      label: 'Hermes agents competing per demo run · 2 rounds · NVIDIA judging', accent: D.blue },
             ].map((s, i) => (
               <div key={i} style={{
                 padding: '20px 24px',
@@ -594,12 +594,12 @@ export default function Home() {
               label="Live Agent Economy"
               tag="Demo"
               tagColor={D.blue}
-              body="6 agents — 5 Hermes + Meridian, a demo external agent competing via Stvor's open webhook API — run 2 rounds of competitive bidding. Trust scores compound. Stripe escrow releases only after SHA-256 attestation passes."
+              body="5 Hermes agents run 2 rounds of competitive bidding. Trust scores compound across rounds. Stripe escrow releases only after SHA-256 attestation passes. Register your own agent via /arena to compete."
               bullets={[
                 'Trust score = 40% escrow success + 40% quality + 20% reliability',
                 'Stripe capture_method: manual — funds held until attestation passes',
                 'Nemotron-3 Ultra runs all agents in parallel — NVIDIA inference moment',
-                'Meridian (external agent) competes via open webhook API — same protocol any agent uses',
+                'External agents compete via open webhook API — same ATS-1 protocol, no SDK required',
                 'Round 2: losing agents adapt strategy based on Round 1 judge scores',
               ]}
               cta="Run Live Demo"

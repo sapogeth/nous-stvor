@@ -422,6 +422,52 @@ const results = await Promise.all(
           </div>
         </Section>
 
+        {/* ── References ───────────────────────────────────────────────────── */}
+        <Section label="09 · References & Sources">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {[
+              {
+                label: 'Bybit hack (Feb 2025)',
+                desc: 'Lazarus Group compromised Safe{Wallet} UI to inject malicious JS, altering Bybit cold-to-warm wallet transfer. $1.5B ETH stolen. Reference implementation of the tampered-payload attack Stvor prevents.',
+                href: 'https://www.chainalysis.com/blog/bybit-hack-february-2025/',
+              },
+              {
+                label: 'Gartner: AI Agent Threat Landscape 2025–2026',
+                desc: '"Through 2029, over 50% of successful cybersecurity attacks against AI agents will exploit access control issues via direct or indirect prompt injection." — Gartner Strategic Planning Assumption.',
+                href: 'https://www.gartner.com/en/articles/what-is-agentic-ai',
+              },
+              {
+                label: 'Practical DevSecOps — AI Security Statistics 2026',
+                desc: 'Prompt injection found in 73% of production AI deployments. Estimated $2.3B+ in losses globally from AI-targeted attacks in 2025.',
+                href: 'https://www.practical-devsecops.com/ai-security-statistics-2026-research-report/',
+              },
+              {
+                label: 'IBM Cost of a Data Breach 2025',
+                desc: 'Third-party/supply chain compromise: $4.91M average breach cost. Supply chain attacks cost 17× more to remediate than direct breaches.',
+                href: 'https://www.ibm.com/reports/data-breach',
+              },
+              {
+                label: 'ATS-1 Open Standard — Agent Trust Standard v0.1.0',
+                desc: 'Stvor reference specification for portable cryptographic trust receipts across agent marketplaces.',
+                href: '/ats-1',
+              },
+            ].map((ref, i) => (
+              <div key={i} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 6, padding: '14px 16px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                  <span style={{ fontSize: 10, fontFamily: C.mono, color: C.text3, flexShrink: 0, marginTop: 2 }}>[{i + 1}]</span>
+                  <div>
+                    <a href={ref.href} target="_blank" rel="noopener noreferrer"
+                      style={{ fontSize: 13, fontWeight: 600, color: C.text1, textDecoration: 'none' }}>
+                      {ref.label} ↗
+                    </a>
+                    <p style={{ fontSize: 12, color: C.text3, lineHeight: 1.6, marginTop: 4 }}>{ref.desc}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Section>
+
       </main>
     </div>
   )

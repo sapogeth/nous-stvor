@@ -57,7 +57,9 @@ function TrustRing({ score, size = 52 }: { score: number; size?: number }) {
 }
 
 export function AgentLeaderboard({ agents }: { agents: Agent[] }) {
-  const sorted = [...agents].sort((a, b) => b.trust_score - a.trust_score)
+  // Hide external agents with no history — they're registered but haven't competed yet
+  const visible = agents.filter(a => a.source !== 'external' || a.total_contracts > 0)
+  const sorted = [...visible].sort((a, b) => b.trust_score - a.trust_score)
 
   return (
     <section>
