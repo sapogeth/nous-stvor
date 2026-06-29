@@ -1,54 +1,36 @@
 import { NextResponse } from 'next/server'
+import { redisGetReceipts } from '@/lib/redis'
+import { syncTrustScoresFromRedis } from '@/lib/db/queries'
+import { getDb } from '@/lib/db/client'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    const upstashUrl   = process.env.UPSTASH_REDIS_REST_URL
-    const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN
-    const kvUrl        = process.env.KV_REST_API_URL
-    const kvToken      = process.env.KV_REST_API_TOKEN
+    // Check what type hgetall returns
+    const { Redis } = await import('@upstash/redis')
+    const url   = process.env.UPSTASH_REDIS_REST_URL   ?? process.env.KV_REST_API_URL ?? ''
+    const token = process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN ?? ''
+    const r = new Redis({ url, token })
+    const raw = await r.hgetall('stvor:receipts') as Record<string, unknown> | null
+    const firstValue = raw ? Object.values(raw)[0] : null
+    const firstValueType = firstValue !== null ? typeof firstValue : 'null'
 
-    const effectiveUrl   = upstashUrl   ?? kvUrl
-    const effectiveToken = upstashToken ?? kvToken
+    // Now call the fixed redisGetReceipts
+    const receipts = await redisGetReceipts()
 
-    // Try to connect and query directly
-    let hlen = 0
-    let hgetallCount = 0
-    let connectError: string | null = null
-    let firstField: string | null = null
-
-    if (effectiveUrl && effectiveToken) {
-      try {
-        const { Redis } = await import('@upstash/redis')
-        const r = new Redis({ url: effectiveUrl, token: effectiveToken })
-
-        // Check the stvor:receipts hash length
-        hlen = (await r.hlen('stvor:receipts')) as number
-
-        // Attempt hgetall
-        const all = await r.hgetall('stvor:receipts') as Record<string, string> | null
-        if (all) {
-          hgetallCount = Object.keys(all).length
-          firstField = Object.keys(all)[0] ?? null
-        }
-      } catch (e) {
-        connectError = String(e)
-      }
-    }
+    // Sync and check DB
+    await syncTrustScoresFromRedis()
+    const db = getDb()
+    const nonVeteran = (db.prepare("SELECT COUNT(*) as c FROM trust_receipts WHERE agent_id != 'hermes-veteran'").get() as { c: number }).c
+    const total = (db.prepare("SELECT COUNT(*) as c FROM trust_receipts").get() as { c: number }).c
 
     return NextResponse.json({
-      envVars: {
-        UPSTASH_REDIS_REST_URL:   upstashUrl   ? `set (${upstashUrl.slice(0, 30)}...)` : 'MISSING',
-        UPSTASH_REDIS_REST_TOKEN: upstashToken ? 'set' : 'MISSING',
-        KV_REST_API_URL:          kvUrl        ? `set (${kvUrl.slice(0, 30)}...)` : 'MISSING',
-        KV_REST_API_TOKEN:        kvToken      ? 'set' : 'MISSING',
-      },
-      effectiveUrl: effectiveUrl ? `${effectiveUrl.slice(0, 40)}...` : 'NONE',
-      hlen,
-      hgetallCount,
-      firstField,
-      connectError,
+      hgetallFirstValueType: firstValueType,
+      redisReceiptCount: receipts.length,
+      firstReceiptAgentId: receipts[0]?.agent_id ?? null,
+      dbTotal: total,
+      dbNonVeteran: nonVeteran,
     })
   } catch (e) {
     return NextResponse.json({ error: String(e) })

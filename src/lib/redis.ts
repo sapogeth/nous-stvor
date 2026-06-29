@@ -31,10 +31,11 @@ export async function redisSaveExternalAgent(agent: RedisAgent): Promise<void> {
 export async function redisGetExternalAgents(): Promise<RedisAgent[]> {
   const r = getRedis()
   if (!r) return []
-  const all = await r.hgetall(EXTERNAL_AGENT_KEY) as Record<string, string> | null
+  const all = await r.hgetall(EXTERNAL_AGENT_KEY) as Record<string, unknown> | null
   if (!all) return []
   return Object.values(all).map(v => {
-    try { return JSON.parse(v) as RedisAgent } catch { return null }
+    if (typeof v === 'object' && v !== null) return v as RedisAgent
+    try { return JSON.parse(v as string) as RedisAgent } catch { return null }
   }).filter(Boolean) as RedisAgent[]
 }
 
@@ -94,12 +95,15 @@ export async function redisGetReceipts(): Promise<Array<{
   const r = getRedis()
   if (!r) return []
   try {
-    const all = await r.hgetall(RECEIPT_KEY) as Record<string, string> | null
+    const all = await r.hgetall(RECEIPT_KEY) as Record<string, unknown> | null
     if (!all) return []
     return Object.values(all)
-      .map(v => { try { return JSON.parse(v) } catch { return null } })
+      .map(v => {
+        if (typeof v === 'object' && v !== null) return v
+        try { return JSON.parse(v as string) } catch { return null }
+      })
       .filter(Boolean)
-      .sort((a, b) => new Date(b.generated_at).getTime() - new Date(a.generated_at).getTime())
+      .sort((a: any, b: any) => new Date(b.generated_at).getTime() - new Date(a.generated_at).getTime())
   } catch { return [] }
 }
 
@@ -152,8 +156,11 @@ export async function redisGetDisputeContracts(): Promise<Array<{
   const r = getRedis()
   if (!r) return []
   try {
-    const all = await r.hgetall(DISPUTE_KEY) as Record<string, string> | null
+    const all = await r.hgetall(DISPUTE_KEY) as Record<string, unknown> | null
     if (!all) return []
-    return Object.values(all).map(v => JSON.parse(v))
+    return Object.values(all).map(v => {
+      if (typeof v === 'object' && v !== null) return v as any
+      try { return JSON.parse(v as string) } catch { return null }
+    }).filter(Boolean)
   } catch { return [] }
 }
