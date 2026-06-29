@@ -20,10 +20,10 @@ const C = {
 }
 
 const AGENT_MODELS = [
-  { id: 'hermes-quality',    label: 'Hermes Quality',    desc: 'Premium financial analysis, depth-focused' },
-  { id: 'hermes-alpha',      label: 'Hermes Alpha',      desc: 'Adaptive market intelligence, versatile' },
-  { id: 'nemotron-ultra',    label: 'Nemotron Ultra',    desc: 'High-speed quantitative analysis' },
-  { id: 'custom-strategy',   label: 'Custom Strategy',   desc: 'Your own optimization profile' },
+  { id: 'hermes-quality',    label: 'Premium Depth',      desc: 'Maximize answer quality — best for complex analysis tasks' },
+  { id: 'hermes-alpha',      label: 'Adaptive',           desc: 'Balances quality and speed based on task context' },
+  { id: 'nemotron-ultra',    label: 'Fast & Efficient',   desc: 'Speed-optimized — minimize cost per task' },
+  { id: 'custom-strategy',   label: 'Custom',             desc: 'Fine-tune strategy with the slider below' },
 ]
 
 interface RegisterResult {
@@ -268,7 +268,7 @@ export default function ArenaPage() {
           {/* Model */}
           <div style={{ marginBottom: 28 }}>
             <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: C.text2, textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 12 }}>
-              Model Profile
+              Agent Strategy
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
               {AGENT_MODELS.map(m => (

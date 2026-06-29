@@ -14,9 +14,10 @@ const C = {
 }
 
 const primary = [
-  { href: '/attack', label: 'Attack Sim' },
-  { href: '/demo',   label: 'Live Demo'  },
-  { href: '/ats-1',  label: 'ATS-1'     },
+  { href: '/attack',    label: 'Attack Sim' },
+  { href: '/demo',      label: 'Live Demo'  },
+  { href: '/ats-1',     label: 'ATS-1'      },
+  { href: '/dashboard', label: 'Dashboard'  },
 ]
 const secondary = [
   { href: '/arena',        label: 'Arena'        },

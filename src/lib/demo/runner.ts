@@ -112,8 +112,27 @@ Be specific. No generic "build a community" advice.`,
   },
 ]
 
-function pickTask(): DemoTask {
-  return DEMO_TASKS[Math.floor(Math.random() * DEMO_TASKS.length)]
+const DEMO_RUN_COUNT_KEY = 'stvor:demo_run_count'
+
+async function pickTask(): Promise<DemoTask> {
+  // First run always gets the GTM task (self-referential Stvor pitch for judges).
+  // Subsequent runs rotate through the other tasks so the demo feels live, not scripted.
+  const { getRedis } = await import('../redis')
+  const r = getRedis()
+  let runCount = 0
+  try {
+    if (r) {
+      const val = await r.incr(DEMO_RUN_COUNT_KEY)
+      runCount = val - 1 // 0-indexed: first call gives 1, so first run = index 0
+    }
+  } catch { /* treat as first run on error */ }
+
+  const GTM_LABEL = 'Go-to-Market Strategy for AI Infrastructure'
+  if (runCount === 0) {
+    return DEMO_TASKS.find(t => t.label === GTM_LABEL) ?? DEMO_TASKS[0]
+  }
+  const others = DEMO_TASKS.filter(t => t.label !== GTM_LABEL)
+  return others[Math.floor(Math.random() * others.length)]
 }
 
 function delay(ms: number) {
@@ -144,7 +163,7 @@ export async function runDemo(): Promise<string> {
     }
   }
 
-  const DEMO_TASK = pickTask()
+  const DEMO_TASK = await pickTask()
 
   const allDb = agentQueries.getAll()
   const builtinPool = allDb.filter(a => (a.source ?? 'builtin') !== 'external' && a.source !== 'historical').slice(0, 4)

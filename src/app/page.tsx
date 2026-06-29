@@ -788,9 +788,6 @@ export default function Home() {
                       <div style={{ fontSize: 13, fontWeight: 600, color: D.t1, fontFamily: D.disp, letterSpacing: '-0.02em' }}>{p.name}</div>
                       <div style={{ fontSize: 10, color: D.t3, marginTop: 1 }}>{p.desc}</div>
                     </div>
-                    <span style={{ fontSize: 10, color: '#6366F1', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 3, padding: '2px 6px', marginLeft: 4, fontFamily: D.mono }}>
-                      exploring
-                    </span>
                   </div>
                 </a>
               ))}
