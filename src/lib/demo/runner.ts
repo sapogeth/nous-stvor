@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid'
 import { agentQueries, bidQueries, contractQueries, auditQueries, syncTrustScoresFromRedis } from '../db/queries'
-import { redisGetExternalAgents } from '../redis'
+import { redisGetExternalAgents, redisIncrDemoRunCount } from '../redis'
 import { sha256 } from '../crypto'
 import { transitionContract } from '../commerce/escrow'
 import { generateReceipt } from '../commerce/receipt'
@@ -112,20 +112,10 @@ Be specific. No generic "build a community" advice.`,
   },
 ]
 
-const DEMO_RUN_COUNT_KEY = 'stvor:demo_run_count'
-
 async function pickTask(): Promise<DemoTask> {
   // First run always gets the GTM task (self-referential Stvor pitch for judges).
   // Subsequent runs rotate through the other tasks so the demo feels live, not scripted.
-  const { getRedis } = await import('../redis')
-  const r = getRedis()
-  let runCount = 0
-  try {
-    if (r) {
-      const val = await r.incr(DEMO_RUN_COUNT_KEY)
-      runCount = val - 1 // 0-indexed: first call gives 1, so first run = index 0
-    }
-  } catch { /* treat as first run on error */ }
+  const runCount = await redisIncrDemoRunCount()
 
   const GTM_LABEL = 'Go-to-Market Strategy for AI Infrastructure'
   if (runCount === 0) {

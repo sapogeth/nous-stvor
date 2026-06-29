@@ -45,6 +45,15 @@ export async function redisSaveTrustScores(updates: Record<string, number>): Pro
   await r.hset(TRUST_KEY, payload)
 }
 
+export async function redisIncrDemoRunCount(): Promise<number> {
+  const r = getRedis()
+  if (!r) return 0
+  try {
+    const val = await r.incr('stvor:demo_run_count')
+    return (val as number) - 1 // 0-indexed: first call → 0
+  } catch { return 0 }
+}
+
 export async function redisGetAllTrustScores(): Promise<Record<string, number>> {
   const r = getRedis()
   if (!r) return {}
