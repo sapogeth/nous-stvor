@@ -608,9 +608,110 @@ export default function Home() {
           </div>
         </motion.div>
 
+        {/* ── Real incidents ────────────────────────────────────────────────── */}
+        <motion.div {...fo(.045)} style={{ marginBottom: 56 }}>
+          <SectionLabel n="02" label="Real attacks. Exact defense." href="/how-it-works" linkText="Technical docs" />
+
+          {/* Bybit */}
+          <div style={{ background: D.ink1, border: `1px solid ${D.b1}`, borderRadius: 12, overflow: 'hidden', marginBottom: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+
+              {/* Attack side */}
+              <div style={{ padding: '24px 28px', borderRight: `1px solid ${D.b1}` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                  <div style={{ fontSize: 9, color: D.red, background: 'rgba(255,69,85,0.08)', border: '1px solid rgba(255,69,85,0.2)', borderRadius: 3, padding: '2px 8px', fontFamily: D.mono, letterSpacing: '.08em' }}>ATTACK</div>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: D.t1, letterSpacing: '-0.02em' }}>Bybit — $1.5B — Feb 2025</span>
+                  <a href="https://www.nccgroup.com/research/in-depth-technical-analysis-of-the-bybit-hack/" target="_blank" rel="noopener noreferrer"
+                    style={{ fontSize: 9, color: D.t3, fontFamily: D.mono, textDecoration: 'none', marginLeft: 'auto', flexShrink: 0 }}>NCC Group ↗</a>
+                </div>
+                {[
+                  { n: '1', text: 'Safe{Wallet} developer workstation compromised via social engineering' },
+                  { n: '2', text: 'Malicious JS injected: UI shows correct destination, underlying tx silently swapped' },
+                  { n: '3', text: 'operation: 0→1 (delegatecall), to: redirected to attacker contract' },
+                  { n: '4', text: 'Signers approve what they see — sign a completely different transaction' },
+                  { n: '✗', text: '$1.5B in ETH transferred to attacker in one routine-looking operation', red: true },
+                ].map((r, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 12, padding: '6px 0', borderBottom: i < 4 ? `1px solid ${D.b1}` : 'none' }}>
+                    <span style={{ fontSize: 9, fontFamily: D.mono, color: (r as any).red ? D.red : D.t3, width: 14, flexShrink: 0, fontWeight: 700 }}>{r.n}</span>
+                    <span style={{ fontSize: 11, color: (r as any).red ? D.red : D.t3, lineHeight: 1.55 }}>{r.text}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Defense side */}
+              <div style={{ padding: '24px 28px', background: 'rgba(0,221,160,0.02)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                  <div style={{ fontSize: 9, color: D.mint, background: 'rgba(0,221,160,0.08)', border: '1px solid rgba(0,221,160,0.2)', borderRadius: 3, padding: '2px 8px', fontFamily: D.mono, letterSpacing: '.08em' }}>STVOR</div>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: D.t1, letterSpacing: '-0.02em' }}>Blocked at attestation</span>
+                </div>
+                {[
+                  { n: '1', text: <><code style={{ fontFamily: D.mono, fontSize: 10, color: D.mint }}>SHA-256(task_payload)</code> committed to contract on creation — immutable ground truth before any UI renders</> },
+                  { n: '2', text: 'Before execution: timingSafeEqual(received_hash, committed_hash)' },
+                  { n: '3', text: 'JS-swapped payload produces different SHA-256 → equality fails in constant time' },
+                  { n: '4', text: 'Execution blocked. Stripe PaymentIntent.cancel() fires. Escrow returned to buyer automatically.' },
+                  { n: '✓', text: 'Attacker gets nothing. Zero manual review. No human in the loop required.', green: true },
+                ].map((r, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 12, padding: '6px 0', borderBottom: i < 4 ? `1px solid rgba(0,221,160,0.08)` : 'none' }}>
+                    <span style={{ fontSize: 9, fontFamily: D.mono, color: (r as any).green ? D.mint : D.t3, width: 14, flexShrink: 0, fontWeight: 700 }}>{r.n}</span>
+                    <span style={{ fontSize: 11, color: (r as any).green ? D.mint : D.t2, lineHeight: 1.55 }}>{r.text as any}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* JaredFromSubway */}
+          <div style={{ background: D.ink1, border: `1px solid ${D.b1}`, borderRadius: 12, overflow: 'hidden' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+
+              {/* Attack side */}
+              <div style={{ padding: '24px 28px', borderRight: `1px solid ${D.b1}` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                  <div style={{ fontSize: 9, color: D.red, background: 'rgba(255,69,85,0.08)', border: '1px solid rgba(255,69,85,0.2)', borderRadius: 3, padding: '2px 8px', fontFamily: D.mono, letterSpacing: '.08em' }}>ATTACK</div>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: D.t1, letterSpacing: '-0.02em' }}>JaredFromSubway — $7.5M — 2024</span>
+                  <a href="https://cointelegraph.com/news/notorious-sandwich-attack-bot-jaredfromsubwayeth-exploited-for-75m" target="_blank" rel="noopener noreferrer"
+                    style={{ fontSize: 9, color: D.t3, fontFamily: D.mono, textDecoration: 'none', marginLeft: 'auto', flexShrink: 0 }}>CoinTelegraph ↗</a>
+                </div>
+                {[
+                  { n: '1', text: '66 fake token contracts deployed mimicking WETH/USDC/USDT with fake liquidity pools' },
+                  { n: '2', text: 'MEV bot chased apparent arbitrage — approved attacker helper contracts over weeks' },
+                  { n: '3', text: 'No single transaction looked suspicious — permissions accumulated gradually' },
+                  { n: '4', text: 'One tx called all 66 backdoors simultaneously, swept all real ETH/USDC/USDT' },
+                  { n: '✗', text: '$7.5M drained in a single block. Bot had no counterparty verification.', red: true },
+                ].map((r, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 12, padding: '6px 0', borderBottom: i < 4 ? `1px solid ${D.b1}` : 'none' }}>
+                    <span style={{ fontSize: 9, fontFamily: D.mono, color: (r as any).red ? D.red : D.t3, width: 14, flexShrink: 0, fontWeight: 700 }}>{r.n}</span>
+                    <span style={{ fontSize: 11, color: (r as any).red ? D.red : D.t3, lineHeight: 1.55 }}>{r.text}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Defense side */}
+              <div style={{ padding: '24px 28px', background: 'rgba(0,221,160,0.02)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                  <div style={{ fontSize: 9, color: D.mint, background: 'rgba(0,221,160,0.08)', border: '1px solid rgba(0,221,160,0.2)', borderRadius: 3, padding: '2px 8px', fontFamily: D.mono, letterSpacing: '.08em' }}>STVOR</div>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: D.t1, letterSpacing: '-0.02em' }}>Blocked at trust gate</span>
+                </div>
+                {[
+                  { n: '1', text: 'Every counterparty requires a Stvor trust score above minimum threshold before interaction is allowed' },
+                  { n: '2', text: <><code style={{ fontFamily: D.mono, fontSize: 10, color: D.mint }}>trust_score(fake_contract) = 0</code> → no history, no attestation, no entry</> },
+                  { n: '3', text: 'Work hash committed at bid time — sweeping real funds produces a different hash → escrow held' },
+                  { n: '4', text: 'Every approval attempt is immutably logged in the audit trail with agent identity' },
+                  { n: '✓', text: 'Bot never interacts with unverified counterparty. Zero accumulated permissions.', green: true },
+                ].map((r, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 12, padding: '6px 0', borderBottom: i < 4 ? `1px solid rgba(0,221,160,0.08)` : 'none' }}>
+                    <span style={{ fontSize: 9, fontFamily: D.mono, color: (r as any).green ? D.mint : D.t3, width: 14, flexShrink: 0, fontWeight: 700 }}>{r.n}</span>
+                    <span style={{ fontSize: 11, color: (r as any).green ? D.mint : D.t2, lineHeight: 1.55 }}>{r.text as any}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
         {/* ── Why not Stripe ────────────────────────────────────────────────── */}
         <motion.div {...fo(.05)} style={{ marginBottom: 56 }}>
-          <SectionLabel n="02" label="Why not Stripe?" />
+          <SectionLabel n="03" label="Why not Stripe?" />
           <div style={{
             background: D.ink1, border: `1px solid ${D.b1}`, borderRadius: 12, overflow: 'hidden',
           }}>
@@ -666,7 +767,7 @@ export default function Home() {
 
         {/* ── Business model ────────────────────────────────────────────────── */}
         <motion.div {...fo(.055)} style={{ marginBottom: 56 }}>
-          <SectionLabel n="03" label="Business model" />
+          <SectionLabel n="04" label="Business model" />
           <div style={{
             display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
             background: D.b1, borderRadius: 10, overflow: 'hidden', gap: 1,
@@ -688,7 +789,7 @@ export default function Home() {
 
         {/* ── How trust compounds ───────────────────────────────────────────── */}
         <motion.div {...fo(.06)} style={{ marginBottom: 56 }}>
-          <SectionLabel n="04" label="How trust compounds" href="/how-it-works" linkText="Full docs" />
+          <SectionLabel n="05" label="How trust compounds" href="/how-it-works" linkText="Full docs" />
           <div className="steps-grid">
             {[
               { n: '01', title: 'Contract created',   body: 'SHA-256(task) committed at creation. Tamper-evident from moment zero.', col: D.blue },
@@ -712,7 +813,7 @@ export default function Home() {
 
         {/* ── Use cases ────────────────────────────────────────────────────── */}
         <motion.div {...fo(.07)} style={{ marginBottom: 64 }}>
-          <SectionLabel n="05" label="Use cases" />
+          <SectionLabel n="06" label="Use cases" />
           <div className="use-cases-grid">
             {[
               {
@@ -755,7 +856,7 @@ export default function Home() {
 
         {/* ── Quick Integration ─────────────────────────────────────────────── */}
         <motion.div {...fo(.075)} style={{ marginBottom: 56 }}>
-          <SectionLabel n="06" label="Quick integration" href="/how-it-works" linkText="Full docs" />
+          <SectionLabel n="07" label="Quick integration" href="/how-it-works" linkText="Full docs" />
           <div style={{
             background: D.ink1, border: `1px solid ${D.b1}`,
             borderRadius: 12, overflow: 'hidden',
@@ -812,7 +913,7 @@ export default function Home() {
 
         {/* ── Stack ────────────────────────────────────────────────────────── */}
         <motion.div {...fo(.08)} style={{ marginBottom: 64 }}>
-          <SectionLabel n="07" label="Stack" />
+          <SectionLabel n="08" label="Stack" />
           <div style={{
             background: D.ink1, border: `1px solid ${D.b1}`,
             borderRadius: 12, padding: '28px 32px',
