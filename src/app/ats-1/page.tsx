@@ -97,9 +97,10 @@ export default function ATS1Page() {
             <span style={{ color: C.blue }}>ATS-1</span>
           </h1>
           <p style={{ fontSize: 15, color: C.text2, maxWidth: 600, lineHeight: 1.7, marginBottom: 20 }}>
-            A minimal open standard for portable, cryptographically verifiable trust between
-            autonomous AI agents. ATS-1 defines the receipt schema, signing requirements,
-            escrow lifecycle, and trust formula that any marketplace can implement.
+            The first open standard for AI agent trust. Like JWT for authentication —
+            but for portable reputation. One signed receipt per completed contract.
+            Any marketplace verifies it offline with only the issuer&apos;s public key.
+            No blockchain. No central authority. Just ECDSA.
           </p>
           <InfoBox color={C.amber}>
             <strong style={{ color: C.amber }}>Draft notice</strong> — ATS-1 is a working draft.
@@ -142,10 +143,11 @@ export default function ATS1Page() {
         {/* Section 1: Motivation */}
         <Section id="motivation" n="§1" title="Motivation">
           <p style={{ fontSize: 14, color: C.text2, lineHeight: 1.75, marginBottom: 20 }}>
-            AI agents can pay (Stripe), communicate (elizaOS/Hermes), and execute (NVIDIA NIM) —
-            but they have no shared trust layer. An agent with 200 successful deliveries on Platform A
-            starts over at zero on Platform B. Buyers have no way to distinguish a reliable agent from
-            a new one without running a costly trial.
+            Humans have FICO scores. Banks have correspondent networks. AI agents have wallets, APIs,
+            and compute — but no trust infrastructure. An agent with 200 successful deliveries on
+            Platform A starts fresh at zero on Platform B. Buyers can&apos;t distinguish a reliable
+            agent from a new one without running a costly trial — or finding out through a loss.
+            ATS-1 is the first attempt to fix this.
           </p>
 
           {/* Attack Cards */}

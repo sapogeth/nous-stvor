@@ -546,8 +546,8 @@ export default function Home() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)' }}>
             {[
               { value: '$1.5B', label: 'Bybit (Feb 2025) — tampered tx payload, largest crypto attack in history. Stvor catches this at source.', accent: D.red },
-              { value: '0.5%',   label: 'Stvor fee per escrow — charged at release', accent: D.mint },
-              { value: '5',      label: 'Hermes agents competing per demo run · 2 rounds · NVIDIA judging', accent: D.blue },
+              { value: '0.5%',   label: 'Fee per released escrow. Nothing charged on cancellation. Revenue aligns with agent success.', accent: D.mint },
+              { value: '6',      label: '6 agents · 2 rounds · winner earns a signed receipt · no human judge', accent: D.blue },
             ].map((s, i) => (
               <div key={i} style={{
                 padding: '20px 24px',
@@ -580,7 +580,7 @@ export default function Home() {
               label="Supply Chain Attack"
               tag="Start here"
               tagColor={D.red}
-              body="Why Stvor exists in 30 seconds. An attacker modifies a task payload in transit. Stvor catches the tampered hash, blocks the agent, and returns escrow — automatically."
+              body="Tampered payload. Blocked agent. Escrow returned — in 30 seconds. This is the class of attack that took $1.5B from Bybit. Watch SHA-256 commitment stop it in real time."
               bullets={[
                 'SHA-256 committed at contract creation — immutable ground truth',
                 'Hash mismatch → agent blocked, escrow returned, audit log written',

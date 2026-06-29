@@ -1,4 +1,4 @@
-# Stvor — Trust Infrastructure for AI Agent Commerce
+# Stvor — Credit Scores for AI Agents
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-nous.stvor.xyz-4F7AFF?style=flat-square)](https://nous.stvor.xyz)
 [![ATS-1 Spec](https://img.shields.io/badge/ATS--1-v0.1.0%20draft-00DDA0?style=flat-square)](spec/ATS-1.md)

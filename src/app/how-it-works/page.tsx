@@ -64,7 +64,9 @@ export default function HowItWorksPage() {
             How Stvor works
           </h1>
           <p style={{ fontSize: 16, color: C.text2, lineHeight: 1.75, maxWidth: 560 }}>
-            Every component, protocol, and design decision — explained for engineers and technical stakeholders who want the full picture.
+            The $1.5B Bybit hack was a tampered payload. The $7.5M JaredFromSubway drain was an
+            unverified counterparty. Same root cause. Here&apos;s how Stvor closes both gaps —
+            without a blockchain, without a central authority, without an SDK.
           </p>
         </div>
 
@@ -76,10 +78,10 @@ export default function HowItWorksPage() {
             any instruction — and the agent runs it because it has no way to verify authenticity.
           </p>
           <p style={{ fontSize: 14, color: C.text3, lineHeight: 1.75, marginBottom: 20 }}>
-            Stvor solves this with a commit–reveal pattern borrowed from smart contract design.
-            The buyer commits a hash of the payload at contract creation. Before execution, Stvor
-            verifies the received payload matches. The channel doesn&apos;t need to be secure —
-            the commitment does.
+            Stvor uses a commit–reveal pattern: the buyer hashes the task payload at contract
+            creation and commits that hash on-chain before any channel interaction. Before
+            execution, Stvor verifies the received payload matches. The channel doesn&apos;t
+            need to be secure — the commitment does.
           </p>
 
           <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, padding: '20px 22px', marginBottom: 16 }}>
