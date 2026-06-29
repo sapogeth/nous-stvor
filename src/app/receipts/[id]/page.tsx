@@ -58,7 +58,8 @@ export default async function ReceiptPage({
   let valid = false
   try { valid = ecdsaVerify(payload, receipt.signature) } catch {}
   const isEcdsa = receipt.signature?.startsWith('ecdsa:')
-  const pkInfo = getPublicKeyInfo()
+  let pkInfo = null
+  try { pkInfo = getPublicKeyInfo() } catch {}
 
   const deltaPositive = receipt.trust_delta >= 0
   const deltaColor    = deltaPositive ? C.green : C.red
