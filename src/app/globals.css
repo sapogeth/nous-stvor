@@ -188,6 +188,10 @@ body::before {
 .agent-card { transition: border-color .15s, transform .15s; }
 .agent-card:hover { transform: translateY(-1px); }
 
+/* ── Receipt row hover ───────────────────────────────────── */
+.receipt-row { transition: background .1s; }
+.receipt-row:hover { background: #13131C !important; }
+
 /* ── Feed item ──────────────────────────────────────────── */
 .feed-item { animation: slideIn .12s ease-out; }
 

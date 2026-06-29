@@ -86,20 +86,34 @@ export async function runWorkerAgent(
 
   const t0 = Date.now()
 
-  const completion = await nvidia.chat.completions.create({
+  const userMessage = `TASK:\n${taskDescription}\n\nDeliver your complete work output now. No preamble — just the deliverable.`
+
+  let content = ''
+  let completion = await nvidia.chat.completions.create({
     model: WORKER_MODEL,
     max_tokens: 1200,
     messages: [
       { role: 'system', content: systemPrompt },
-      {
-        role: 'user',
-        content: `TASK:\n${taskDescription}\n\nDeliver your complete work output now. No preamble — just the deliverable.`,
-      },
+      { role: 'user', content: userMessage },
     ],
   })
+  content = completion.choices[0]?.message?.content?.trim() ?? ''
+
+  // Retry once on empty — can happen under load or content filter edge cases
+  if (!content) {
+    await new Promise(r => setTimeout(r, 800))
+    completion = await nvidia.chat.completions.create({
+      model: WORKER_MODEL,
+      max_tokens: 1200,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage },
+      ],
+    })
+    content = completion.choices[0]?.message?.content?.trim() ?? ''
+  }
 
   const inferenceMs = Date.now() - t0
-  const content = completion.choices[0]?.message?.content ?? ''
 
   return { content, agentId: agent.id, agentName: agent.name, model: WORKER_MODEL, inferenceMs, deliveryMethod: 'nim' }
 }

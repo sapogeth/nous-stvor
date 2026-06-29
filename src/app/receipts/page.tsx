@@ -87,8 +87,7 @@ export default async function ReceiptsIndexPage() {
                 borderBottom: i < receipts.length - 1 ? `1px solid ${C.border}` : 'none',
                 transition: 'background .1s',
               }}
-                onMouseEnter={e => (e.currentTarget.style.background = '#13131C')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                className="receipt-row"
               >
                 <span style={{ fontSize: 11, color: C.blue, fontFamily: C.mono, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   R-{r.id.slice(5, 13).toUpperCase()}
