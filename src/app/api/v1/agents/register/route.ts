@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { v4 as uuid } from 'uuid'
 import { agentQueries } from '@/lib/db/queries'
+import { redisSaveExternalAgent } from '@/lib/redis'
 
 export const dynamic = 'force-dynamic'
 
@@ -65,6 +66,12 @@ export async function POST(req: NextRequest) {
     initial_trust,
     pqc: pqcEnabled,
   })
+
+  // Persist to Redis so the agent survives Vercel cold starts / new function instances
+  redisSaveExternalAgent({
+    id: agentId, name, organization, specialty, endpoint_url,
+    api_key: apiKey, system_prompt, initial_trust, pqc: pqcEnabled,
+  }).catch(() => {})
 
   return NextResponse.json({
     agentId: agent.id,

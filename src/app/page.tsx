@@ -754,8 +754,75 @@ export default function Home() {
           </div>
         </motion.div>
 
+        {/* ── Ecosystem ────────────────────────────────────────────────────── */}
+        <motion.div {...fo(.08)} style={{ marginBottom: 64 }}>
+          <SectionLabel n="06" label="Ecosystem" />
+          <div style={{
+            background: D.ink1, border: `1px solid ${D.b1}`,
+            borderRadius: 12, padding: '28px 32px',
+          }}>
+            <div style={{ fontSize: 11, color: D.t3, letterSpacing: '.08em', textTransform: 'uppercase', fontFamily: D.mono, marginBottom: 24 }}>
+              Exploring integration with
+            </div>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', marginBottom: 28 }}>
+              {[
+                { name: 'Orbserv', desc: 'Agent wallets & payments', url: 'https://orbserv.xyz', accent: '#6366F1' },
+              ].map(p => (
+                <a key={p.name} href={p.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    background: D.ink2, border: `1px solid rgba(99,102,241,0.25)`,
+                    borderRadius: 8, padding: '10px 16px',
+                    transition: 'border-color .15s',
+                  }}
+                    onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(99,102,241,0.5)')}
+                    onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(99,102,241,0.25)')}
+                  >
+                    <div style={{
+                      width: 28, height: 28, borderRadius: 6,
+                      background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 12, color: '#6366F1', fontWeight: 800, fontFamily: D.mono,
+                    }}>O</div>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: D.t1, fontFamily: D.disp, letterSpacing: '-0.02em' }}>{p.name}</div>
+                      <div style={{ fontSize: 10, color: D.t3, marginTop: 1 }}>{p.desc}</div>
+                    </div>
+                    <span style={{ fontSize: 10, color: '#6366F1', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 3, padding: '2px 6px', marginLeft: 4, fontFamily: D.mono }}>
+                      exploring
+                    </span>
+                  </div>
+                </a>
+              ))}
+            </div>
+            <div style={{ fontSize: 11, color: D.t3, letterSpacing: '.08em', textTransform: 'uppercase', fontFamily: D.mono, marginBottom: 16 }}>
+              Built on
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {[
+                { name: 'Stripe', desc: 'Escrow & payments', col: '#635BFF' },
+                { name: 'NVIDIA NIM', desc: 'Agent inference', col: '#76B900' },
+                { name: 'elizaOS / Hermes', desc: 'Agent framework', col: D.blue },
+                { name: 'ATS-1', desc: 'Open trust standard', col: D.mint },
+              ].map(t => (
+                <div key={t.name} style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  background: D.ink2, border: `1px solid ${D.b1}`,
+                  borderRadius: 6, padding: '6px 12px',
+                }}>
+                  <div style={{ width: 5, height: 5, borderRadius: '50%', background: t.col, flexShrink: 0 }} />
+                  <div>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: D.t1 }}>{t.name}</span>
+                    <span style={{ fontSize: 11, color: D.t3, marginLeft: 6 }}>{t.desc}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+
         {/* ── Footer strip ─────────────────────────────────────────────────── */}
-        <motion.div {...fo(.08)}>
+        <motion.div {...fo(.09)}>
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             padding: '20px 0', borderTop: `1px solid ${D.b1}`,

@@ -73,6 +73,7 @@ export default function ArenaPage() {
       }
       const data = await res.json()
       setResult({ agentId: data.agentId, agentName: data.agentName, trustScore: data.trustScore, trustGate: data.trustGate, verifyUrl: data.verifyUrl, pqcEnabled: data.pqcEnabled ?? false })
+      try { sessionStorage.setItem('stvor_my_agent', JSON.stringify({ agentId: data.agentId, agentName: data.agentName })) } catch {}
     } catch {
       setError('Network error. Please try again.')
     } finally {

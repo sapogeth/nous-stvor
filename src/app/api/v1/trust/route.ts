@@ -1,9 +1,27 @@
 import { NextResponse } from 'next/server'
-import { agentQueries } from '@/lib/db/queries'
+import { agentQueries, syncTrustScoresFromRedis } from '@/lib/db/queries'
+import { redisGetExternalAgents } from '@/lib/redis'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
+  // Sync trust scores and external agents from Redis on every leaderboard load
+  // so data survives Vercel cold starts and page refreshes
+  await syncTrustScoresFromRedis()
+  const redisAgents = await redisGetExternalAgents()
+  for (const ra of redisAgents) {
+    if (!agentQueries.getById(ra.id)) {
+      try {
+        agentQueries.register({
+          id: ra.id, name: ra.name, organization: ra.organization,
+          specialty: ra.specialty, endpoint_url: ra.endpoint_url,
+          api_key: ra.api_key, system_prompt: ra.system_prompt,
+          initial_trust: ra.initial_trust, pqc: ra.pqc,
+        })
+      } catch { /* already exists */ }
+    }
+  }
+
   const agents = agentQueries.getAll()
 
   return NextResponse.json({

@@ -1,5 +1,6 @@
 import { v4 as uuid } from 'uuid'
 import { agentQueries, bidQueries, contractQueries, auditQueries, syncTrustScoresFromRedis } from '../db/queries'
+import { redisGetExternalAgents } from '../redis'
 import { sha256 } from '../crypto'
 import { transitionContract } from '../commerce/escrow'
 import { generateReceipt } from '../commerce/receipt'
@@ -127,6 +128,21 @@ export async function runDemo(): Promise<string> {
   // Restore persisted trust scores from Redis before each run
   // (Vercel ephemeral SQLite resets on cold start; Redis is the durable store)
   await syncTrustScoresFromRedis()
+
+  // Restore externally registered agents from Redis (also wiped on cold start)
+  const redisAgents = await redisGetExternalAgents()
+  for (const ra of redisAgents) {
+    if (!agentQueries.getById(ra.id)) {
+      try {
+        agentQueries.register({
+          id: ra.id, name: ra.name, organization: ra.organization,
+          specialty: ra.specialty, endpoint_url: ra.endpoint_url,
+          api_key: ra.api_key, system_prompt: ra.system_prompt,
+          initial_trust: ra.initial_trust, pqc: ra.pqc,
+        })
+      } catch { /* already exists race */ }
+    }
+  }
 
   const DEMO_TASK = pickTask()
 
