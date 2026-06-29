@@ -761,8 +761,8 @@ export default function Home() {
             background: D.ink1, border: `1px solid ${D.b1}`,
             borderRadius: 12, padding: '28px 32px',
           }}>
-            <div style={{ fontSize: 11, color: D.t3, letterSpacing: '.08em', textTransform: 'uppercase', fontFamily: D.mono, marginBottom: 24 }}>
-              Exploring integration with
+            <div style={{ fontSize: 11, color: D.t3, letterSpacing: '.08em', textTransform: 'uppercase', fontFamily: D.mono, marginBottom: 16 }}>
+              Partners
             </div>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', marginBottom: 28 }}>
               {[
@@ -781,9 +781,7 @@ export default function Home() {
                     <div style={{
                       width: 28, height: 28, borderRadius: 6,
                       background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 12, color: '#6366F1', fontWeight: 800, fontFamily: D.mono,
-                    }}>O</div>
+                    }} />
                     <div>
                       <div style={{ fontSize: 13, fontWeight: 600, color: D.t1, fontFamily: D.disp, letterSpacing: '-0.02em' }}>{p.name}</div>
                       <div style={{ fontSize: 10, color: D.t3, marginTop: 1 }}>{p.desc}</div>
