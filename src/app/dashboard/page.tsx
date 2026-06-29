@@ -438,7 +438,7 @@ function VolumeCard({ points, totalCents }: { points: DashData['volumePoints']; 
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
           <span style={{ fontSize: 30, fontWeight: 800, color: C.text1, fontFamily: C.mono, letterSpacing: '-0.04em' }}>
-            {fmtBig(totalCents || 5350000)}
+            {fmtBig(totalCents)}
           </span>
           <span style={{
             fontSize: 11, fontWeight: 600, color: C.mint,

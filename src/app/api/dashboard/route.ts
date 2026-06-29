@@ -96,7 +96,9 @@ export async function GET() {
     }
   }
 
-  const totalVolumeCents = contracts.filter(c => c.status === 'COMPLETE').reduce((s, c) => s + c.budget_cents, 0)
+  const contractVolumeCents = contracts.filter(c => c.status === 'COMPLETE').reduce((s, c) => s + c.budget_cents, 0)
+  const agentRevenueCents = agents.reduce((s, a) => s + a.total_revenue_cents, 0)
+  const totalVolumeCents = contractVolumeCents || agentRevenueCents
 
   return NextResponse.json({
     topAgents: topAgents.map(a => ({ ...a, revenuePct: Math.round((a.totalRevenueCents / maxRevenue) * 100) })),
