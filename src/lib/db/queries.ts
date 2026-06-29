@@ -212,6 +212,38 @@ export async function syncTrustScoresFromRedis(): Promise<void> {
       }
     })()
   } catch {}
+
+  // 4. Restore dispute contracts that may have been lost on cold start
+  try {
+    const { redisGetDisputeContracts } = await import('../redis')
+    const disputes = await redisGetDisputeContracts()
+    const insertDispute = db.prepare(`
+      INSERT OR IGNORE INTO contracts
+        (id, task_description, task_hash, evaluation_criteria, budget_cents, status,
+         buyer_agent_id, winner_agent_id, stripe_payment_intent_id, created_at)
+      VALUES
+        (@id, @task_description, @task_hash, @evaluation_criteria, @budget_cents, @status,
+         @buyer_agent_id, @winner_agent_id, @stripe_payment_intent_id, @created_at)
+    `)
+    db.transaction(() => {
+      for (const d of disputes) {
+        try {
+          insertDispute.run({
+            id: d.id,
+            task_description: d.task_description,
+            task_hash: '',
+            evaluation_criteria: '[]',
+            budget_cents: d.budget_cents,
+            status: d.status,
+            buyer_agent_id: 'elizaOS-agent-001',
+            winner_agent_id: d.winner_agent_id,
+            stripe_payment_intent_id: d.stripe_payment_intent_id,
+            created_at: d.created_at,
+          })
+        } catch {}
+      }
+    })()
+  } catch {}
 }
 
 // Contracts

@@ -32,7 +32,8 @@ interface DisputeContract {
 }
 
 function timeAgo(iso: string) {
-  const diff = Date.now() - new Date(iso).getTime()
+  const utc = iso.includes('T') ? iso : iso.replace(' ', 'T') + 'Z'
+  const diff = Date.now() - new Date(utc).getTime()
   const m = Math.floor(diff / 60000)
   if (m < 1) return 'just now'
   if (m < 60) return `${m}m ago`

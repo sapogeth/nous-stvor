@@ -192,7 +192,7 @@ export default async function ReceiptPage({
               { label: 'Contract ID',    value: receipt.contract_id,  mono: true },
               { label: 'Agent ID',       value: receipt.agent_id,     mono: true },
               { label: 'Escrow Status',  value: receipt.escrow_status, mono: false },
-              { label: 'Generated At',   value: new Date(receipt.generated_at).toLocaleString(), mono: false },
+              { label: 'Generated At',   value: new Date((receipt.generated_at.includes('T') ? receipt.generated_at : receipt.generated_at.replace(' ', 'T') + 'Z')).toLocaleString(), mono: false },
             ].map((r, i, arr) => (
               <div key={i} style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',

@@ -1,4 +1,5 @@
 import { getDb } from '@/lib/db/client'
+import { syncTrustScoresFromRedis } from '@/lib/db/queries'
 import { Nav } from '@/components/Nav'
 import Link from 'next/link'
 
@@ -25,7 +26,8 @@ const C = {
 }
 
 function timeAgo(iso: string) {
-  const diff = Date.now() - new Date(iso).getTime()
+  const utc = iso.includes('T') ? iso : iso.replace(' ', 'T') + 'Z'
+  const diff = Date.now() - new Date(utc).getTime()
   const m = Math.floor(diff / 60000)
   if (m < 1) return 'just now'
   if (m < 60) return `${m}m ago`
@@ -34,6 +36,7 @@ function timeAgo(iso: string) {
 }
 
 export default async function ReceiptsIndexPage() {
+  await syncTrustScoresFromRedis()
   let receipts: Receipt[] = []
   try {
     receipts = getDb()

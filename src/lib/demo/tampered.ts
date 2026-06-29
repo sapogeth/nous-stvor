@@ -3,6 +3,7 @@ import { contractQueries, auditQueries } from '../db/queries'
 import { sha256 } from '../crypto'
 import { createEscrowPaymentIntent } from '../stripe/payments'
 import { emit } from '../events'
+import { redisSaveDisputeContract } from '../redis'
 
 const ORIGINAL_TASK = `Produce a risk assessment for $NTRN (Neutron Protocol) to inform a $50,000 allocation. Include smart contract audit summary, liquidity analysis, 5 risk factors with severity ratings, and a BUY/HOLD/SELL recommendation with confidence %.`
 
@@ -74,7 +75,19 @@ export async function runTamperedDemo(): Promise<void> {
   await delay(1200)
 
   // Step 5: Escrow held — funds NOT released
-  contractQueries.updateStatus(contractId, 'DISPUTED', {})
+  contractQueries.updateStatus(contractId, 'HELD', {})
+  const disputedContract = contractQueries.getById(contractId)
+  if (disputedContract) {
+    redisSaveDisputeContract({
+      id: disputedContract.id,
+      task_description: disputedContract.task_description,
+      budget_cents: disputedContract.budget_cents,
+      status: disputedContract.status,
+      created_at: disputedContract.created_at,
+      winner_agent_id: disputedContract.winner_agent_id ?? null,
+      stripe_payment_intent_id: disputedContract.stripe_payment_intent_id ?? null,
+    }).catch(() => {})
+  }
   emit({ type: 'ESCROW_HELD', data: {
     contractId,
     amountCents: budgetCents,

@@ -128,3 +128,31 @@ export async function redisGetVolume(): Promise<Record<string, number>> {
     return result
   } catch { return {} }
 }
+
+// ── Dispute contracts persistence ───────────────────────────────────────────
+const DISPUTE_KEY = 'stvor:disputes'
+
+export async function redisSaveDisputeContract(contract: {
+  id: string; task_description: string; budget_cents: number; status: string
+  created_at: string; winner_agent_id: string | null; stripe_payment_intent_id: string | null
+}): Promise<void> {
+  const r = getRedis()
+  if (!r) return
+  try {
+    await r.hset(DISPUTE_KEY, { [contract.id]: JSON.stringify(contract) })
+    await r.expire(DISPUTE_KEY, 86400 * 14) // 14-day TTL
+  } catch {}
+}
+
+export async function redisGetDisputeContracts(): Promise<Array<{
+  id: string; task_description: string; budget_cents: number; status: string
+  created_at: string; winner_agent_id: string | null; stripe_payment_intent_id: string | null
+}>> {
+  const r = getRedis()
+  if (!r) return []
+  try {
+    const all = await r.hgetall(DISPUTE_KEY) as Record<string, string> | null
+    if (!all) return []
+    return Object.values(all).map(v => JSON.parse(v))
+  } catch { return [] }
+}
