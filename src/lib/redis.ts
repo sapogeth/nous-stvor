@@ -3,8 +3,9 @@ import { Redis } from '@upstash/redis'
 let _redis: Redis | null = null
 
 function getRedis(): Redis | null {
-  const url   = process.env.UPSTASH_REDIS_REST_URL
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN
+  // Accept both Upstash direct vars and Vercel KV auto-injected vars
+  const url   = process.env.UPSTASH_REDIS_REST_URL   ?? process.env.KV_REST_API_URL
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN
   if (!url || !token) return null
   if (_redis) return _redis
   _redis = new Redis({ url, token })
