@@ -2,7 +2,7 @@
 
 **Status:** Draft  
 **Version:** 0.1.0  
-**Date:** 2026-06-26  
+**Date:** 2026-06-29  
 **Authors:** Stvor  
 **Reference implementation:** https://nous.stvor.xyz  
 
@@ -18,7 +18,21 @@ v0.1.0 is Stvor's reference draft — seeking co-implementers. If you're buildin
 
 ## Motivation
 
-AI agents can pay (Stripe), communicate (elizaOS/Hermes), and execute (NVIDIA NIM) — but they have no shared trust layer. An agent with 200 successful deliveries on Platform A starts over at zero on Platform B. Buyers have no way to distinguish a reliable agent from a new one without running a costly trial.
+### The attacks that already happened
+
+**February 2025 — Bybit, $1.5 billion stolen.**  
+Attackers compromised a Safe{Wallet} developer's machine and injected malicious JavaScript into the signing UI. The interface showed a legitimate transfer to a cold wallet. The underlying payload redirected funds to an attacker-controlled contract via `delegatecall`. Three signers approved what they saw. No one verified the payload. Largest cryptocurrency theft in history.
+
+ATS-1's SHA-256 commitment scheme directly addresses this: the task payload is hashed and committed to the contract _before_ any UI renders. Any modification — however subtle — produces a different hash. `timingSafeEqual(committed, received)` fails in constant time. No payload can be silently swapped.
+
+**2024 — JaredFromSubway MEV bot, $7.5 million drained.**  
+Attackers deployed 66 fake token contracts over several weeks, each accumulating token approvals from the bot's autonomous execution logic. A single sweep transaction drained all accumulated balances. The bot had no way to assess counterparty trustworthiness before granting approvals.
+
+ATS-1's trust gating addresses this directly: agents with no verified history start at `trust_score = 65.0` — above the minimum eligibility threshold, but below the PREFERRED tier. Any agent with `trust_score = 0` (no history, or history on no ATS-1 marketplace) is `BLOCKED`. New counterparties cannot accumulate authorization without building a verifiable track record first.
+
+### The structural problem
+
+AI agents can pay (Stripe), communicate (elizaOS/Hermes), and execute (NVIDIA NIM) — but they have no shared trust layer. An agent with 200 successful deliveries on Platform A starts over at zero on Platform B. Buyers have no way to distinguish a reliable agent from a new one without running a costly trial — or worse, finding out through a loss.
 
 ATS-1 defines a portable trust receipt that travels with the agent, not the marketplace.
 
@@ -283,8 +297,17 @@ Areas actively seeking input:
 
 ---
 
+## References
+
+1. NCC Group — In-depth technical analysis of the Bybit hack (Feb 2025): https://www.nccgroup.com/research/in-depth-technical-analysis-of-the-bybit-hack/
+2. CoinTelegraph — JaredFromSubway MEV bot exploited for $7.5M: https://cointelegraph.com/news/notorious-sandwich-attack-bot-jaredfromsubwayeth-exploited-for-75m
+3. CSO Online — Bybit $1.5B hack linked to North Korea's Lazarus Group: https://www.csoonline.com/article/3831315/bybits-1-5b-hack-linked-to-north-koreas-lazarus-group.html
+4. Practical DevSecOps — AI Security Statistics 2026 Research Report: https://www.practical-devsecops.com/ai-security-statistics-2026-research-report/
+
+---
+
 ## Changelog
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 0.1.0 | 2026-06-26 | Initial draft |
+| 0.1.0 | 2026-06-29 | Initial draft — motivation expanded with Bybit/JaredFromSubway incident analysis |

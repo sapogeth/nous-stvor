@@ -83,7 +83,7 @@ export default function ATS1Page() {
               { label: 'ATS-1', color: C.blue },
               { label: 'DRAFT', color: C.amber },
               { label: 'v0.1.0', color: C.text3 },
-              { label: '2026-06-26', color: C.text3 },
+              { label: '2026-06-29', color: C.text3 },
             ].map(b => (
               <span key={b.label} style={{
                 fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 4,
@@ -141,13 +141,57 @@ export default function ATS1Page() {
 
         {/* Section 1: Motivation */}
         <Section id="motivation" n="§1" title="Motivation">
-          <p style={{ fontSize: 14, color: C.text2, lineHeight: 1.75, marginBottom: 16 }}>
+          <p style={{ fontSize: 14, color: C.text2, lineHeight: 1.75, marginBottom: 20 }}>
             AI agents can pay (Stripe), communicate (elizaOS/Hermes), and execute (NVIDIA NIM) —
             but they have no shared trust layer. An agent with 200 successful deliveries on Platform A
             starts over at zero on Platform B. Buyers have no way to distinguish a reliable agent from
             a new one without running a costly trial.
           </p>
-          <p style={{ fontSize: 14, color: C.text2, lineHeight: 1.75, marginBottom: 16 }}>
+
+          {/* Attack Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
+            {[
+              {
+                label: 'Bybit — Feb 2025',
+                loss: '$1.5B',
+                attack: 'JS injection swapped tx destination silently. Signers approved what the UI showed. Payload was already tampered.',
+                defense: 'SHA-256(task) committed before any UI renders. timingSafeEqual() fails on mismatch. Execution blocked.',
+                defenseLabel: 'Attestation',
+                color: '#EF4444',
+                defColor: C.green,
+              },
+              {
+                label: 'JaredFromSubway — 2024',
+                loss: '$7.5M',
+                attack: '66 fake token contracts accumulated approvals over weeks. Single sweep tx drained everything.',
+                defense: 'Trust gate: score = 0 → BLOCKED. New unverified counterparties cannot accumulate authorization.',
+                defenseLabel: 'Trust gating',
+                color: '#F59E0B',
+                defColor: C.blue,
+              },
+            ].map(card => (
+              <div key={card.label} style={{
+                background: C.surface2, border: `1px solid ${C.border}`,
+                borderRadius: 8, padding: '16px 18px',
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: C.text3, letterSpacing: '.04em' }}>{card.label}</span>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: card.color, fontFamily: C.mono }}>{card.loss}</span>
+                </div>
+                <p style={{ fontSize: 11, color: C.text3, lineHeight: 1.6, marginBottom: 10 }}>{card.attack}</p>
+                <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 10 }}>
+                  <span style={{
+                    fontSize: 9, fontWeight: 700, color: card.defColor,
+                    background: `${card.defColor}12`, border: `1px solid ${card.defColor}25`,
+                    borderRadius: 3, padding: '2px 6px', letterSpacing: '.06em', marginBottom: 6, display: 'inline-block',
+                  }}>ATS-1 · {card.defenseLabel}</span>
+                  <p style={{ fontSize: 11, color: C.text2, lineHeight: 1.6, margin: 0 }}>{card.defense}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p style={{ fontSize: 13, color: C.text2, lineHeight: 1.75, marginBottom: 16 }}>
             ATS-1 defines the minimum viable trust substrate: a cryptographically signed receipt
             for every completed task, a deterministic trust formula, and a verification API any
             marketplace can call. No blockchain required. No central authority. Just ECDSA.
@@ -459,6 +503,26 @@ console.log('valid:', c.verify('sha256', Buffer.from(JSON.stringify(payload)), p
               </div>
             ))}
           </div>
+        </div>
+
+        {/* References */}
+        <div style={{ marginBottom: 40 }}>
+          <div style={{ fontSize: 10, color: C.text3, fontWeight: 600, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 12, paddingBottom: 10, borderBottom: `1px solid ${C.border}` }}>
+            References
+          </div>
+          {[
+            { n: 1, text: 'NCC Group — In-depth technical analysis of the Bybit hack (Feb 2025)', href: 'https://www.nccgroup.com/research/in-depth-technical-analysis-of-the-bybit-hack/' },
+            { n: 2, text: 'CoinTelegraph — JaredFromSubway MEV bot exploited for $7.5M (2024)', href: 'https://cointelegraph.com/news/notorious-sandwich-attack-bot-jaredfromsubwayeth-exploited-for-75m' },
+            { n: 3, text: 'CSO Online — Bybit $1.5B hack linked to Lazarus Group', href: 'https://www.csoonline.com/article/3831315/bybits-1-5b-hack-linked-to-north-koreas-lazarus-group.html' },
+            { n: 4, text: 'Practical DevSecOps — AI Security Statistics 2026 Research Report', href: 'https://www.practical-devsecops.com/ai-security-statistics-2026-research-report/' },
+          ].map(ref => (
+            <div key={ref.n} style={{ display: 'flex', gap: 12, marginBottom: 8, alignItems: 'flex-start' }}>
+              <span style={{ fontSize: 10, color: C.text3, fontFamily: C.mono, minWidth: 16, marginTop: 2 }}>[{ref.n}]</span>
+              <a href={ref.href} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: C.blue, textDecoration: 'none', lineHeight: 1.55 }}>
+                {ref.text} ↗
+              </a>
+            </div>
+          ))}
         </div>
 
         {/* Footer */}
