@@ -86,11 +86,38 @@ export function DemoFlow({ currentStep, events }: Props) {
 
       {fundedEvent && (
         <StepCard label="Escrow Funded — Stripe" active={currentStep === 2} done={currentStep > 2}>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
-            <InfoBox label="Amount Locked" value={`$${(fundedEvent.data.amountCents / 100).toFixed(2)}`} color={T.green} large />
-            <InfoBox label="Payment Intent" value={fundedEvent.data.paymentIntentId} mono />
+          {/* Stripe PaymentIntent lifecycle */}
+          <div style={{
+            background: 'rgba(99,91,255,.06)', border: '1px solid rgba(99,91,255,.2)',
+            borderRadius: 8, padding: '12px 16px', marginBottom: 10,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 9, fontWeight: 700, color: '#635BFF', letterSpacing: '.1em', textTransform: 'uppercase' }}>Stripe PaymentIntent</span>
+                <span style={{ fontSize: 11, fontFamily: T.mono, color: T.text2 }}>{fundedEvent.data.paymentIntentId}</span>
+              </div>
+              <span style={{
+                fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 4,
+                background: 'rgba(251,191,36,.1)', border: '1px solid rgba(251,191,36,.3)', color: '#FBBF24',
+                fontFamily: T.mono, letterSpacing: '.02em',
+              }}>requires_capture</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+              <div>
+                <div style={{ fontSize: 9, color: T.text3, textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 3 }}>Amount Held</div>
+                <div style={{ fontSize: 16, fontWeight: 700, fontFamily: T.mono, color: T.green }}>${(fundedEvent.data.amountCents / 100).toFixed(2)}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 9, color: T.text3, textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 3 }}>capture_method</div>
+                <div style={{ fontSize: 11, fontFamily: T.mono, color: '#635BFF' }}>manual</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 9, color: T.text3, textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 3 }}>Release trigger</div>
+                <div style={{ fontSize: 11, fontFamily: T.mono, color: T.text2 }}>attestation pass</div>
+              </div>
+            </div>
           </div>
-          <StatusBadge color={T.green}>Funds held in Stripe escrow until work verified</StatusBadge>
+          <StatusBadge color={T.text3}>Funds locked — no disbursement possible until SHA-256 attestation passes</StatusBadge>
         </StepCard>
       )}
 
@@ -150,36 +177,67 @@ export function DemoFlow({ currentStep, events }: Props) {
 
       {r1Released && (
         <StepCard label="Escrow Released + Trust Updated" active={currentStep === 6} done={currentStep > 6}>
+          {/* Stripe lifecycle: requires_capture → succeeded */}
           <div style={{
-            background: 'rgba(34,197,94,.05)', border:`1px solid rgba(34,197,94,.12)`,
-            borderRadius:8, padding:'14px 16px', marginBottom:10,
-            display:'flex', justifyContent:'space-between', alignItems:'center',
+            background: 'rgba(99,91,255,.06)', border: '1px solid rgba(99,91,255,.2)',
+            borderRadius: 8, padding: '12px 16px', marginBottom: 10,
           }}>
-            <div>
-              <div style={{ fontSize:11, color:T.text3, marginBottom:4 }}>Released to {r1Released.data.agentName}</div>
-              <div style={{ fontSize:26, fontWeight:700, fontFamily:T.mono, color:T.green, letterSpacing:'-0.02em' }}>
+            <div style={{ fontSize: 9, fontWeight: 700, color: '#635BFF', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 10 }}>
+              Stripe PaymentIntent · {r1Released.data.paymentIntentId}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+              <span style={{
+                fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 4,
+                background: 'rgba(251,191,36,.1)', border: '1px solid rgba(251,191,36,.3)', color: '#FBBF24',
+                fontFamily: T.mono,
+              }}>requires_capture</span>
+              <span style={{ fontSize: 14, color: T.text3 }}>→</span>
+              <span style={{
+                fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 4,
+                background: 'rgba(34,197,94,.1)', border: '1px solid rgba(34,197,94,.3)', color: T.green,
+                fontFamily: T.mono,
+              }}>succeeded</span>
+              <span style={{ marginLeft: 'auto', fontSize: 11, color: T.text3, fontFamily: T.mono }}>
+                PaymentIntent.capture()
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontSize: 9, color: T.text3, textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 3 }}>Captured to</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: T.text1 }}>{r1Released.data.agentName}</div>
+              </div>
+              <div style={{ fontSize: 28, fontWeight: 700, fontFamily: T.mono, color: T.green, letterSpacing: '-0.02em' }}>
                 ${(r1Released.data.amountCents / 100).toFixed(2)}
               </div>
             </div>
-            <div style={{ textAlign:'right' }}>
-              <div style={{ fontSize:11, color:T.green, marginBottom:8, letterSpacing:'.02em' }}>STRIPE ESCROW RELEASED</div>
+          </div>
+
+          {/* Trust score updates */}
+          {trustEvents.length > 0 && (
+            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 8, padding: '10px 14px', marginBottom: 10 }}>
+              <div style={{ fontSize: 9, color: T.text3, textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 8 }}>Trust Score Updated</div>
               {trustEvents.map((te, i) => (
                 <div key={`${te.data.agentId}-${i}`} style={{
-                  fontSize:11, fontFamily:T.mono,
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  fontSize: 11, fontFamily: T.mono,
                   color: te.data.delta > 0 ? T.green : T.red,
-                  marginBottom:3,
+                  marginBottom: i < trustEvents.length - 1 ? 5 : 0,
                 }}>
-                  {te.data.agentName}: {te.data.before.toFixed(1)} → {te.data.after.toFixed(1)}
-                  <span style={{ marginLeft:6, fontSize:10, opacity:.7 }}>
-                    ({te.data.delta > 0 ? '+' : ''}{te.data.delta.toFixed(1)})
+                  <span style={{ color: T.text2 }}>{te.data.agentName}</span>
+                  <span>
+                    {te.data.before.toFixed(1)} → {te.data.after.toFixed(1)}
+                    <span style={{ marginLeft: 6, fontSize: 10, opacity: .8 }}>
+                      ({te.data.delta > 0 ? '+' : ''}{te.data.delta.toFixed(1)})
+                    </span>
                   </span>
                 </div>
               ))}
             </div>
-          </div>
+          )}
+
           {receiptEvent && (
-            <StatusBadge color={T.text2}>
-              Trust Receipt #{receiptEvent.data.id.slice(0, 8)} — HMAC-SHA256 signed
+            <StatusBadge color={T.green}>
+              Trust Receipt #{receiptEvent.data.id.slice(0, 8)} — ECDSA P-256 signed · verifiable offline
             </StatusBadge>
           )}
         </StepCard>
