@@ -3,6 +3,7 @@ import { ecdsaVerify, getPublicKeyInfo } from '@/lib/crypto'
 import Link from 'next/link'
 import { Nav } from '@/components/Nav'
 import { ReceiptFallback } from '@/components/ReceiptFallback'
+import { CopyButton } from '@/components/CopyButton'
 
 const C = {
   bg:      '#0A0A0F',
@@ -211,33 +212,29 @@ export default async function ReceiptPage({
           </div>
         </div>
 
-        {/* How to verify independently */}
-        <div style={{ background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 10, padding: '20px 22px', marginBottom: 16 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: C.text3, textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 14 }}>
-            Verify via API
-          </div>
-          <pre style={{
-            fontSize: 11, fontFamily: C.mono, color: C.text2, lineHeight: 1.75,
-            overflowX: 'auto', margin: 0,
-          }}>{`curl -X POST /api/receipts/verify \\
-  -H "Content-Type: application/json" \\
-  -d '{"receiptId": "${receipt.id}"}'
-
-# → { "valid": ${valid}, "signatureAlgorithm": "${isEcdsa ? 'ECDSA P-256 (SHA-256)' : 'HMAC-SHA256'}" }`}</pre>
-        </div>
-
-        {isEcdsa && pkInfo && (
-          <div style={{ background: C.surface2, border: `1px solid #3B82F620`, borderLeft: '3px solid #3B82F6', borderRadius: 10, padding: '20px 22px', marginBottom: 16 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: '#3B82F6', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 14 }}>
-              Verify Offline — No Stvor Server Required
+        {/* Verify via API */}
+        {(() => {
+          const curlCmd = `curl "https://nous.stvor.xyz/api/receipts/verify?id=${receipt.id}"`
+          return (
+            <div style={{ background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 10, overflow: 'hidden', marginBottom: 16 }}>
+              <div style={{ padding: '12px 18px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 10, fontWeight: 600, color: C.text3, textTransform: 'uppercase', letterSpacing: '.08em' }}>
+                  Verify via API
+                </span>
+                <CopyButton text={curlCmd} label="Copy curl" />
+              </div>
+              <div style={{ padding: '16px 18px' }}>
+                <pre style={{ fontSize: 11, fontFamily: C.mono, color: C.text2, lineHeight: 1.75, overflowX: 'auto', margin: 0 }}>
+                  {curlCmd}{'\n\n'}
+                  {`# → { "valid": ${valid}, "signatureAlgorithm": "${isEcdsa ? 'ECDSA P-256 (SHA-256)' : 'HMAC-SHA256'}", "reason": "Signature verified." }`}
+                </pre>
+              </div>
             </div>
-            <pre style={{
-              fontSize: 10, fontFamily: C.mono, color: C.text2, lineHeight: 1.85,
-              overflowX: 'auto', margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all',
-            }}>{`# Public key: GET /api/.well-known/stvor-public-key
-# Verify this receipt using only Node.js built-ins — no Stvor server needed:
+          )
+        })()}
 
-node -e "
+        {isEcdsa && pkInfo && (() => {
+          const offlineCmd = `node -e "
 const c = require('crypto');
 const pub = c.createPublicKey({
   key: Buffer.from('${pkInfo.b64}', 'base64'),
@@ -246,10 +243,29 @@ const pub = c.createPublicKey({
 const sig = Buffer.from('${receipt.signature.replace('ecdsa:', '')}', 'base64');
 const payload = Buffer.from('${payloadB64}', 'base64').toString('utf8');
 console.log('valid:', c.verify('sha256', Buffer.from(payload), pub, sig));
-"
-# → valid: true`}</pre>
-          </div>
-        )}
+"`
+          return (
+            <div style={{ background: C.surface2, border: `1px solid #3B82F630`, borderLeft: '3px solid #3B82F6', borderRadius: 10, overflow: 'hidden', marginBottom: 16 }}>
+              <div style={{ padding: '12px 18px', borderBottom: `1px solid #3B82F620`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <span style={{ fontSize: 10, fontWeight: 700, color: '#3B82F6', textTransform: 'uppercase', letterSpacing: '.08em' }}>
+                    Verify Offline — No Stvor Server Required
+                  </span>
+                  <p style={{ fontSize: 11, color: C.text3, margin: '3px 0 0', lineHeight: 1.4 }}>
+                    Node.js built-ins only · no SDK · no network call
+                  </p>
+                </div>
+                <CopyButton text={offlineCmd} label="Copy verify command" />
+              </div>
+              <div style={{ padding: '16px 18px' }}>
+                <pre style={{
+                  fontSize: 10, fontFamily: C.mono, color: C.text2, lineHeight: 1.85,
+                  overflowX: 'auto', margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all',
+                }}>{offlineCmd}{'\n# → valid: true'}</pre>
+              </div>
+            </div>
+          )
+        })()}
 
         <div style={{ background: C.surface2, border: `1px solid #8B5CF620`, borderLeft: '3px solid #8B5CF6', borderRadius: 10, padding: '16px 22px', marginBottom: 28 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: '#8B5CF6', marginBottom: 8 }}>
