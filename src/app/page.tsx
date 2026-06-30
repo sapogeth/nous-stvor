@@ -475,16 +475,16 @@ export default function Home() {
               </motion.h1>
 
               <motion.p {...fo(.1)} style={{ fontSize: 16, color: D.t2, maxWidth: 500, lineHeight: 1.78, marginBottom: 36, marginTop: 24 }}>
-                AI agents now settle six-figure contracts with no way to verify
-                the work or the counterparty. That&apos;s how $1.5B disappeared
-                from Bybit in one transaction.{' '}
+                Every wallet answers: <em>&ldquo;Can this agent sign?&rdquo;</em>{' '}
+                Nobody answers:{' '}
                 <strong style={{ color: D.t1, fontWeight: 500 }}>
-                  Stvor is the missing layer — escrow attestation,
-                  cryptographic receipts, portable reputation.{' '}
-                  <em style={{ fontFamily: D.serif, fontStyle: 'italic', color: D.mint }}>
-                    Your agents earn trust once. Spend it everywhere.
-                  </em>
-                </strong>
+                  &ldquo;Should this transaction exist at all?&rdquo;
+                </strong>{' '}
+                Stvor is the safety layer that asks that question — verifying
+                destination, payload, and counterparty before any payment rail executes.{' '}
+                <em style={{ fontFamily: D.serif, fontStyle: 'italic', color: D.mint }}>
+                  Your agents earn trust once. Spend it everywhere.
+                </em>
               </motion.p>
 
               <motion.div {...fo(.14)} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 36 }}>
@@ -712,9 +712,9 @@ export default function Home() {
           </div>
         </motion.div>
 
-        {/* ── Why not Stripe ────────────────────────────────────────────────── */}
+        {/* ── Where Stvor sits ──────────────────────────────────────────────── */}
         <motion.div {...fo(.05)} style={{ marginBottom: 56 }}>
-          <SectionLabel n="03" label="Why not Stripe?" />
+          <SectionLabel n="03" label="Where Stvor sits" />
           <div style={{
             background: D.ink1, border: `1px solid ${D.b1}`, borderRadius: 12, overflow: 'hidden',
           }}>
@@ -726,34 +726,34 @@ export default function Home() {
                 fontSize: 22, fontWeight: 600, color: D.t1, letterSpacing: '-0.03em',
                 fontFamily: D.disp, marginBottom: 14,
               }}>
-                &ldquo;Why can&apos;t Stripe do this?&rdquo;
+                Not an escrow service.{' '}
+                <em style={{ fontFamily: D.serif, fontStyle: 'italic', color: D.mint }}>A safety layer.</em>
               </div>
               <p style={{ fontSize: 14, color: D.t2, lineHeight: 1.75, maxWidth: 520 }}>
                 Stripe answers: <em>did the payment clear?</em>{' '}
                 Stvor answers:{' '}
-                <strong style={{ color: D.t1 }}>should you trust this agent with your $10,000 task?</strong>{' '}
-                Stripe has no concept of agent reputation, delivery quality, or cross-platform history.
-                An agent with a perfect Stripe record could have a Stvor score of 30 — paid on time, delivered garbage.
-                A Stvor score of 30 blocks that agent before money moves.
+                <strong style={{ color: D.t1 }}>should this transaction exist at all?</strong>{' '}
+                Stvor sits before the payment rail — verifying destination, payload, counterparty,
+                and policy before any funds move. Stripe is one integration.
+                OrbWallet, x402, and any HTTP payment API are others.
               </p>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', background: D.b1, gap: 1 }}>
               {[
-                { q: 'Payment succeeded?',     stripe: true,  stvor: true  },
-                { q: 'Work quality verified?',  stripe: false, stvor: true  },
-                { q: 'Cross-platform history?', stripe: false, stvor: true  },
-                { q: 'Payload tamper-evident?', stripe: false, stvor: true  },
+                { q: 'Destination verified?',   rail: false, stvor: true },
+                { q: 'Payload tamper-evident?',  rail: false, stvor: true },
+                { q: 'Counterparty trusted?',    rail: false, stvor: true },
+                { q: 'Cross-platform receipt?',  rail: false, stvor: true },
               ].map((r, i) => (
                 <div key={i} style={{ background: D.ink1, padding: '16px 18px' }}>
                   <div style={{ fontSize: 11, color: D.t3, marginBottom: 12, lineHeight: 1.5 }}>{r.q}</div>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <div style={{
                       flex: 1, padding: '5px 0', textAlign: 'center', borderRadius: 5, fontSize: 10, fontWeight: 600,
-                      background: r.stripe ? 'rgba(0,221,160,0.06)' : 'rgba(255,69,85,0.06)',
-                      color: r.stripe ? D.mint : D.red,
-                      border: `1px solid ${r.stripe ? 'rgba(0,221,160,0.15)' : 'rgba(255,69,85,0.15)'}`,
+                      background: 'rgba(255,69,85,0.06)', color: D.red,
+                      border: '1px solid rgba(255,69,85,0.15)',
                     }}>
-                      Stripe {r.stripe ? '✓' : '✗'}
+                      Any rail ✗
                     </div>
                     <div style={{
                       flex: 1, padding: '5px 0', textAlign: 'center', borderRadius: 5, fontSize: 10, fontWeight: 600,
@@ -764,6 +764,19 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
+              ))}
+            </div>
+            <div style={{ padding: '14px 32px', borderTop: `1px solid ${D.b1}`, background: D.ink2, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+              <span style={{ fontSize: 10, color: D.t3, fontFamily: D.mono }}>Compatible payment rails:</span>
+              {['Stripe', 'OrbWallet', 'x402', 'Any HTTP API'].map((r, i) => (
+                <span key={i} style={{
+                  fontSize: 10, color: i === 0 ? '#635BFF' : D.t2,
+                  background: i === 0 ? 'rgba(99,91,255,0.08)' : 'rgba(100,100,200,0.05)',
+                  border: `1px solid ${i === 0 ? 'rgba(99,91,255,0.2)' : D.b1}`,
+                  borderRadius: 4, padding: '3px 9px', fontFamily: D.mono,
+                }}>
+                  {r}{i === 0 ? ' (reference)' : ''}
+                </span>
               ))}
             </div>
           </div>
