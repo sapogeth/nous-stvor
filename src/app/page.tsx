@@ -475,12 +475,15 @@ export default function Home() {
               </motion.h1>
 
               <motion.p {...fo(.1)} style={{ fontSize: 16, color: D.t2, maxWidth: 500, lineHeight: 1.78, marginBottom: 36, marginTop: 24 }}>
-                Like FICO for machines — every verified delivery
-                builds a portable trust score backed by cryptographic
-                receipts.{' '}
+                AI agents now settle six-figure contracts with no way to verify
+                the work or the counterparty. That&apos;s how $1.5B disappeared
+                from Bybit in one transaction.{' '}
                 <strong style={{ color: D.t1, fontWeight: 500 }}>
-                  Stripe lets agents pay. Stvor lets agents{' '}
-                  <em style={{ fontFamily: D.serif, fontStyle: 'italic', color: D.mint }}>trust.</em>
+                  Stvor is the missing layer — escrow attestation,
+                  cryptographic receipts, portable reputation.{' '}
+                  <em style={{ fontFamily: D.serif, fontStyle: 'italic', color: D.mint }}>
+                    Your agents earn trust once. Spend it everywhere.
+                  </em>
                 </strong>
               </motion.p>
 
@@ -496,7 +499,7 @@ export default function Home() {
                   }}
                     onMouseEnter={e => { const el = e.currentTarget; el.style.opacity = '.85'; el.style.transform = 'translateY(-1px)' }}
                     onMouseLeave={e => { const el = e.currentTarget; el.style.opacity = '1'; el.style.transform = '' }}>
-                    Watch Supply Chain Attack →
+                    Watch $1.5B Attack Blocked Live →
                   </button>
                 </Link>
                 <Link href="/demo" style={{ textDecoration: 'none' }}>
@@ -511,7 +514,7 @@ export default function Home() {
                   }}
                     onMouseEnter={e => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.04)'; el.style.transform = 'translateY(-1px)' }}
                     onMouseLeave={e => { const el = e.currentTarget; el.style.background = 'transparent'; el.style.transform = '' }}>
-                    Run Agent Economy →
+                    Run Live Demo →
                   </button>
                 </Link>
               </motion.div>
@@ -573,14 +576,14 @@ export default function Home() {
 
         {/* ── Feature cards ────────────────────────────────────────────────── */}
         <motion.div {...fo(.04)} style={{ marginTop: 56, marginBottom: 56 }}>
-          <SectionLabel n="01" label="Start here" />
+          <SectionLabel n="01" label="See it work" />
           <div className="feature-grid">
             <FeatureCard
               href="/attack"
               label="Supply Chain Attack"
               tag="Start here"
               tagColor={D.red}
-              body="Tampered payload. Blocked agent. Escrow returned — in 30 seconds. This is the class of attack that took $1.5B from Bybit. Watch SHA-256 commitment stop it in real time."
+              body="A tampered payload gets past Bybit's security team, 3 signers, and $1.5B disappears. Watch SHA-256 commitment stop the same attack in 30 seconds — agent blocked, escrow returned, zero human review."
               bullets={[
                 'SHA-256 committed at contract creation — immutable ground truth',
                 'Hash mismatch → agent blocked, escrow returned, audit log written',
@@ -594,7 +597,7 @@ export default function Home() {
               label="Live Agent Economy"
               tag="Demo"
               tagColor={D.blue}
-              body="6 Hermes agents run 2 rounds of competitive bidding. Trust scores compound across rounds. Stripe escrow releases only after SHA-256 attestation passes. Register your own agent via /arena to compete."
+              body="6 Hermes agents. 2 rounds. 1 winner walks away with a signed receipt and a higher trust score. This is what AI commerce looks like when the infrastructure actually works — register your own agent to compete."
               bullets={[
                 'Trust score = 40% escrow success + 40% quality + 20% reliability',
                 'Stripe capture_method: manual — funds held until attestation passes',
@@ -717,7 +720,7 @@ export default function Home() {
           }}>
             <div style={{ padding: '28px 32px', borderBottom: `1px solid ${D.b1}` }}>
               <div style={{ fontSize: 9, color: D.t3, letterSpacing: '.1em', textTransform: 'uppercase', fontFamily: D.mono, marginBottom: 10 }}>
-                The question judges ask
+                The question every investor asks
               </div>
               <div style={{
                 fontSize: 22, fontWeight: 600, color: D.t1, letterSpacing: '-0.03em',
@@ -726,11 +729,12 @@ export default function Home() {
                 &ldquo;Why can&apos;t Stripe do this?&rdquo;
               </div>
               <p style={{ fontSize: 14, color: D.t2, lineHeight: 1.75, maxWidth: 520 }}>
-                Stripe answers: <em>did the payment succeed?</em>{' '}
+                Stripe answers: <em>did the payment clear?</em>{' '}
                 Stvor answers:{' '}
-                <strong style={{ color: D.t1 }}>should you trust this agent?</strong>{' '}
+                <strong style={{ color: D.t1 }}>should you trust this agent with your $10,000 task?</strong>{' '}
                 Stripe has no concept of agent reputation, delivery quality, or cross-platform history.
                 An agent with a perfect Stripe record could have a Stvor score of 30 — paid on time, delivered garbage.
+                A Stvor score of 30 blocks that agent before money moves.
               </p>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', background: D.b1, gap: 1 }}>
@@ -789,15 +793,15 @@ export default function Home() {
 
         {/* ── How trust compounds ───────────────────────────────────────────── */}
         <motion.div {...fo(.06)} style={{ marginBottom: 56 }}>
-          <SectionLabel n="05" label="How trust compounds" href="/how-it-works" linkText="Full docs" />
+          <SectionLabel n="05" label="How agents earn trust" href="/how-it-works" linkText="Full docs" />
           <div className="steps-grid">
             {[
-              { n: '01', title: 'Contract created',   body: 'SHA-256(task) committed at creation. Tamper-evident from moment zero.', col: D.blue },
-              { n: '02', title: 'Escrow locks',       body: 'Stripe manual capture holds funds. No release without attestation.', col: D.t3 },
-              { n: '03', title: 'Payload verified',   body: 'Mismatch → execution blocked. Funds returned. Trust docked −15 pts.', col: D.red },
-              { n: '04', title: 'Nemotron judges',    body: 'NIM autonomous judge scores all deliverables. Feeds trust formula.',   col: D.t3 },
-              { n: '05', title: 'Score updates',      body: '40% escrow + 40% quality + 20% reliability. Live, persistent, portable.', col: D.mint },
-              { n: '06', title: 'Higher score wins',  body: 'EV = (Trust × Quality) ÷ Price. Better history → more contracts.',   col: D.t3 },
+              { n: '01', title: 'Tamper-evident from second zero', body: 'SHA-256(task) committed at creation. No one can swap the payload without detection — not even the buyer.', col: D.blue },
+              { n: '02', title: 'Money held until proof arrives',  body: 'Stripe manual capture locks funds. No disbursement is possible until attestation passes.', col: D.t3 },
+              { n: '03', title: 'Attack blocked automatically',    body: 'Hash mismatch → execution stops. Funds return to buyer. Attacker gets nothing. Zero manual review.', col: D.red },
+              { n: '04', title: 'NVIDIA scores the work',          body: 'Nemotron-3 Ultra judges every deliverable autonomously. No human bias. Parallel inference.', col: D.t3 },
+              { n: '05', title: 'Reputation compounds on-chain',   body: '40% escrow + 40% quality + 20% reliability. Score is live, persistent, and portable across marketplaces.', col: D.mint },
+              { n: '06', title: 'Better history earns more work',  body: 'EV = (Trust × Quality) ÷ Price. Agents with proven records win contracts against cheaper, unknown rivals.', col: D.t3 },
             ].map((s, i) => (
               <div key={i} style={{ background: D.ink1, padding: '20px 22px' }}>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 12 }}>
@@ -820,14 +824,14 @@ export default function Home() {
                 icon: '◈',
                 title: 'AI Marketplace Operators',
                 body: 'Gate high-value contracts to agents with proven track records. Trust scores reduce disputes without manual review — the system self-polices.',
-                metric: 'Trust-gated contracts → lower ops cost',
+                metric: 'Trust-gated contracts → disputes drop, ops cost drops',
                 col: D.blue,
               },
               {
                 icon: '◎',
                 title: 'Autonomous Agent Builders',
                 body: 'ECDSA receipts are portable proof of quality across every Stvor-integrated marketplace — a credit history that travels with the agent.',
-                metric: 'Portable reputation → higher earnings',
+                metric: 'Portable reputation → win contracts on merit, not price',
                 col: D.mint,
               },
             ].map((c, i) => (
@@ -940,6 +944,57 @@ export default function Home() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ── Closing CTA ──────────────────────────────────────────────────── */}
+        <motion.div {...fo(.085)} style={{ marginBottom: 56 }}>
+          <div style={{
+            background: D.ink1, border: `1px solid ${D.b1}`,
+            borderTop: `1px solid ${D.blueB}`,
+            borderRadius: 12, padding: '40px 40px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            gap: 40, flexWrap: 'wrap',
+          }}>
+            <div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: D.t1, letterSpacing: '-0.03em', fontFamily: D.disp, marginBottom: 10 }}>
+                The next $1.5B attack is coming.
+              </div>
+              <div style={{ fontSize: 14, color: D.t2, lineHeight: 1.7, maxWidth: 460 }}>
+                AI agent commerce is scaling faster than trust infrastructure.
+                Every unverified payload is a Bybit waiting to happen.
+                Run the attack demo — watch Stvor catch it in real time.
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 10, flexShrink: 0, flexWrap: 'wrap' }}>
+              <Link href="/attack" style={{ textDecoration: 'none' }}>
+                <button style={{
+                  background: D.red, color: '#fff', border: 'none',
+                  borderRadius: 7, padding: '12px 24px',
+                  fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                  letterSpacing: '-0.01em', fontFamily: D.disp,
+                  transition: 'opacity .15s',
+                }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.opacity = '.85' }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.opacity = '1' }}>
+                  Watch Attack Get Blocked →
+                </button>
+              </Link>
+              <Link href="/demo" style={{ textDecoration: 'none' }}>
+                <button style={{
+                  background: 'transparent', color: D.t1,
+                  border: `1px solid ${D.b2}`,
+                  borderRadius: 7, padding: '11px 24px',
+                  fontSize: 13, fontWeight: 500, cursor: 'pointer',
+                  letterSpacing: '-0.01em', fontFamily: D.disp,
+                  transition: 'background .15s',
+                }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)' }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}>
+                  Run Agent Economy →
+                </button>
+              </Link>
             </div>
           </div>
         </motion.div>
