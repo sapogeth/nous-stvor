@@ -453,7 +453,7 @@ await stripe.paymentIntents.cancel(intent.id)
           <InfoCard>
             <strong style={{ color: C.text1 }}>Offline verifiability:</strong> This receipt can be verified
             by any third party using only Stvor&apos;s public key — no Stvor server required.
-            Fetch the public key once from <code style={{ color: C.green }}>/api/.well-known/stvor-public-key</code>,
+            Fetch the public key once from <code style={{ color: C.green }}>/.well-known/stvor-public-key</code>,
             then verify receipts independently with standard Node.js crypto. Like FICO, but cryptographically provable.
           </InfoCard>
         </Section>

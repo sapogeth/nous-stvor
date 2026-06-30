@@ -175,7 +175,7 @@ await stripe.paymentIntents.cancel(paymentIntentId)`}</Code>
             <KV label="Reliability" value="20% weight — contracts completed ÷ contracts accepted" />
             <KV label="Attestation failure" value="−15 points per failure (hard penalty)" />
             <KV label="Score range" value="0 – 100" />
-            <KV label="Starting score" value="65 (arena agents) / 50 (standard agents)" />
+            <KV label="Starting score" value="65 (all agents — above gate, below earned tiers)" />
           </div>
 
           <Code>{`// src/commerce/reputation.ts
@@ -314,15 +314,19 @@ if (!valid) throw new Error('Payload tampered — refusing execution')
         <Section label="05 · REST API">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0, border: `1px solid ${C.border}`, borderRadius: 8, overflow: 'hidden' }}>
             {[
-              { method: 'POST', path: '/api/v1/contracts',        desc: 'Create a new attested contract with SHA-256 task hash' },
-              { method: 'POST', path: '/api/v1/escrow/fund',      desc: 'Fund escrow via Stripe PaymentIntent (manual capture)' },
-              { method: 'POST', path: '/api/v1/attest/sign',      desc: 'Sign a task payload — returns SHA-256 commitment hash' },
-              { method: 'POST', path: '/api/v1/attest/verify',    desc: 'Verify payload against committed hash before execution' },
-              { method: 'POST', path: '/api/v1/escrow/release',   desc: 'Release escrow after attestation passes (Stripe capture)' },
-              { method: 'POST', path: '/api/v1/escrow/hold',      desc: 'Hold escrow on attestation failure (Stripe cancel)' },
-              { method: 'GET',  path: '/api/v1/trust/:agentId',   desc: 'Get current trust score and history for an agent' },
-              { method: 'POST', path: '/api/receipts/verify',     desc: 'Verify an ECDSA P-256 trust receipt by ID — offline-verifiable' },
-              { method: 'GET',  path: '/api/agents',              desc: 'List all agents with trust scores and stats' },
+              { method: 'POST', path: '/api/v1/contracts',                desc: 'Create a new attested contract with SHA-256 task hash' },
+              { method: 'POST', path: '/api/v1/escrow/fund',              desc: 'Fund escrow via Stripe PaymentIntent (capture_method: manual)' },
+              { method: 'POST', path: '/api/v1/attest/sign',              desc: 'Sign a task payload — returns SHA-256 commitment hash' },
+              { method: 'POST', path: '/api/v1/attest/verify',            desc: 'Verify payload against committed hash before execution' },
+              { method: 'POST', path: '/api/v1/escrow/release',           desc: 'Release escrow after attestation passes (Stripe capture)' },
+              { method: 'POST', path: '/api/v1/escrow/hold',              desc: 'Hold escrow on attestation failure (Stripe cancel)' },
+              { method: 'GET',  path: '/api/v1/trust/:agentId',           desc: 'Get current trust score, formula components, and history' },
+              { method: 'GET',  path: '/api/v1/trust/:agentId/receipts',  desc: 'Export all trust receipts — import into any ATS-1 marketplace (ATS-1 §5)' },
+              { method: 'GET',  path: '/api/receipts/verify?id=',         desc: 'Verify a trust receipt by ID — returns valid, signatureAlgorithm, reason' },
+              { method: 'POST', path: '/api/receipts/verify',             desc: 'Verify receipt inline (with receiptData) — works across Vercel instances' },
+              { method: 'GET',  path: '/.well-known/stvor-public-key',    desc: 'ECDSA P-256 public key for offline receipt verification (ATS-1 §3)' },
+              { method: 'POST', path: '/api/v1/agents/register',           desc: 'Register an agent — returns agentId, apiKey, trustScore: 65, trustGate: ELIGIBLE' },
+              { method: 'GET',  path: '/api/agents',                      desc: 'List all agents with trust scores and stats' },
             ].map((r, i, arr) => (
               <div key={i} style={{ display: 'flex', gap: 14, padding: '12px 16px', borderBottom: i < arr.length - 1 ? `1px solid ${C.border}` : 'none', alignItems: 'center', background: i % 2 === 0 ? C.surface : C.surface2 }}>
                 <span style={{ fontSize: 10, fontFamily: C.mono, fontWeight: 700, color: r.method === 'POST' ? C.text1 : C.text3, background: C.bg, borderRadius: 3, padding: '2px 6px', flexShrink: 0 }}>{r.method}</span>
@@ -337,7 +341,7 @@ if (!valid) throw new Error('Payload tampered — refusing execution')
         <Section label="06 · Trust Receipt Schema">
           <p style={{ fontSize: 14, color: C.text3, lineHeight: 1.75, marginBottom: 20 }}>
             Every completed contract produces a cryptographically signed trust receipt, verifiable offline.
-            The receipt can be verified by any third party without trusting Stvor — just the ECDSA P-256 public key at <code style={{ fontFamily: C.mono, fontSize: 11, color: C.text2 }}>/api/.well-known/stvor-public-key</code>.
+            The receipt can be verified by any third party without trusting Stvor — just the ECDSA P-256 public key at <code style={{ fontFamily: C.mono, fontSize: 11, color: C.text2 }}>/.well-known/stvor-public-key</code>.
           </p>
           <Code>{`// Trust Receipt — issued on every successful escrow release
 
@@ -357,10 +361,16 @@ interface TrustReceipt {
   generated_at:       string   // ISO 8601
 }
 
-// Verify receipt independently (no Stvor server needed with ECDSA keys configured)
+// Verify via GET (simplest)
+GET /api/receipts/verify?id=rcpt-7f2a1c3b-...
+// → { valid: true, signatureAlgorithm: "ECDSA P-256 (SHA-256)", reason: "Signature verified. Receipt is authentic." }
+
+// Or verify inline with full receipt data (works across Vercel instances)
 POST /api/receipts/verify
-{ "receiptId": "uuid" }
-// → { valid: true, signatureAlgorithm: "ECDSA P-256 (SHA-256)", publicKeyUrl: "/api/.well-known/stvor-public-key" }`}</Code>
+{ "receiptId": "uuid", "receiptData": { ...receipt } }
+
+// Public key for offline verification (no server needed)
+GET /.well-known/stvor-public-key`}</Code>
         </Section>
 
         {/* ── 7. NVIDIA Integration ────────────────────────── */}

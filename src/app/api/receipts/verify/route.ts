@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
     trustDelta: receipt.trust_delta,
     generatedAt: receipt.generated_at,
     signatureAlgorithm: isEcdsa ? 'ECDSA P-256 (SHA-256)' : 'HMAC-SHA256 (legacy)',
-    publicKeyUrl: '/api/.well-known/stvor-public-key',
+    publicKeyUrl: '/.well-known/stvor-public-key',
     verifyOffline: isEcdsa ? 'node -e "const c=require(\'crypto\');const pub=require(\'crypto\').createPublicKey({key:Buffer.from(\'<STVOR_EC_PUBLIC_KEY_B64>\',\'base64\'),format:\'der\',type:\'spki\'});console.log(c.verify(\'sha256\',Buffer.from(JSON.stringify(PAYLOAD)),pub,Buffer.from(SIG,\'base64\')))"' : null,
     reason: valid ? 'Signature verified. Receipt is authentic and tamper-proof.' : 'Signature mismatch. Receipt may be tampered.',
   })

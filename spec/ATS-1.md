@@ -135,7 +135,7 @@ const valid = crypto.verify('sha256', Buffer.from(canonicalPayload), pub, sig)
 Issuers MUST publish their public key at:
 
 ```
-GET /.well-known/ats1-public-key
+GET /.well-known/stvor-public-key
 ```
 
 Response:
@@ -250,11 +250,12 @@ ATS-1-compliant marketplaces MUST expose these endpoints.
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/.well-known/ats1-public-key` | Return ECDSA P-256 public key (SPKI DER, base64). No auth required. |
+| `GET` | `/.well-known/stvor-public-key` | Return ECDSA P-256 public key (SPKI DER, base64). No auth required. |
 | `GET` | `/api/v1/trust/:agentId` | Return current trust score, receipt count, history summary. |
 | `GET` | `/api/v1/trust/:agentId/receipts` | Return paginated array of TrustReceipts for export/import. |
-| `POST` | `/api/receipts/verify` | Verify a receipt by ID or inline payload. Returns `{ valid, reason }`. |
-| `GET` | `/receipts/:id?d=<base64>` | Human-readable receipt. `?d=` embeds data for offline/CDN rendering. |
+| `GET` | `/api/receipts/verify?id=<receiptId>` | Verify a receipt by ID. Returns `{ valid, signatureAlgorithm, reason }`. |
+| `POST` | `/api/receipts/verify` | Verify inline with `receiptData`. Works across ephemeral instances. |
+| `GET` | `/receipts/:id?d=<base64>` | Human-readable receipt with Copy verify command button. |
 
 ### Offline verification (no server required)
 

@@ -159,7 +159,7 @@ export function TrustReceiptModal({ receipt, onClose }: { receipt: TrustReceipt;
           </div>
           {isEcdsa && (
             <div style={{ marginTop: 5, fontSize: 10, color: T.text3 }}>
-              Verifiable offline — no Stvor server required. Public key: <code style={{ color: T.text2, fontSize: 9 }}>/api/.well-known/stvor-public-key</code>
+              Verifiable offline — no Stvor server required. Public key: <code style={{ color: T.text2, fontSize: 9 }}>/.well-known/stvor-public-key</code>
             </div>
           )}
         </div>
